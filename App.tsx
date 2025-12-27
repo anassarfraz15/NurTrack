@@ -11,6 +11,7 @@ import Onboarding from './components/Onboarding.tsx';
 import { getTodayDateString } from './utils/dateTime.ts';
 import { supabase, syncUserData, fetchUserData } from './services/supabase.ts';
 import { Loader2 } from 'lucide-react';
+import { Logo } from './constants.tsx';
 
 const STORAGE_KEY = 'nurtrack_state_v1';
 
@@ -272,10 +273,11 @@ const App: React.FC = () => {
   if (loading) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
-        <div className="w-16 h-16 bg-emerald-600 rounded-3xl flex items-center justify-center shadow-2xl animate-pulse">
-          <span className="text-white font-black text-2xl">N</span>
+        <div className="relative">
+          <Logo size={120} className="animate-pulse" />
+          <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full -z-10 animate-pulse"></div>
         </div>
-        <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">
+        <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mt-8">
           <Loader2 className="animate-spin" size={16} />
           Initializing NurTrack
         </div>

@@ -1,15 +1,13 @@
-
 import React, { useState } from 'react';
 import { LayoutDashboard, Pocket, Activity, Menu, X, Settings as SettingsIcon, LogOut, User as UserIcon } from 'lucide-react';
-// Removed missing User type from @supabase/supabase-js
-import { supabase } from '../services/supabase';
+import { supabase } from '../services/supabase.ts';
+import { Logo } from '../constants.tsx';
 
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
   setActiveTab: (tab: string) => void;
   drawerContent?: React.ReactNode; 
-  // Changed User type to any to bypass missing export error
   user: any;
 }
 
@@ -30,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
   };
 
   const handleLogout = async () => {
-    // Cast supabase.auth to any to resolve property access error
     await (supabase.auth as any).signOut();
     window.location.reload();
   };
@@ -49,10 +46,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         </button>
         
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">N</span>
-          </div>
-          <h1 className="text-lg font-bold text-slate-800 dark:text-white">NurTrack</h1>
+          <Logo size={36} />
+          <h1 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">NurTrack</h1>
         </div>
         
         <div className="w-10"></div>
@@ -61,10 +56,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 transition-colors duration-500 flex-shrink-0">
         <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 dark:shadow-none">
-            <span className="text-white font-bold text-xl">N</span>
-          </div>
-          <h1 className="text-xl font-bold text-slate-800 dark:text-white">NurTrack</h1>
+          <Logo size={48} className="drop-shadow-lg" />
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">NurTrack</h1>
         </div>
         
         <nav className="flex-1 space-y-2">

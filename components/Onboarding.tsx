@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { ChevronRight, Sparkles, User, Shield, Heart, Check, X } from 'lucide-react';
-import { AppSettings } from '../types';
+import { AppSettings } from '../types.ts';
+import { Logo } from '../constants.tsx';
 
 interface OnboardingProps {
   onComplete: (updates: Partial<AppSettings>) => void;
@@ -37,7 +37,6 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
   const progress = (step / totalSteps) * 100;
 
-  // Fix: Explicitly type StepWrapper as React.FC to ensure TypeScript correctly handles JSX children
   const StepWrapper: React.FC<{ children: React.ReactNode, title: string, subtitle: string }> = ({ children, title, subtitle }) => (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-4 duration-500">
       <div className="mb-8">
@@ -176,8 +175,9 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             subtitle="Your companion is prepared. May this be a source of barakah."
           >
             <div className="flex flex-col items-center justify-center py-10">
-              <div className="w-32 h-32 bg-emerald-100 dark:bg-emerald-900/30 rounded-[3rem] flex items-center justify-center text-emerald-600 mb-8 shadow-2xl animate-bounce">
-                <Sparkles size={64} />
+              <div className="relative mb-8 animate-bounce">
+                <Logo size={120} />
+                <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full -z-10"></div>
               </div>
               <div className="text-center space-y-2">
                 <p className="font-black text-xl text-slate-900 dark:text-white">Bismillah!</p>

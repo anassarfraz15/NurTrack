@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabase.ts';
 import { Mail, Lock, Loader2, Sparkles, ChevronRight, UserPlus, LogIn, Heart, Moon, Star } from 'lucide-react';
+import { Logo } from '../constants.tsx';
 
 interface AuthProps {
   onGuestMode: () => void;
@@ -47,14 +48,12 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
         <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[3.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white dark:border-slate-800 overflow-hidden transition-all duration-500">
           
           {/* Hero Section */}
-          <div className="relative h-56 flex flex-col items-center justify-center text-center px-8 overflow-hidden">
+          <div className="relative h-64 flex flex-col items-center justify-center text-center px-8 overflow-hidden pt-8">
             {/* Animated Light Orb */}
-            <div className="absolute w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute w-56 h-56 bg-emerald-500/20 rounded-full blur-3xl animate-pulse"></div>
             
-            <div className="relative z-10 mb-4">
-              <div className="w-20 h-20 bg-emerald-600 rounded-[2rem] flex items-center justify-center shadow-2xl shadow-emerald-500/40 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <span className="text-white font-black text-3xl">N</span>
-              </div>
+            <div className="relative z-10 mb-4 transform hover:scale-105 transition-transform duration-700">
+               <Logo size={120} className="drop-shadow-2xl" />
             </div>
             
             <div className="relative z-10">
