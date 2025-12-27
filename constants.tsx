@@ -16,6 +16,10 @@ export const STATUS_TEXT = {
   NOT_MARKED: 'Untracked'
 };
 
+/**
+ * High-fidelity brand logo reflecting the mosque silhouette, 
+ * five prayer dots, and the success checkmark.
+ */
 export const Logo: React.FC<{ size?: number; className?: string }> = ({ size = 40, className = "" }) => (
   <svg 
     width={size} 
@@ -26,50 +30,47 @@ export const Logo: React.FC<{ size?: number; className?: string }> = ({ size = 4
     className={className}
   >
     <defs>
-      <linearGradient id="moonGradient" x1="60" y1="40" x2="140" y2="140" gradientUnits="userSpaceOnUse">
-        <stop offset="0%" stopColor="#7dd3fc" />
-        <stop offset="100%" stopColor="#fbbf24" />
+      {/* Gradients for depth */}
+      <linearGradient id="checkmarkGradient" x1="50" y1="130" x2="180" y2="100" gradientUnits="userSpaceOnUse">
+        <stop offset="0%" stopColor="#15803d" />
+        <stop offset="100%" stopColor="#22c55e" />
       </linearGradient>
-      <filter id="glow">
-        <feGaussianBlur stdDeviation="3" result="blur" />
-        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-      </filter>
     </defs>
     
-    {/* Crescent Moon */}
+    {/* Five Prayer Dots in Arc */}
+    <circle cx="28" cy="55" r="10" fill="#fbbf24" /> {/* Yellow - Fajr */}
+    <circle cx="62" cy="35" r="10" fill="#f97316" /> {/* Orange - Dhuhr */}
+    <circle cx="100" cy="25" r="10" fill="#38bdf8" /> {/* Sky Blue - Asr */}
+    <circle cx="138" cy="35" r="10" fill="#2563eb" /> {/* Blue - Maghrib */}
+    <circle cx="172" cy="55" r="10" fill="#7c3aed" /> {/* Purple - Isha */}
+
+    {/* Mosque Silhouette */}
     <path 
-      d="M100 25C70 25 45 50 45 80C45 110 70 135 100 135C85 135 70 120 70 95C70 70 85 55 100 55C115 55 130 70 130 95C130 120 115 135 100 135C130 135 155 110 155 80C155 50 130 25 100 25Z" 
-      fill="url(#moonGradient)" 
-      filter="url(#glow)"
+      d="M10 160C40 160 50 150 50 150V95L42 90V75L50 68L58 75V90L50 95V150C50 150 70 80 100 80C130 80 150 150 150 150C150 150 160 120 175 120C185 120 190 160 190 160" 
+      fill="#1e293b" 
     />
     
-    {/* Star */}
+    {/* Crescent on Main Dome */}
     <path 
-      d="M120 75L124 83L133 84L127 90L128 99L120 94L112 99L113 90L107 84L116 83L120 75Z" 
-      fill="white" 
-      filter="url(#glow)"
+      d="M100 55C92 55 86 61 86 69C86 77 92 83 100 83C96 83 93 80 93 74C93 68 96 65 100 65C104 65 107 68 107 74C107 80 104 83 100 83C108 83 114 77 114 69C114 61 108 55 100 55Z" 
+      fill="#1e293b" 
     />
 
-    {/* Arches at bottom */}
-    <g transform="translate(0, 10)">
-      {[35, 65, 100, 135, 165].map((x, i) => (
-        <g key={i} transform={`translate(${x}, 160)`}>
-          <path 
-            d="M-12 0C-12 -15 0 -22 0 -22C0 -22 12 -15 12 0L12 15L-12 15Z" 
-            fill="none" 
-            stroke="#0369a1" 
-            strokeWidth="3"
-          />
-          <path 
-            d="M-5 0L-1 4L6 -4" 
-            fill="none" 
-            stroke="#0ea5e9" 
-            strokeWidth="2.5" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-          />
-        </g>
-      ))}
-    </g>
+    {/* Green Success Checkmark */}
+    <path 
+      d="M50 135L90 180L185 100L175 90L90 160L60 125L50 135Z" 
+      fill="url(#checkmarkGradient)" 
+      stroke="#ffffff" 
+      strokeWidth="2"
+    />
+    
+    {/* Subtle highlight on checkmark */}
+    <path 
+      d="M60 130L90 165L170 98" 
+      stroke="white" 
+      strokeWidth="4" 
+      strokeLinecap="round" 
+      opacity="0.2" 
+    />
   </svg>
 );
