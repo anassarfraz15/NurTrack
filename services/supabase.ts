@@ -3,7 +3,6 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 /**
  * CONFIGURATION:
  * When deploying to Netlify, add these as Environment Variables in the Netlify Dashboard.
- * These local constants act as fallbacks for local development.
  */
 const FALLBACK_URL = 'https://kmmukykeswqgqqyoquxv.supabase.co';
 const FALLBACK_KEY = 'sb_publishable_QywUVoTx8WTK9Vf0QL6ZWA_aUfh76Lw';
@@ -25,7 +24,7 @@ if (isValidUrl(supabaseUrl) && supabaseAnonKey) {
   try {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
   } catch (e) {
-    console.error('NurTrack: Supabase connection failed:', e);
+    console.warn('NurTrack: Supabase client initialization skipped or failed.');
   }
 }
 
@@ -33,8 +32,8 @@ export const supabase = (supabaseInstance || {
   auth: {
     getSession: () => Promise.resolve({ data: { session: null }, error: null }),
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signInWithPassword: () => Promise.reject(new Error('Auth Unavailable')),
-    signUp: () => Promise.reject(new Error('Auth Unavailable')),
+    signInWithPassword: () => Promise.reject(new Error('Authentication Service Unavailable')),
+    signUp: () => Promise.reject(new Error('Authentication Service Unavailable')),
     signOut: () => Promise.resolve({ error: null }),
   },
   from: () => ({
@@ -54,7 +53,7 @@ export async function syncUserData(userId: string, data: any) {
       .from('user_profiles')
       .upsert({ user_id: userId, data: data }, { onConflict: 'user_id' });
   } catch (e) {
-    // Silent fail for better UX in production
+    // Fail silently to prevent UI disruption
   }
 }
 

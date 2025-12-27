@@ -1,17 +1,15 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, PrayerStatus, PrayerName, AppSettings, UserStats, DailyLog } from './types';
-import Layout from './components/Layout';
-import Dashboard from './components/Dashboard';
-import Analytics from './components/Analytics';
-import Tools from './components/Tools';
-import Settings from './components/Settings';
-import AchievementPopup from './components/AchievementPopup';
-import Auth from './components/Auth';
-import Onboarding from './components/Onboarding';
-import { getTodayDateString } from './utils/dateTime';
-import { supabase, syncUserData, fetchUserData } from './services/supabase';
-// Removed missing User type from @supabase/supabase-js
+import { AppState, PrayerStatus, PrayerName, AppSettings, UserStats, DailyLog } from './types.ts';
+import Layout from './components/Layout.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import Analytics from './components/Analytics.tsx';
+import Tools from './components/Tools.tsx';
+import Settings from './components/Settings.tsx';
+import AchievementPopup from './components/AchievementPopup.tsx';
+import Auth from './components/Auth.tsx';
+import Onboarding from './components/Onboarding.tsx';
+import { getTodayDateString } from './utils/dateTime.ts';
+import { supabase, syncUserData, fetchUserData } from './services/supabase.ts';
 import { Loader2 } from 'lucide-react';
 
 const STORAGE_KEY = 'nurtrack_state_v1';
@@ -93,7 +91,6 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showAchievement, setShowAchievement] = useState(false);
   const [guestMode, setGuestMode] = useState(false);
-  // Changed User type to any to bypass missing export error
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const syncTimeoutRef = useRef<number | null>(null);
@@ -127,7 +124,6 @@ const App: React.FC = () => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // Cast supabase.auth to any to bypass getSession missing error
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
       } catch (e) {
@@ -139,7 +135,6 @@ const App: React.FC = () => {
 
     initAuth();
 
-    // Cast supabase.auth to any to bypass onAuthStateChange missing error
     const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
     });
