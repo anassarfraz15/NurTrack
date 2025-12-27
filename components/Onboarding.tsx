@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronRight, User, Shield, Heart, Check } from 'lucide-react';
+import { ChevronRight, User, Shield, Heart, Check, Sparkles } from 'lucide-react';
 import { AppSettings } from '../types.ts';
 import { Logo } from '../constants.tsx';
 
@@ -40,8 +40,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const StepWrapper: React.FC<{ children: React.ReactNode, title: string, subtitle: string }> = ({ children, title, subtitle }) => (
     <div className="flex flex-col h-full animate-in fade-in slide-in-from-right-2 duration-500">
       <div className="mb-6 flex-shrink-0">
-        <h2 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-1.5 tracking-tight">{title}</h2>
-        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{subtitle}</p>
+        <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-1.5 tracking-tight leading-tight">{title}</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{subtitle}</p>
       </div>
       
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar py-1">
@@ -57,7 +57,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         </button>
         <button 
           onClick={handleNext}
-          className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group"
+          className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 group"
         >
           <span className="text-sm">{step === totalSteps ? 'Get Started' : 'Continue'}</span>
           <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -67,15 +67,15 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   );
 
   return (
-    <div className="fixed inset-0 z-[300] bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 md:p-8 overflow-hidden">
-      {/* Background Decor */}
+    <div className="fixed inset-0 z-[500] bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 overflow-hidden">
+      {/* Subtle Background */}
       <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-emerald-400 rounded-full blur-[100px]"></div>
         <div className="absolute bottom-[-5%] right-[-5%] w-[40%] h-[40%] bg-blue-400 rounded-full blur-[100px]"></div>
       </div>
 
-      {/* Main Container - Non Scrollable */}
-      <div className="w-full max-w-lg bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-slate-100 dark:border-slate-800 relative flex flex-col h-auto max-h-[90vh] overflow-hidden">
+      {/* Main Container */}
+      <div className="w-full max-w-lg bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 relative flex flex-col h-auto max-h-[90vh] overflow-hidden">
         
         {/* Progress Bar */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-800 flex-shrink-0">
@@ -88,12 +88,15 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         <div className="p-8 md:p-10 flex flex-col h-full min-h-0">
           {step === 1 && (
             <StepWrapper 
-              title="Assalamu Alaikum" 
-              subtitle="Let's start your journey. What should we call you?"
+              title="Ahlan wa Sahlan" 
+              subtitle="Let's personalize your companion. What's your name?"
             >
-              <div className="space-y-4 py-4">
-                <div className="relative">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500" size={20} />
+              <div className="space-y-6 py-6 flex flex-col items-center">
+                <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-3xl flex items-center justify-center text-emerald-600 mb-2">
+                   <User size={32} />
+                </div>
+                <div className="relative w-full">
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
                   <input 
                     autoFocus
                     type="text"
@@ -103,21 +106,21 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 rounded-2xl outline-none transition-all text-base font-bold dark:text-white"
                   />
                 </div>
-                <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest px-1">This name will be used throughout your journey.</p>
+                <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest text-center px-4">This will be used for your spiritual greetings.</p>
               </div>
             </StepWrapper>
           )}
 
           {step === 2 && (
             <StepWrapper 
-              title="Your Path" 
-              subtitle="Choose the level of discipline that fits your lifestyle."
+              title="Choose Your Path" 
+              subtitle="Select the level of tracking discipline that fits your heart."
             >
               <div className="grid grid-cols-1 gap-3 py-2">
                 {[
-                  { id: 'soft', label: 'Soft', desc: 'Flexible tracking for beginners.' },
-                  { id: 'normal', label: 'Normal', desc: 'The balanced daily standard.' },
-                  { id: 'strict', label: 'Strict', desc: 'No edits allowed after marking.' }
+                  { id: 'soft', label: 'Soft', desc: 'Graceful tracking, easy to adjust.' },
+                  { id: 'normal', label: 'Normal', desc: 'The balanced path of consistency.' },
+                  { id: 'strict', label: 'Strict', desc: 'Firm tracking. No edits after saving.' }
                 ].map((m) => (
                   <button
                     key={m.id}
@@ -128,12 +131,12 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                       : 'bg-slate-50 dark:bg-slate-800/50 border-transparent hover:border-slate-200'
                     }`}
                   >
-                    <div className={`flex-shrink-0 p-2 rounded-xl bg-white dark:bg-slate-700 ${formData.strictness === m.id ? 'text-emerald-600' : 'text-slate-400'}`}>
-                      <Shield size={18} />
+                    <div className={`flex-shrink-0 p-2.5 rounded-xl bg-white dark:bg-slate-700 shadow-sm ${formData.strictness === m.id ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      <Shield size={20} />
                     </div>
                     <div>
                       <span className="font-bold text-sm block dark:text-white leading-tight">{m.label}</span>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">{m.desc}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{m.desc}</p>
                     </div>
                   </button>
                 ))}
@@ -143,22 +146,22 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
           {step === 3 && (
             <StepWrapper 
-              title="Your Intent" 
-              subtitle="Focus your energy. Select up to three core goals."
+              title="Daily Intention" 
+              subtitle="Why are you here? Focusing your intent brings barakah."
             >
-              <div className="grid grid-cols-1 gap-2.5 py-2">
+              <div className="grid grid-cols-1 gap-2 py-2">
                 {[
-                  'Improve consistency',
-                  'Pray on time',
-                  'Build a habit',
+                  'Improve prayer consistency',
+                  'Focus on praying on time',
+                  'Build a long-term habit',
                   'Reconnect spiritually'
                 ].map((goal) => (
                   <button
                     key={goal}
                     onClick={() => toggleIntention(goal)}
-                    className={`p-4 rounded-xl border-2 flex items-center justify-between transition-all ${
+                    className={`p-4 rounded-2xl border-2 flex items-center justify-between transition-all ${
                       formData.intentions?.includes(goal)
-                      ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500 text-emerald-700 dark:text-emerald-400' 
+                      ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500 text-emerald-800 dark:text-emerald-300 shadow-sm' 
                       : 'bg-slate-50 dark:bg-slate-800/50 border-transparent text-slate-500'
                     }`}
                   >
@@ -176,17 +179,21 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
           {step === 4 && (
             <StepWrapper 
-              title="Ready to Begin" 
-              subtitle="May your journey be filled with light and barakah."
+              title="Welcome to NurTrack" 
+              subtitle="May your heart find peace in every prayer."
             >
-              <div className="flex flex-col items-center justify-center flex-1 py-4">
-                <div className="relative mb-6 transform scale-90">
-                  <Logo size={110} className="animate-pulse" />
-                  <div className="absolute inset-0 bg-emerald-500/10 blur-2xl rounded-full -z-10"></div>
+              <div className="flex flex-col items-center justify-center flex-1 py-4 text-center">
+                <div className="relative mb-6">
+                  <Logo size={120} className="animate-pulse drop-shadow-2xl" />
+                  <div className="absolute inset-0 bg-emerald-500/10 blur-3xl rounded-full -z-10"></div>
                 </div>
-                <div className="text-center space-y-1.5">
-                  <p className="font-black text-xl text-slate-900 dark:text-white">Bismillah!</p>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">Your account is ready. Safe sync enabled.</p>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-center gap-2 text-emerald-600 font-black uppercase text-[10px] tracking-widest">
+                    <Sparkles size={12} />
+                    Bismillah
+                  </div>
+                  <p className="font-black text-2xl text-slate-900 dark:text-white">You're Ready</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-medium px-4 max-w-xs mx-auto">Your spiritual journey is now perfectly configured and synced.</p>
                 </div>
               </div>
             </StepWrapper>
@@ -197,6 +204,13 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .animate-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+        @keyframes fade-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
       `}</style>
     </div>
   );

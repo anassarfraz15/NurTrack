@@ -128,7 +128,7 @@ const App: React.FC = () => {
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
       } catch (e) {
-        console.warn("Auth initialization bypassed due to connection issues.");
+        console.warn("Auth initialization bypassed.");
       } finally {
         setLoading(false);
       }
@@ -138,6 +138,8 @@ const App: React.FC = () => {
 
     const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
+      // Reset guest mode on auth change
+      if (session?.user) setGuestMode(false);
     });
 
     return () => subscription.unsubscribe();
@@ -151,10 +153,11 @@ const App: React.FC = () => {
           if (cloudData) {
             setAppState(cloudData);
           } else {
+            // New cloud user: prioritize onboarding if local state says so
             syncUserData(user.id, appState);
           }
         } catch (e) {
-          console.error("Cloud data sync failed:", e);
+          console.error("Cloud sync failed:", e);
         }
       };
       loadCloudData();
@@ -285,14 +288,17 @@ const App: React.FC = () => {
     );
   }
 
+  // 1. Check Auth First
   if (!user && !guestMode) {
     return <Auth onGuestMode={() => setGuestMode(true)} />;
   }
 
+  // 2. Then Check Onboarding (for both Guests and Registered Users)
   if (!appState.settings.onboardingCompleted) {
     return <Onboarding onComplete={completeOnboarding} />;
   }
 
+  // 3. Finally Main App
   return (
     <Layout activeTab={activeTab} setActiveTab={setActiveTab} drawerContent={<Settings appState={appState} onToggleTheme={toggleTheme} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />} user={user}>
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
