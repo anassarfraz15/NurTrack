@@ -1,0 +1,7 @@
+{
+  "name": "NurTrack: Modern Salah & Lifestyle Companion",
+  "description": "A comprehensive Islamic app designed to help Muslims build consistency in prayers, track streaks, find Qibla, and grow spiritually through AI-powered motivation.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
