@@ -1,19 +1,21 @@
-
 import React, { useMemo, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
-import { AppState, PrayerStatus, PrayerName, DailyLog } from '../types';
-import { PRAYER_NAMES } from '../constants';
+import { AppState, PrayerStatus, PrayerName, DailyLog } from '../types.ts';
+import { PRAYER_NAMES } from '../constants.tsx';
 import { TrendingUp, Award, Sparkles, Info, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame } from 'lucide-react';
-import { getTodayDateString, formatDisplayDate } from '../utils/dateTime';
+import { getTodayDateString, formatDisplayDate } from '../utils/dateTime.ts';
 
 interface AnalyticsProps {
   appState: AppState;
 }
 
 const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
-  const [selectedCalendarDate, setSelectedCalendarDate] = useState(getTodayDateString());
+  const todayStr = getTodayDateString();
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(todayStr);
+  const [viewDate, setViewDate] = useState(new Date()); // Controls which month we are looking at
+  
   const isDark = appState.settings.theme === 'dark';
 
   // Theme-aware color constants
@@ -24,13 +26,19 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
   };
 
   // Calendar Logic
-  const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
-  const todayStr = getTodayDateString();
+  const viewMonth = viewDate.getMonth();
+  const viewYear = viewDate.getFullYear();
 
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay();
+
+  const handlePrevMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth - 1, 1));
+  };
+
+  const handleNextMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth + 1, 1));
+  };
 
   const calendarDays = useMemo(() => {
     const days = [];
@@ -40,28 +48,28 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
     }
     // Real days
     for (let i = 1; i <= daysInMonth; i++) {
-      const date = new Date(currentYear, currentMonth, i);
-      const dateKey = date.toISOString().split('T')[0];
+      // Local construction of YYYY-MM-DD to avoid UTC shifting issues
+      const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       const log = appState.logs[dateKey];
       
       let status: 'perfect' | 'partial' | 'missed' | 'none' = 'none';
       
       if (log) {
-        const markedCount = Object.values(log.prayers).filter(s => s !== PrayerStatus.NOT_MARKED && s !== PrayerStatus.MISSED).length;
-        const missedCount = Object.values(log.prayers).filter(s => s === PrayerStatus.MISSED).length;
+        const prayers = Object.values(log.prayers);
+        const markedCount = prayers.filter(s => s === PrayerStatus.ON_TIME || s === PrayerStatus.LATE).length;
+        const missedCount = prayers.filter(s => s === PrayerStatus.MISSED).length;
         
         if (markedCount === 5) status = 'perfect';
         else if (markedCount > 0) status = 'partial';
-        else if (missedCount > 0) status = 'missed';
+        else if (missedCount > 0 || markedCount < 5) status = 'missed';
       } else if (dateKey < todayStr) {
-        // Past day with no log
         status = 'missed';
       }
       
       days.push({ day: i, dateKey, status });
     }
     return days;
-  }, [appState.logs, currentMonth, currentYear, todayStr]);
+  }, [appState.logs, viewMonth, viewYear, todayStr]);
 
   // Selected Day Data
   const selectedDayLog = appState.logs[selectedCalendarDate] || { prayers: {} };
@@ -69,10 +77,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
   // Chart Data Computation
   const { weeklyTrend, overallDistribution, averageConsistency } = useMemo(() => {
     const trendDays = [];
+    const today = new Date();
     for (let i = 6; i >= 0; i--) {
       const d = new Date(today);
       d.setDate(d.getDate() - i);
-      const dateKey = d.toISOString().split('T')[0];
+      const dateKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       const log = (appState.logs[dateKey] || { prayers: {} }) as DailyLog;
       
       const counts = {
@@ -164,28 +173,35 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
                 <CalendarDays size={22} />
               </div>
               <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 tracking-tight">
-                {today.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h3>
             </div>
-            <div className="flex gap-4">
-              <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400 opacity-50 cursor-not-allowed"><ChevronLeft size={20} /></button>
-                <button className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400 opacity-50 cursor-not-allowed"><ChevronRight size={20} /></button>
-              </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={handlePrevMonth}
+                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-600 dark:text-slate-400"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button 
+                onClick={handleNextMonth}
+                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-600 dark:text-slate-400"
+              >
+                <ChevronRight size={20} />
+              </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-3 mb-6">
+          <div className="grid grid-cols-7 gap-2 md:gap-3 mb-6">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
               <div key={d} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-2">{d}</div>
             ))}
             {calendarDays.map((dayObj, idx) => {
-              if (!dayObj) return <div key={`empty-${idx}`} className="h-14 md:h-20" />;
+              if (!dayObj) return <div key={`empty-${idx}`} className="h-12 md:h-16 lg:h-20" />;
               
               const isSelected = selectedCalendarDate === dayObj.dateKey;
               const isToday = dayObj.dateKey === todayStr;
 
-              // Color Logic for Streak Calendar
               let bgClass = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/50";
               let textClass = "text-slate-600 dark:text-slate-400";
               let shadowClass = "";
@@ -208,14 +224,14 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
                 <button
                   key={dayObj.dateKey}
                   onClick={() => setSelectedCalendarDate(dayObj.dateKey)}
-                  className={`group relative h-14 md:h-20 rounded-2xl transition-all flex flex-col items-center justify-center gap-1 border-2 ${
+                  className={`group relative h-12 md:h-16 lg:h-20 rounded-xl md:rounded-2xl transition-all flex flex-col items-center justify-center gap-1 border-2 ${
                     isSelected 
                     ? 'ring-4 ring-slate-900/10 dark:ring-white/10 scale-105 z-10' 
                     : ''
                   } ${bgClass} ${textClass} ${shadowClass} hover:scale-[1.02] active:scale-95`}
                 >
-                  <span className="text-sm font-black">{dayObj.day}</span>
-                  {isToday && !isSelected && (
+                  <span className="text-xs md:text-sm font-black">{dayObj.day}</span>
+                  {isToday && (
                     <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white dark:border-slate-900" />
                   )}
                 </button>
@@ -223,23 +239,23 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
             })}
           </div>
 
-          <div className="flex flex-wrap items-center gap-6 mt-8 pt-8 border-t border-slate-50 dark:border-slate-800/50">
+          <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 pt-8 border-t border-slate-50 dark:border-slate-800/50">
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-4 h-4 rounded-lg bg-emerald-500 shadow-sm" /> All Prayers (5/5)
+              <div className="w-4 h-4 rounded-lg bg-emerald-500 shadow-sm" /> Perfect Day
             </div>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-4 h-4 rounded-lg bg-amber-400 shadow-sm" /> Partial (1-4)
+              <div className="w-4 h-4 rounded-lg bg-amber-400 shadow-sm" /> Partial
             </div>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-4 h-4 rounded-lg bg-rose-500 shadow-sm" /> Missed Day
+              <div className="w-4 h-4 rounded-lg bg-rose-500 shadow-sm" /> Missed
             </div>
             <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-auto">
-              <div className="w-4 h-4 rounded-lg border-2 border-slate-100 dark:border-slate-800" /> Future/Not Tracked
+              <div className="w-4 h-4 rounded-lg border-2 border-slate-100 dark:border-slate-800" /> Future
             </div>
           </div>
         </section>
 
-        {/* Selected Day Panel - Redesigned for History */}
+        {/* Selected Day Panel */}
         <section className="bg-slate-950 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col h-full border border-slate-800/50">
           <div className="absolute top-0 right-0 p-8 text-white/5 pointer-events-none">
             <CalendarDays size={180} />
@@ -252,6 +268,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
                 <h3 className="text-2xl font-bold tracking-tight">
                   {formatDisplayDate(selectedCalendarDate).split(',')[0]}
                 </h3>
+                <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-widest">{selectedCalendarDate}</p>
               </div>
               <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
                 <CalendarDays size={20} className="text-slate-400" />
@@ -267,7 +284,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
                   <div key={name} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
                     <div className="flex items-center gap-4">
                       <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                        {getStatusIcon(status)}
+                        {getStatusIcon(status as PrayerStatus)}
                       </div>
                       <span className="font-bold text-sm tracking-tight">{name}</span>
                     </div>
