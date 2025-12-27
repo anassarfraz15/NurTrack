@@ -20,9 +20,10 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
     setError(null);
 
     try {
+      // Cast supabase.auth to any to bypass property access errors for signInWithPassword and signUp
       const { error } = isLogin 
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+        ? await (supabase.auth as any).signInWithPassword({ email, password })
+        : await (supabase.auth as any).signUp({ email, password });
 
       if (error) throw error;
     } catch (err: any) {

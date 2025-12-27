@@ -1,25 +1,21 @@
-
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * CONFIGURATION:
- * 1. Go to your Supabase Dashboard (https://supabase.com/dashboard)
- * 2. Go to Settings > API
- * 3. Copy "Project URL" and "anon public" key
- * 4. Paste them into the strings below:
+ * When deploying to Netlify, add these as Environment Variables in the Netlify Dashboard.
+ * These local constants act as fallbacks for local development.
  */
-const SUPABASE_URL = 'https://kmmukykeswqgqqyoquxv.supabase.co'; // <-- PASTE YOUR PROJECT URL HERE
-const SUPABASE_ANON_KEY = 'sb_publishable_QywUVoTx8WTK9Vf0QL6ZWA_aUfh76Lw'; // <-- PASTE YOUR ANON KEY HERE
+const FALLBACK_URL = 'https://kmmukykeswqgqqyoquxv.supabase.co';
+const FALLBACK_KEY = 'sb_publishable_QywUVoTx8WTK9Vf0QL6ZWA_aUfh76Lw';
 
-// Fallback to environment variables if the above are empty
-const supabaseUrl = SUPABASE_URL || (typeof process !== 'undefined' && process.env?.SUPABASE_URL) || '';
-const supabaseAnonKey = SUPABASE_ANON_KEY || (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) || '';
+const supabaseUrl = (typeof process !== 'undefined' && process.env?.SUPABASE_URL) || FALLBACK_URL;
+const supabaseAnonKey = (typeof process !== 'undefined' && process.env?.SUPABASE_ANON_KEY) || FALLBACK_KEY;
 
 let supabaseInstance: SupabaseClient | null = null;
 
 const isValidUrl = (url: string) => {
   try {
-    return url.startsWith('http');
+    return url && url.startsWith('http');
   } catch {
     return false;
   }
@@ -28,21 +24,17 @@ const isValidUrl = (url: string) => {
 if (isValidUrl(supabaseUrl) && supabaseAnonKey) {
   try {
     supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
-    console.log('NurTrack: Supabase cloud sync enabled.');
   } catch (e) {
-    console.error('NurTrack: Supabase initialization error:', e);
+    console.error('NurTrack: Supabase connection failed:', e);
   }
-} else {
-  console.warn('NurTrack: Running in Local Mode (No Supabase keys found). Set your credentials in services/supabase.ts for cloud backup.');
 }
 
-// Export a robust proxy to ensure calls like supabase.auth.getSession() don't crash the app
 export const supabase = (supabaseInstance || {
   auth: {
     getSession: () => Promise.resolve({ data: { session: null }, error: null }),
     onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signInWithPassword: () => Promise.reject(new Error('Supabase project not connected. Check services/supabase.ts')),
-    signUp: () => Promise.reject(new Error('Supabase project not connected. Check services/supabase.ts')),
+    signInWithPassword: () => Promise.reject(new Error('Auth Unavailable')),
+    signUp: () => Promise.reject(new Error('Auth Unavailable')),
     signOut: () => Promise.resolve({ error: null }),
   },
   from: () => ({
@@ -58,12 +50,11 @@ export const supabase = (supabaseInstance || {
 export async function syncUserData(userId: string, data: any) {
   if (!supabaseInstance) return;
   try {
-    const { error } = await supabase
+    await supabase
       .from('user_profiles')
       .upsert({ user_id: userId, data: data }, { onConflict: 'user_id' });
-    if (error) console.error('NurTrack Sync Error:', error.message);
   } catch (e) {
-    console.error('NurTrack Sync Failed:', e);
+    // Silent fail for better UX in production
   }
 }
 

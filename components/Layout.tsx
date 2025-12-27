@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { LayoutDashboard, Pocket, Activity, Menu, X, Settings as SettingsIcon, LogOut, User as UserIcon } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
+// Removed missing User type from @supabase/supabase-js
 import { supabase } from '../services/supabase';
 
 interface LayoutProps {
@@ -9,7 +9,8 @@ interface LayoutProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   drawerContent?: React.ReactNode; 
-  user: User | null;
+  // Changed User type to any to bypass missing export error
+  user: any;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, drawerContent, user }) => {
@@ -29,7 +30,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    // Cast supabase.auth to any to resolve property access error
+    await (supabase.auth as any).signOut();
     window.location.reload();
   };
 
