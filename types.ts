@@ -9,16 +9,20 @@ export enum PrayerStatus {
 }
 
 export interface PrayerEntry {
-  id: string;
-  name: PrayerName;
-  status: PrayerStatus;
-  timestamp: number;
+  id: string; // UUID for local and remote tracking
+  user_id: string;
+  prayer_name: PrayerName;
+  prayer_date: string; // YYYY-MM-DD
+  prayer_status: PrayerStatus;
+  prayer_timestamp: number;
+  synced: boolean;
+  created_at: number;
 }
 
 export interface DailyLog {
   date: string; // YYYY-MM-DD
   prayers: Record<PrayerName, PrayerStatus>;
-  notes?: string;
+  entries?: PrayerEntry[]; // Detailed entries for offline-first tracking
 }
 
 export interface UserStats {

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, PrayerStatus, PrayerName, AppSettings, UserStats, DailyLog } from './types.ts';
+import { AppState, PrayerStatus, PrayerName, AppSettings, UserStats, DailyLog, PrayerEntry } from './types.ts';
 import Layout from './components/Layout.tsx';
 import Dashboard from './components/Dashboard.tsx';
 import Analytics from './components/Analytics.tsx';
@@ -10,11 +11,13 @@ import AchievementPopup from './components/AchievementPopup.tsx';
 import Auth from './components/Auth.tsx';
 import Onboarding from './components/Onboarding.tsx';
 import { getTodayDateString } from './utils/dateTime.ts';
-import { supabase, syncUserData, fetchUserData } from './services/supabase.ts';
-import { Loader2 } from 'lucide-react';
+import { supabase } from './services/supabase.ts';
+import { db } from './services/db.ts';
+import { syncEngine } from './services/sync.ts';
+import { Loader2, WifiOff } from 'lucide-react';
 import { Logo } from './constants.tsx';
 
-const STORAGE_KEY = 'nurtrack_state_v1';
+const SETTINGS_STORAGE_KEY = 'nurtrack_settings_v1';
 
 const INITIAL_SETTINGS: AppSettings = {
   userName: '',
@@ -32,6 +35,29 @@ const INITIAL_SETTINGS: AppSettings = {
   onboardingCompleted: false,
   hapticsEnabled: true,
   location: null
+};
+
+// Helper to construct UI logs from flat DB entries
+const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
+  const logs: Record<string, DailyLog> = {};
+  entries.forEach(entry => {
+    if (!logs[entry.prayer_date]) {
+      logs[entry.prayer_date] = {
+        date: entry.prayer_date,
+        prayers: {
+          Fajr: PrayerStatus.NOT_MARKED,
+          Dhuhr: PrayerStatus.NOT_MARKED,
+          Asr: PrayerStatus.NOT_MARKED,
+          Maghrib: PrayerStatus.NOT_MARKED,
+          Isha: PrayerStatus.NOT_MARKED
+        },
+        entries: []
+      };
+    }
+    logs[entry.prayer_date].prayers[entry.prayer_name] = entry.prayer_status;
+    logs[entry.prayer_date].entries?.push(entry);
+  });
+  return logs;
 };
 
 const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats => {
@@ -96,48 +122,66 @@ const App: React.FC = () => {
   const [guestMode, setGuestMode] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const syncTimeoutRef = useRef<number | null>(null);
 
   const [lastCelebratedDate, setLastCelebratedDate] = useState<string | null>(() => {
     return localStorage.getItem('nurtrack_last_celebrated');
   });
 
-  const [appState, setAppState] = useState<AppState>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const stats = calculateStatsFromLogs(parsed.logs || {});
-        return {
-          logs: parsed.logs || {},
-          stats: stats,
-          settings: { ...INITIAL_SETTINGS, ...(parsed.settings || {}) }
-        };
-      }
-    } catch (e) {
-      console.error("Local State Initialization Failed:", e);
-    }
-    return {
-      logs: {},
-      stats: { streak: 0, totalPrayers: 0, onTimeCount: 0, lastCompletedDate: null },
-      settings: INITIAL_SETTINGS
-    };
+  const [appState, setAppState] = useState<AppState>({
+    logs: {},
+    stats: { streak: 0, totalPrayers: 0, onTimeCount: 0, lastCompletedDate: null },
+    settings: INITIAL_SETTINGS
   });
 
+  // Handle Online/Offline Detection
   useEffect(() => {
-    const initAuth = async () => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      if (user) syncEngine.sync(user.id);
+    };
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [user]);
+
+  // Load Settings & Initialize Auth
+  useEffect(() => {
+    const init = async () => {
       try {
+        // Load Settings from LocalStorage (Separated from logs now)
+        const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        const settings = savedSettings ? JSON.parse(savedSettings) : INITIAL_SETTINGS;
+
+        // Hydrate Logs from IndexedDB
+        const entries = await db.getAllLogs();
+        const logs = entriesToLogs(entries);
+        const stats = calculateStatsFromLogs(logs);
+
+        setAppState(prev => ({
+          ...prev,
+          settings,
+          logs,
+          stats
+        }));
+
+        // Auth
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
       } catch (e) {
-        console.warn("Auth initialization bypassed.");
+        console.warn("Init bypassed:", e);
       } finally {
         setLoading(false);
       }
     };
 
-    initAuth();
+    init();
 
     const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
@@ -147,42 +191,30 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Background Sync Trigger
   useEffect(() => {
-    if (user) {
-      const loadCloudData = async () => {
-        try {
-          const cloudData = await fetchUserData(user.id);
-          if (cloudData) {
-            setAppState(cloudData);
-          } else {
-            syncUserData(user.id, appState);
-          }
-        } catch (e) {
-          console.error("Cloud sync failed:", e);
-        }
-      };
-      loadCloudData();
+    if (user && isOnline) {
+      const interval = setInterval(() => syncEngine.sync(user.id), 30000);
+      syncEngine.hydrateLocal(user.id).then(() => {
+        // Refresh local state after hydration
+        db.getAllLogs().then(entries => {
+          const logs = entriesToLogs(entries);
+          setAppState(prev => ({ ...prev, logs, stats: calculateStatsFromLogs(logs) }));
+        });
+      });
+      return () => clearInterval(interval);
     }
-  }, [user]);
+  }, [user, isOnline]);
 
+  // Sync Settings to LocalStorage
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
-    } catch (e) {}
-    
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appState.settings));
     if (appState.settings.theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-
-    if (user) {
-      if (syncTimeoutRef.current) window.clearTimeout(syncTimeoutRef.current);
-      syncTimeoutRef.current = window.setTimeout(() => {
-        syncUserData(user.id, appState);
-      }, 2000);
-    }
-  }, [appState, user]);
+  }, [appState.settings]);
 
   const toggleTheme = () => {
     setAppState(prev => ({
@@ -244,10 +276,28 @@ const App: React.FC = () => {
     }));
   };
 
-  const updatePrayerStatus = (name: PrayerName, status: PrayerStatus) => {
+  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus) => {
     const today = getTodayDateString();
+    const userId = user?.id || 'guest_user';
+    
+    // 1. Create the new entry with local UUID
+    const newEntry: PrayerEntry = {
+      id: crypto.randomUUID(),
+      user_id: userId,
+      prayer_name: name,
+      prayer_date: today,
+      prayer_status: status,
+      prayer_timestamp: Date.now(),
+      synced: false,
+      created_at: Date.now()
+    };
+
+    // 2. Persist to IndexedDB First
+    await db.saveEntry(newEntry);
+
+    // 3. Update Local React State for immediate UI feedback
     setAppState(prev => {
-      const currentLog: DailyLog = prev.logs[today] || { 
+      const currentLog = prev.logs[today] || { 
         date: today, 
         prayers: {
           Fajr: PrayerStatus.NOT_MARKED,
@@ -255,16 +305,13 @@ const App: React.FC = () => {
           Asr: PrayerStatus.NOT_MARKED,
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
-        } 
+        },
+        entries: []
       };
-      
-      const previousStatus = currentLog.prayers[name];
-      if (prev.settings.strictness === 'strict' && previousStatus !== PrayerStatus.NOT_MARKED) return prev;
-      if (previousStatus === status) return prev;
 
-      const updatedPrayers: Record<PrayerName, PrayerStatus> = { ...currentLog.prayers, [name]: status };
-      const updatedLog: DailyLog = { ...currentLog, prayers: updatedPrayers };
-      const updatedLogs: Record<string, DailyLog> = { ...prev.logs, [today]: updatedLog };
+      const updatedPrayers = { ...currentLog.prayers, [name]: status };
+      const updatedLog = { ...currentLog, prayers: updatedPrayers, entries: [...(currentLog.entries || []), newEntry] };
+      const updatedLogs = { ...prev.logs, [today]: updatedLog };
       
       const newStats = calculateStatsFromLogs(updatedLogs);
 
@@ -275,10 +322,14 @@ const App: React.FC = () => {
       if (allOnTime && lastCelebratedDate !== today) {
         setShowAchievement(true);
         setLastCelebratedDate(today);
+        localStorage.setItem('nurtrack_last_celebrated', today);
       }
 
       return { ...prev, logs: updatedLogs, stats: newStats };
     });
+
+    // 4. Trigger Sync immediately if online
+    if (isOnline && user) syncEngine.sync(user.id);
   };
 
   const handleOpenDrawer = () => setIsDrawerOpen(true);
@@ -293,7 +344,7 @@ const App: React.FC = () => {
         </div>
         <div className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase tracking-[0.2em] mt-8">
           <Loader2 className="animate-spin" size={16} />
-          Initializing NurTrack
+          Initializing Local Database
         </div>
       </div>
     );
@@ -326,6 +377,16 @@ const App: React.FC = () => {
       } 
       user={user}
     >
+      {/* Connectivity Banner */}
+      {!isOnline && (
+        <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center justify-center gap-3 animate-in fade-in slide-in-from-top-4">
+          <WifiOff size={16} className="text-amber-600 dark:text-amber-400" />
+          <p className="text-[10px] font-black uppercase tracking-widest text-amber-800 dark:text-amber-200">
+            Offline Mode: Saving prayers locally
+          </p>
+        </div>
+      )}
+
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
         {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'analytics' && <Analytics appState={appState} onOpenDrawer={handleOpenDrawer} />}
