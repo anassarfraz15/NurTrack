@@ -27,6 +27,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
   const [loadingCalendar, setLoadingCalendar] = useState(false);
 
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const lastHapticTime = useRef<number>(0);
 
   const tools = [
     { id: 'tasbeeh', icon: Heart, label: 'Tasbeeh' },
@@ -58,16 +59,14 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     }
   }, [activeTool, islamicEvents.length]);
 
-  // Qibla Logic: Calculate Angle to Kaaba
+  // Qibla Logic
   const calculateQibla = (lat: number, lng: number) => {
     const toRad = (deg: number) => (deg * Math.PI) / 180;
     const toDeg = (rad: number) => (rad * 180) / Math.PI;
-
     const φ1 = toRad(lat);
     const λ1 = toRad(lng);
     const φ2 = toRad(21.4225); // Kaaba Lat
     const λ2 = toRad(39.8262); // Kaaba Lng
-
     const y = Math.sin(λ2 - λ1);
     const x = Math.cos(φ1) * Math.tan(φ2) - Math.sin(φ1) * Math.cos(λ2 - λ1);
     const qibla = toDeg(Math.atan2(y, x));
@@ -79,16 +78,13 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
       setLocationError("Geolocation is not supported by your browser.");
       return;
     }
-
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const angle = calculateQibla(pos.coords.latitude, pos.coords.longitude);
         setQiblaAngle(angle);
         requestCompassPermission();
       },
-      (err) => {
-        setLocationError("Please enable location access to find Qibla direction.");
-      }
+      () => setLocationError("Please enable location access to find Qibla direction.")
     );
   };
 
@@ -107,11 +103,8 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
       }
     } else {
       setCompassPermission('granted');
-      if ('ondeviceorientationabsolute' in window) {
-        (window as any).addEventListener('deviceorientationabsolute', handleOrientation, true);
-      } else {
-        (window as any).addEventListener('deviceorientation', handleOrientation, true);
-      }
+      const eventName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+      (window as any).addEventListener(eventName, handleOrientation, true);
     }
   };
 
@@ -129,33 +122,23 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     if (qiblaAngle !== null) {
       const relative = (qiblaAngle - heading + 360) % 360;
       const aligned = relative < 10 || relative > 350;
-      if (aligned !== isAligned) {
-        setIsAligned(aligned);
-      }
+      if (aligned !== isAligned) setIsAligned(aligned);
     }
   }, [heading, qiblaAngle, isAligned]);
-
-  useEffect(() => {
-    if (activeTool === 'qibla' && compassPermission === 'granted') {
-        requestCompassPermission();
-    }
-    return () => {
-      (window as any).removeEventListener('deviceorientation', handleOrientation);
-      (window as any).removeEventListener('deviceorientationabsolute', handleOrientation);
-    };
-  }, [activeTool, compassPermission]);
 
   const triggerHaptics = (strength: 'light' | 'heavy' = 'light') => {
     if (!appState.settings.hapticsEnabled) return;
     
+    // Throttle haptics slightly to prevent overlap during super-fast clicking
+    const now = Date.now();
+    if (now - lastHapticTime.current < 40) return;
+    lastHapticTime.current = now;
+
     if ('vibrate' in navigator) {
-      // 15ms feels like a "click", 40ms feels like a "heavy bump"
       const duration = strength === 'heavy' ? 40 : 15;
       try {
         navigator.vibrate(duration);
-      } catch (e) {
-        console.debug("Haptics failed to trigger", e);
-      }
+      } catch (e) {}
     }
   };
 
@@ -165,47 +148,50 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
         audioCtxRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
       }
       const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
+      if (ctx.state === 'suspended') ctx.resume();
       
       const oscillator = ctx.createOscillator();
       const gainNode = ctx.createGain();
-
       oscillator.type = 'sine';
       oscillator.frequency.setValueAtTime(880, ctx.currentTime);
-      
       gainNode.gain.setValueAtTime(0, ctx.currentTime);
       gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
       gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
-
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
-
       oscillator.start();
       oscillator.stop(ctx.currentTime + 0.5);
-    } catch (e) {
-      console.warn("Audio play failed", e);
-    }
+    } catch (e) {}
   };
 
-  const handleTasbeehIncrement = () => {
-    if (tasbeehGoal !== null && tasbeehCount >= tasbeehGoal) {
-      playCalmBeep();
-      triggerHaptics('heavy');
-      return;
+  // Separation of Logic: Handle State Update
+  const handleTasbeehIncrement = (e?: React.PointerEvent | React.TouchEvent) => {
+    if (e) {
+      // Prevent multiple events from firing (touch + mouse)
+      if (e.type === 'touchstart') e.preventDefault();
+      e.stopPropagation();
     }
-    const nextCount = tasbeehCount + 1;
-    setTasbeehCount(nextCount);
-    
-    // Check if goal reached
-    if (tasbeehGoal !== null && nextCount === tasbeehGoal) {
+
+    setTasbeehCount((prev) => {
+      // If goal set and reached, don't increment, just trigger "complete" feedback
+      if (tasbeehGoal !== null && prev >= tasbeehGoal) {
+        return prev;
+      }
+      return prev + 1;
+    });
+  };
+
+  // Separation of Logic: Handle Feedback
+  useEffect(() => {
+    if (tasbeehCount === 0) return;
+
+    if (tasbeehGoal !== null && tasbeehCount === tasbeehGoal) {
       playCalmBeep();
       triggerHaptics('heavy');
     } else {
       triggerHaptics('light');
     }
-  };
+  }, [tasbeehCount, tasbeehGoal]);
 
   const selectGoal = (goal: number | null) => {
     setTasbeehGoal(goal);
@@ -238,7 +224,6 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
         <p className="text-slate-500">Your everyday Muslim companions</p>
       </header>
 
-      {/* Tool switcher with flex-wrap to prevent horizontal overflow */}
       <div className="flex flex-wrap gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit max-w-full">
         {tools.map((tool) => (
           <button
@@ -263,9 +248,9 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
         {activeTool === 'tasbeeh' && (
           <>
             <div 
-              onMouseDown={(e) => { e.preventDefault(); handleTasbeehIncrement(); }}
-              onTouchStart={(e) => { e.preventDefault(); handleTasbeehIncrement(); }}
-              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[450px] sm:min-h-[500px] cursor-pointer transition-all rounded-[3rem] select-none active:bg-slate-50/50 dark:active:bg-slate-900/20"
+              onPointerDown={handleTasbeehIncrement}
+              style={{ touchAction: 'none' }}
+              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[450px] sm:min-h-[500px] cursor-pointer transition-all rounded-[3rem] select-none active:bg-slate-50/30 dark:active:bg-slate-800/20"
             >
               <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none">
                 <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40 animate-pulse">
@@ -276,7 +261,6 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
               <div className="flex items-center gap-6 sm:gap-8 md:gap-16">
                 <div className="relative pointer-events-none">
-                  {/* Scaled down for very small mobile screens */}
                   <div 
                     className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden active:scale-95 ${
                       tasbeehGoal && tasbeehCount >= tasbeehGoal 
@@ -310,8 +294,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
                 <div className="flex flex-col gap-3 sm:gap-4">
                   <button 
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); triggerHaptics('heavy'); }}
                     title="Reset Counter"
                     className="p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
@@ -319,8 +302,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                     <RotateCcw size={20} className="sm:w-6 sm:h-6" />
                   </button>
                   <button 
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
+                    onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); triggerHaptics('light'); }}
                     title="Set Goal"
                     className="p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
@@ -336,8 +318,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                   {[33, 99, 100].map(val => (
                     <button 
                       key={val}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onTouchStart={(e) => e.stopPropagation()}
+                      onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => { e.stopPropagation(); selectGoal(val); }}
                       className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border transition-all font-black text-xs sm:text-sm ${
                         tasbeehGoal === val 
@@ -356,8 +337,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
             {showGoalModal && (
               <div 
                 className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
-                onMouseDown={(e) => e.stopPropagation()}
-                onTouchStart={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
               >
                 <div 
                   className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
@@ -449,7 +429,6 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                   {isAligned ? 'Pointing to Kaaba' : 'Rotate your phone'}
                 </div>
 
-                {/* Slightly responsive compass container */}
                 <div className="relative w-64 h-64 sm:w-72 sm:h-72">
                   <div className={`absolute inset-0 rounded-full border-4 transition-all duration-700 ${
                     isAligned 
