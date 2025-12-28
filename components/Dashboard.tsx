@@ -1,21 +1,21 @@
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, CheckCircle } from 'lucide-react';
-import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
+import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, X, Calendar, ArrowRight } from 'lucide-react';
+import { PrayerName, PrayerStatus, AppState } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
 import { getSpiritualMotivation } from '../services/gemini';
 
 interface DashboardProps {
   appState: AppState;
-  updatePrayerStatus: (name: PrayerName, status: PrayerStatus, mode?: PrayerMode) => void;
+  updatePrayerStatus: (name: PrayerName, status: PrayerStatus) => void;
   lockTodayLog: () => void;
   onOpenDrawer: () => void;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, lockTodayLog, onOpenDrawer }) => {
   const today = getTodayDateString();
-  const todayLog = appState.logs[today] || { date: today, prayers: {}, modes: {}, isLocked: false };
+  const todayLog = appState.logs[today] || { date: today, prayers: {}, isLocked: false };
   const [prayerContext, setPrayerContext] = useState(getPrayerContext(appState.settings));
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(prayerContext.next.rawTime, prayerContext.next.isTomorrow));
   const [isTimingsPopupOpen, setIsTimingsPopupOpen] = useState(false);
@@ -24,11 +24,12 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const [loadingMotivation, setLoadingMotivation] = useState(false);
   
   const [isEditing, setIsEditing] = useState(!todayLog.isLocked);
-  
-  // Track temporary mode selection before final check
-  const [tempModes, setTempModes] = useState<Record<string, PrayerMode>>({});
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
+
+  const allPrayersMarked = PRAYER_NAMES.every(name => 
+    todayLog.prayers[name as PrayerName] && todayLog.prayers[name as PrayerName] !== PrayerStatus.NOT_MARKED
+  );
 
   const consistencyScore = appState.stats.totalPrayers 
     ? Math.round((appState.stats.onTimeCount / appState.stats.totalPrayers) * 100) 
@@ -60,33 +61,11 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     fetchMotivation();
   }, [appState.stats.streak, consistencyScore]);
 
-  const toggleMode = (name: PrayerName, mode: PrayerMode) => {
-    if (!isEditing) return;
-    setTempModes(prev => ({
-      ...prev,
-      [name]: prev[name] === mode ? undefined as any : mode
-    }));
-  };
-
-  const handleMarkCompleted = (name: PrayerName) => {
+  const handleStatusUpdate = (name: PrayerName, newStatus: PrayerStatus) => {
     if (!isEditing) return;
     const currentStatus = todayLog.prayers[name] || PrayerStatus.NOT_MARKED;
-    const isCurrentlyMarked = currentStatus !== PrayerStatus.NOT_MARKED;
-
-    if (isCurrentlyMarked) {
-      if (window.confirm(`Unmark ${name}?`)) {
-        updatePrayerStatus(name, PrayerStatus.NOT_MARKED);
-        setTempModes(prev => {
-          const next = { ...prev };
-          delete next[name];
-          return next;
-        });
-      }
-    } else {
-      // Complete prayer: Use temp mode or default to INDIVIDUAL
-      const mode = tempModes[name] || PrayerMode.INDIVIDUAL;
-      updatePrayerStatus(name, PrayerStatus.ON_TIME, mode);
-    }
+    const finalStatus = currentStatus === newStatus ? PrayerStatus.NOT_MARKED : newStatus;
+    updatePrayerStatus(name, finalStatus);
   };
 
   const handleSave = () => {
@@ -112,21 +91,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
       return;
     }
     setIsEditing(true);
-  };
-
-  const allPrayersMarked = PRAYER_NAMES.every(name => 
-    todayLog.prayers[name as PrayerName] && todayLog.prayers[name as PrayerName] !== PrayerStatus.NOT_MARKED
-  );
-
-  const getPrayerColor = (name: string) => {
-    switch(name) {
-      case 'Fajr': return 'bg-indigo-600';
-      case 'Dhuhr': return 'bg-amber-500';
-      case 'Asr': return 'bg-orange-500';
-      case 'Maghrib': return 'bg-rose-600';
-      case 'Isha': return 'bg-violet-800';
-      default: return 'bg-emerald-600';
-    }
   };
 
   const firstName = appState.settings.userName ? appState.settings.userName.trim().split(' ')[0] : '';
@@ -177,9 +141,11 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         </div>
       </header>
 
-      {/* Next Prayer Banner */}
+      {/* New Redesigned Next Prayer Banner */}
       <div className="relative overflow-hidden bg-emerald-700 dark:bg-emerald-800 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white shadow-xl shadow-emerald-200/40 dark:shadow-none transition-all duration-500">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          
+          {/* Left: Current Prayer Section */}
           <div className="flex-1 flex flex-col gap-1">
              <div className="flex items-center gap-2 mb-1">
                 <span className="px-2 py-0.5 bg-emerald-600/50 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-white/10">
@@ -195,12 +161,14 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
              </h3>
           </div>
 
+          {/* Middle: Progress Arrow */}
           <div className="hidden md:flex items-center justify-center px-4">
-             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10">
+             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10 animate-pulse">
                 <ArrowRight size={20} className="text-emerald-200" />
              </div>
           </div>
 
+          {/* Right: Next Prayer Section */}
           <div className="flex-1 flex flex-col md:items-end gap-1">
              <div className="flex items-center md:justify-end gap-2 mb-1">
                 <span className="px-2 py-0.5 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 ring-1 ring-white/20 backdrop-blur-sm">
@@ -226,151 +194,12 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
             <ChevronRight size={18} />
           </button>
         </div>
+
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-60 h-60 md:w-80 md:h-80 bg-emerald-400/20 rounded-full blur-[70px] md:blur-[90px]"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 bg-emerald-900/40 rounded-full blur-[60px] opacity-50"></div>
       </div>
 
-      {/* Redesigned Prayer Marking Cards */}
-      <section className="space-y-3 relative">
-        {PRAYER_NAMES.map((name) => {
-          const prayerName = name as PrayerName;
-          const status = todayLog.prayers[prayerName] || PrayerStatus.NOT_MARKED;
-          const savedMode = todayLog.modes?.[prayerName];
-          const activeMode = savedMode || tempModes[prayerName];
-          const isMarked = status !== PrayerStatus.NOT_MARKED;
-          const prayerColor = getPrayerColor(name);
-
-          return (
-            <div 
-              key={name}
-              className={`flex overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-300 ${!isEditing ? 'opacity-80' : ''}`}
-            >
-              {/* Left Section: Identity */}
-              <div className={`w-24 md:w-32 flex flex-col items-center justify-center text-white ${prayerColor} relative`}>
-                <span className="text-[10px] font-black uppercase tracking-widest opacity-60 mb-1">Prayer</span>
-                <span className="text-base md:text-xl font-black tracking-tight">{name}</span>
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-black/10"></div>
-              </div>
-
-              {/* Right Section: Actions */}
-              <div className="flex-1 flex items-center justify-between px-4 md:px-8 py-4 relative">
-                {!isEditing && (
-                  <div className="absolute inset-0 bg-slate-100/10 dark:bg-slate-950/20 backdrop-blur-[1px] z-10 pointer-events-none" />
-                )}
-
-                {/* Mode Selectors */}
-                <div className="flex items-center gap-4 md:gap-8">
-                  <div className="flex flex-col items-center gap-1.5">
-                    <button
-                      onClick={() => toggleMode(prayerName, PrayerMode.CONGREGATION)}
-                      className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all ${
-                        activeMode === PrayerMode.CONGREGATION 
-                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' 
-                        : 'text-slate-300 dark:text-slate-700 hover:text-slate-400'
-                      }`}
-                      title="Prayed in congregation"
-                    >
-                      <Users size={24} className={activeMode === PrayerMode.CONGREGATION ? 'scale-110' : ''} />
-                    </button>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 opacity-60">Jamaat</span>
-                  </div>
-
-                  <div className="flex flex-col items-center gap-1.5">
-                    <button
-                      onClick={() => toggleMode(prayerName, PrayerMode.INDIVIDUAL)}
-                      className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center transition-all ${
-                        activeMode === PrayerMode.INDIVIDUAL 
-                        ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' 
-                        : 'text-slate-300 dark:text-slate-700 hover:text-slate-400'
-                      }`}
-                      title="Prayed individually"
-                    >
-                      <User size={24} className={activeMode === PrayerMode.INDIVIDUAL ? 'scale-110' : ''} />
-                    </button>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 opacity-60">Alone</span>
-                  </div>
-                </div>
-
-                {/* Completion Checkmark */}
-                <div className="flex items-center">
-                  <button 
-                    onClick={() => handleMarkCompleted(prayerName)}
-                    className={`w-12 h-12 md:w-14 md:h-14 rounded-full border-2 flex items-center justify-center transition-all active:scale-90 ${
-                      isMarked 
-                      ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/30' 
-                      : 'border-slate-100 dark:border-slate-800 text-slate-200 dark:text-slate-800'
-                    }`}
-                  >
-                    {isMarked ? <CheckCircle size={24} /> : <Circle size={24} />}
-                  </button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* Save & Edit Buttons */}
-      {allPrayersMarked && (
-        <div className="flex items-center justify-center gap-3 py-2 animate-in slide-in-from-bottom-4">
-          {isEditing ? (
-            <button
-              onClick={handleSave}
-              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-3 min-w-[160px] justify-center"
-            >
-              <Save size={18} />
-              Lock Today
-            </button>
-          ) : (
-            <button
-              onClick={handleEdit}
-              className={`px-8 py-4 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black text-sm rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3 min-w-[160px] justify-center ${
-                appState.settings.strictness === 'strict' && todayLog.isLocked ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <Edit3 size={18} />
-              Edit Log
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Reflection Card */}
-      <section className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-6 text-slate-50 dark:text-slate-800/20 group-hover:text-emerald-500/10 transition-colors pointer-events-none">
-          <Quote size={80} />
-        </div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600">
-              <Quote size={16} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Reflection</h3>
-          </div>
-          
-          {loadingMotivation ? (
-            <div className="space-y-3 animate-pulse">
-              <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-full w-full"></div>
-              <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-full w-3/4"></div>
-            </div>
-          ) : motivation ? (
-            <div className="space-y-3">
-              <div>
-                <p className="text-slate-800 dark:text-slate-200 italic text-lg leading-relaxed arabic-font font-medium">
-                  "{motivation.message}"
-                </p>
-                <p className="text-emerald-600 dark:text-emerald-400 font-black text-[9px] mt-2 tracking-widest uppercase">— {motivation.source}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="py-6 text-center">
-              <p className="text-slate-400 text-xs font-medium italic">Start tracking to unlock insights.</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Timings Popup */}
+      {/* Prayer Timings Modal */}
       {isTimingsPopupOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
           <div 
@@ -424,14 +253,175 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                   </div>
                 ))}
               </div>
+
+              <div className="mt-6 pt-4 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-center gap-2">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Mode:</span>
+                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded-md">
+                  {appState.settings.timingMode}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Prayer Status Tracking - Minimalist Grid */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 relative">
+        {PRAYER_NAMES.map((name) => {
+          const status = todayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
+          const timing = prayerTimings.find(t => t.name === name);
+          
+          let cardStyle = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800";
+          let accentText = "text-slate-400";
+          let shadowStyle = "shadow-sm";
+
+          if (status === PrayerStatus.ON_TIME) {
+            cardStyle = "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-500/20";
+            accentText = "text-emerald-600 dark:text-emerald-400";
+            shadowStyle = "shadow-md shadow-emerald-500/5";
+          } else if (status === PrayerStatus.LATE) {
+            cardStyle = "bg-amber-50 dark:bg-amber-900/10 border-amber-500/20";
+            accentText = "text-amber-600 dark:text-amber-400";
+            shadowStyle = "shadow-md shadow-amber-500/5";
+          } else if (status === PrayerStatus.MISSED) {
+            cardStyle = "bg-rose-50 dark:bg-rose-900/10 border-rose-500/20";
+            accentText = "text-rose-600 dark:text-rose-400";
+            shadowStyle = "shadow-md shadow-rose-500/5";
+          }
+
+          return (
+            <div 
+              key={name}
+              className={`p-3 sm:p-4 rounded-[1.75rem] md:rounded-[2rem] border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden ${cardStyle} ${shadowStyle} ${!isEditing ? 'opacity-80 grayscale-[0.3]' : ''}`}
+            >
+              {!isEditing && (
+                <div className="absolute inset-0 bg-slate-100/10 dark:bg-slate-950/20 backdrop-blur-[1px] z-10 pointer-events-none" />
+              )}
+              
+              <div className="flex justify-between items-start mb-4 relative z-20">
+                <div>
+                  <h4 className={`font-black text-xs tracking-tight uppercase ${status === PrayerStatus.NOT_MARKED ? 'text-slate-800 dark:text-slate-200' : accentText}`}>
+                    {name}
+                  </h4>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">{timing?.time}</p>
+                </div>
+                {!isEditing && (
+                  <div className="p-1 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-400">
+                    <Lock size={10} />
+                  </div>
+                )}
+              </div>
+              
+              <div className={`grid grid-cols-3 gap-1 relative z-20 ${!isEditing ? 'pointer-events-none' : ''}`}>
+                <button 
+                  onClick={() => handleStatusUpdate(name as PrayerName, PrayerStatus.ON_TIME)}
+                  className={`flex flex-col items-center justify-center py-2.5 rounded-xl transition-all ${
+                    status === PrayerStatus.ON_TIME 
+                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 scale-105 z-10' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30'
+                  }`}
+                >
+                  {status === PrayerStatus.ON_TIME ? <Check size={14} /> : <CheckCircle2 size={14} />}
+                </button>
+
+                <button 
+                  onClick={() => handleStatusUpdate(name as PrayerName, PrayerStatus.LATE)}
+                  className={`flex flex-col items-center justify-center py-2.5 rounded-xl transition-all ${
+                    status === PrayerStatus.LATE 
+                    ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 scale-105 z-10' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-900/30'
+                  }`}
+                >
+                  <Clock size={14} />
+                </button>
+
+                <button 
+                  onClick={() => handleStatusUpdate(name as PrayerName, PrayerStatus.MISSED)}
+                  className={`flex flex-col items-center justify-center py-2.5 rounded-xl transition-all ${
+                    status === PrayerStatus.MISSED 
+                    ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 scale-105 z-10' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-900/30'
+                  }`}
+                >
+                  <AlertCircle size={14} />
+                </button>
+              </div>
+              
+              <div className="mt-2 text-center relative z-20">
+                <span className={`text-[7px] font-black uppercase tracking-[0.2em] opacity-40 transition-opacity ${status !== PrayerStatus.NOT_MARKED ? 'opacity-100' : 'opacity-0'}`}>
+                  {status.replace('_', ' ')}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      {/* Save & Edit Buttons - Minimalist floating style */}
+      {allPrayersMarked && (
+        <div className="flex items-center justify-center gap-3 py-2 animate-in slide-in-from-bottom-4">
+          {isEditing ? (
+            <button
+              onClick={handleSave}
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-2 min-w-[140px] justify-center"
+            >
+              <Save size={16} />
+              Save Today
+            </button>
+          ) : (
+            <button
+              onClick={handleEdit}
+              className={`px-6 py-3 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black text-xs rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-2 min-w-[140px] justify-center ${
+                appState.settings.strictness === 'strict' && todayLog.isLocked ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <Edit3 size={16} />
+              Edit Log
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Reflection Card - Refined padding */}
+      <section className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-[1.75rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-6 text-slate-50 dark:text-slate-800/20 group-hover:text-emerald-500/10 transition-colors pointer-events-none">
+          <Quote size={80} />
+        </div>
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600">
+              <Quote size={16} />
+            </div>
+            <h3 className="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Reflection</h3>
+          </div>
+          
+          {loadingMotivation ? (
+            <div className="space-y-3 animate-pulse">
+              <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-full w-full"></div>
+              <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-full w-3/4"></div>
+            </div>
+          ) : motivation ? (
+            <div className="space-y-3">
+              <div>
+                <p className="text-slate-800 dark:text-slate-200 italic text-lg leading-relaxed arabic-font font-medium">
+                  "{motivation.message}"
+                </p>
+                <p className="text-emerald-600 dark:text-emerald-400 font-black text-[9px] mt-2 tracking-widest uppercase">— {motivation.source}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="py-6 text-center">
+              <p className="text-slate-400 text-xs font-medium italic">Start tracking to unlock insights.</p>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   );
 };
 
+// Internal icons for modal
 const Sun = ({ size, className = "" }: { size: number, className?: string }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>;
 const Moon = ({ size, className = "" }: { size: number, className?: string }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
 

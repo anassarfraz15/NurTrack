@@ -27,76 +27,70 @@ const formatTime12h = (timeStr: string) => {
   return `${displayH}:${displayM} ${ampm}`;
 };
 
-export const getNextPrayer = (settings: AppSettings) => {
-  const now = new Date();
-  const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  
-  const timings = settings.timingMode === 'manual' ? settings.manualTimings : DEFAULT_TIMINGS;
-  
-  const prayerOrder: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-  
-  for (const name of prayerOrder) {
-    const timeStr = timings[name];
-    const [h, m] = timeStr.split(':').map(Number);
-    const prayerMinutes = h * 60 + m;
-    
-    if (prayerMinutes > currentMinutes) {
-      return { 
-        name, 
-        time: formatTime12h(timeStr),
-        rawTime: timeStr,
-        isTomorrow: false
-      };
-    }
-  }
-  
-  // If all prayers today are passed, return Fajr tomorrow
-  return { 
-    name: 'Fajr' as PrayerName, 
-    time: formatTime12h(timings['Fajr']),
-    rawTime: timings['Fajr'],
-    isTomorrow: true
-  };
-};
-
-/**
- * Calculates both the currently active prayer period and the upcoming prayer context.
- * Used for the main dashboard display.
- */
 export const getPrayerContext = (settings: AppSettings) => {
-  const timings = settings.timingMode === 'manual' ? settings.manualTimings : DEFAULT_TIMINGS;
-  const prayerOrder: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const timings = settings.timingMode === 'manual' ? settings.manualTimings : DEFAULT_TIMINGS;
+  const prayerOrder: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
-  // Find the prayer whose time has passed but is most recent
-  let currentPrayer: PrayerName = 'Isha';
-  for (const name of prayerOrder) {
+  // Create a mapping of minutes for comparison
+  const prayerMinutes = prayerOrder.map(name => {
     const [h, m] = timings[name].split(':').map(Number);
-    if (currentMinutes >= (h * 60 + m)) {
-      currentPrayer = name;
+    return { name, mins: h * 60 + m };
+  });
+
+  let currentIndex = -1;
+  let nextIndex = -1;
+
+  // Find the current period
+  for (let i = 0; i < prayerMinutes.length; i++) {
+    const current = prayerMinutes[i];
+    const next = prayerMinutes[(i + 1) % prayerMinutes.length];
+    
+    // Check if it's after the last prayer (Isha) but before midnight or after midnight but before Fajr
+    if (i === prayerMinutes.length - 1) {
+       if (currentMinutes >= current.mins || currentMinutes < prayerMinutes[0].mins) {
+         currentIndex = i;
+         nextIndex = 0;
+         break;
+       }
+    } else {
+       if (currentMinutes >= current.mins && currentMinutes < next.mins) {
+         currentIndex = i;
+         nextIndex = i + 1;
+         break;
+       }
     }
   }
 
-  const currentIndex = prayerOrder.indexOf(currentPrayer);
-  const nextIndex = (currentIndex + 1) % prayerOrder.length;
-  const nextName = prayerOrder[nextIndex];
-  
-  const nextPrayerData = getNextPrayer(settings);
+  // Handle case before Fajr starts (Midnight to Fajr)
+  if (currentIndex === -1 && currentMinutes < prayerMinutes[0].mins) {
+    currentIndex = 4; // Isha from yesterday
+    nextIndex = 0; // Fajr today
+  }
+
+  const currentPrayer = prayerMinutes[currentIndex];
+  const nextPrayer = prayerMinutes[nextIndex];
 
   return {
     current: {
-      name: currentPrayer,
-      startTime: formatTime12h(timings[currentPrayer]),
-      endTime: formatTime12h(timings[nextName])
+      name: currentPrayer.name,
+      startTime: formatTime12h(timings[currentPrayer.name]),
+      endTime: formatTime12h(timings[nextPrayer.name]),
+      isOngoing: true
     },
     next: {
-      name: nextPrayerData.name,
-      startTime: nextPrayerData.time,
-      rawTime: nextPrayerData.rawTime,
-      isTomorrow: nextPrayerData.isTomorrow
+      name: nextPrayer.name,
+      startTime: formatTime12h(timings[nextPrayer.name]),
+      rawTime: timings[nextPrayer.name],
+      isTomorrow: nextIndex === 0 && currentMinutes >= prayerMinutes[4].mins
     }
   };
+};
+
+export const getNextPrayer = (settings: AppSettings) => {
+  const context = getPrayerContext(settings);
+  return context.next;
 };
 
 export const getTimeRemaining = (rawTime: string, isTomorrow: boolean) => {
