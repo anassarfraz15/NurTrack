@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, ShieldAlert, X, Sparkles } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, ShieldAlert, X, Sparkles, Calendar } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState } from '../types';
 import { getTodayDateString, formatDisplayDate, getNextPrayer, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -192,7 +192,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <div className="flex items-center gap-2 text-emerald-600 font-black uppercase text-[9px] tracking-[0.2em] mb-1">
-                    <Sparkles size={10} />
+                    <Calendar size={10} />
                     Schedule
                   </div>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Prayer Timings</h3>
