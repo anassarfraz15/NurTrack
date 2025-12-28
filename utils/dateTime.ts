@@ -59,6 +59,46 @@ export const getNextPrayer = (settings: AppSettings) => {
   };
 };
 
+/**
+ * Calculates both the currently active prayer period and the upcoming prayer context.
+ * Used for the main dashboard display.
+ */
+export const getPrayerContext = (settings: AppSettings) => {
+  const timings = settings.timingMode === 'manual' ? settings.manualTimings : DEFAULT_TIMINGS;
+  const prayerOrder: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+  // Find the prayer whose time has passed but is most recent
+  let currentPrayer: PrayerName = 'Isha';
+  for (const name of prayerOrder) {
+    const [h, m] = timings[name].split(':').map(Number);
+    if (currentMinutes >= (h * 60 + m)) {
+      currentPrayer = name;
+    }
+  }
+
+  const currentIndex = prayerOrder.indexOf(currentPrayer);
+  const nextIndex = (currentIndex + 1) % prayerOrder.length;
+  const nextName = prayerOrder[nextIndex];
+  
+  const nextPrayerData = getNextPrayer(settings);
+
+  return {
+    current: {
+      name: currentPrayer,
+      startTime: formatTime12h(timings[currentPrayer]),
+      endTime: formatTime12h(timings[nextName])
+    },
+    next: {
+      name: nextPrayerData.name,
+      startTime: nextPrayerData.time,
+      rawTime: nextPrayerData.rawTime,
+      isTomorrow: nextPrayerData.isTomorrow
+    }
+  };
+};
+
 export const getTimeRemaining = (rawTime: string, isTomorrow: boolean) => {
   const now = new Date();
   const [h, m] = rawTime.split(':').map(Number);

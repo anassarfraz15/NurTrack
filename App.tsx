@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, PrayerStatus, PrayerName, AppSettings, UserStats, DailyLog, PrayerEntry } from './types.ts';
+import { AppState, PrayerStatus, PrayerName, PrayerMode, AppSettings, UserStats, DailyLog, PrayerEntry } from './types.ts';
 import Layout from './components/Layout.tsx';
 import Dashboard from './components/Dashboard.tsx';
 import Analytics from './components/Analytics.tsx';
@@ -40,7 +40,6 @@ const INITIAL_SETTINGS: AppSettings = {
 // Helper to construct UI logs from flat DB entries
 const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
   const logs: Record<string, DailyLog> = {};
-  // Sort entries by timestamp so the latest update for a specific prayer wins
   const sortedEntries = [...entries].sort((a, b) => a.prayer_timestamp - b.prayer_timestamp);
   
   sortedEntries.forEach(entry => {
@@ -54,14 +53,17 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
+        modes: {} as Record<PrayerName, PrayerMode>,
         entries: [],
         isLocked: false
       };
     }
     logs[entry.prayer_date].prayers[entry.prayer_name] = entry.prayer_status;
+    if (entry.prayer_mode && logs[entry.prayer_date].modes) {
+      logs[entry.prayer_date].modes![entry.prayer_name] = entry.prayer_mode;
+    }
     if (entry.is_locked) logs[entry.prayer_date].isLocked = true;
     
-    // Replace or add entry in the list
     const existingIdx = logs[entry.prayer_date].entries?.findIndex(e => e.prayer_name === entry.prayer_name) ?? -1;
     if (existingIdx > -1) {
       logs[entry.prayer_date].entries![existingIdx] = entry;
@@ -81,7 +83,7 @@ const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats 
   Object.values(safeLogs).forEach(log => {
     if (!log?.prayers) return;
     Object.values(log.prayers).forEach(status => {
-      if (status !== PrayerStatus.NOT_MARKED) {
+      if (status !== PrayerStatus.NOT_MARKED && status !== PrayerStatus.MISSED) {
         totalPrayers++;
         if (status === PrayerStatus.ON_TIME) onTimeCount++;
       }
@@ -147,7 +149,6 @@ const App: React.FC = () => {
     settings: INITIAL_SETTINGS
   });
 
-  // Handle Online/Offline Detection
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
@@ -163,7 +164,6 @@ const App: React.FC = () => {
     };
   }, [user]);
 
-  // Load Settings & Initialize Auth
   useEffect(() => {
     const init = async () => {
       try {
@@ -195,7 +195,6 @@ const App: React.FC = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Background Sync Trigger
   useEffect(() => {
     if (user && isOnline) {
       const interval = setInterval(() => syncEngine.sync(user.id), 30000);
@@ -218,35 +217,32 @@ const App: React.FC = () => {
     }
   }, [appState.settings]);
 
-  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus) => {
+  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus, mode?: PrayerMode) => {
     const today = getTodayDateString();
     const userId = user?.id || 'guest_user';
-    
-    // Find if we already have an entry for this specific prayer/day combo to update it
     const currentLog = appState.logs[today];
 
     if (currentLog?.isLocked && appState.settings.strictness === 'strict') {
-      return; // Cannot edit locked day in strict mode
+      return; 
     }
 
     const existingEntry = currentLog?.entries?.find(e => e.prayer_name === name);
 
     const newEntry: PrayerEntry = {
-      id: existingEntry?.id || crypto.randomUUID(), // Reuse ID to overwrite in IndexedDB and Supabase
+      id: existingEntry?.id || crypto.randomUUID(),
       user_id: userId,
       prayer_name: name,
       prayer_date: today,
       prayer_status: status,
+      prayer_mode: mode,
       prayer_timestamp: Date.now(),
       synced: false,
       created_at: existingEntry?.created_at || Date.now(),
       is_locked: currentLog?.isLocked || false
     };
 
-    // 1. Persist to IndexedDB
     await db.saveEntry(newEntry);
 
-    // 2. Update Local React State
     setAppState(prev => {
       const currentLog = prev.logs[today] || { 
         date: today, 
@@ -257,25 +253,26 @@ const App: React.FC = () => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
+        modes: {} as Record<PrayerName, PrayerMode>,
         entries: [],
         isLocked: false
       };
 
       const updatedPrayers = { ...currentLog.prayers, [name]: status };
+      const updatedModes = { ...currentLog.modes, [name]: mode } as Record<PrayerName, PrayerMode>;
       
-      // Update entry list
       const updatedEntries = [...(currentLog.entries || [])];
       const eIdx = updatedEntries.findIndex(e => e.prayer_name === name);
       if (eIdx > -1) updatedEntries[eIdx] = newEntry;
       else updatedEntries.push(newEntry);
 
-      const updatedLog = { ...currentLog, prayers: updatedPrayers, entries: updatedEntries };
+      const updatedLog = { ...currentLog, prayers: updatedPrayers, modes: updatedModes, entries: updatedEntries };
       const updatedLogs = { ...prev.logs, [today]: updatedLog };
       
       const newStats = calculateStatsFromLogs(updatedLogs);
 
       const allOnTime = (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
-        updatedPrayers[p] === PrayerStatus.ON_TIME
+        updatedPrayers[p] === PrayerStatus.ON_TIME || updatedPrayers[p] === PrayerStatus.LATE
       );
 
       if (allOnTime && lastCelebratedDate !== today) {
@@ -287,10 +284,8 @@ const App: React.FC = () => {
       return { ...prev, logs: updatedLogs, stats: newStats };
     });
 
-    // 3. Trigger Sync
     if (isOnline && user) syncEngine.sync(user.id);
     
-    // Haptic feedback
     if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
       navigator.vibrate(status === PrayerStatus.NOT_MARKED ? 30 : 15);
     }
@@ -301,7 +296,6 @@ const App: React.FC = () => {
     const currentLog = appState.logs[today];
     if (!currentLog) return;
 
-    // Mark all entries for today as locked
     const updatedEntriesPromises = (currentLog.entries || []).map(async entry => {
       const lockedEntry = { ...entry, is_locked: true, synced: false };
       await db.saveEntry(lockedEntry);
@@ -332,26 +326,21 @@ const App: React.FC = () => {
     }
 
     try {
-      // 1. Clear IndexedDB
       const DB_NAME = 'NurTrackDB';
       const deleteReq = indexedDB.deleteDatabase(DB_NAME);
       
       deleteReq.onerror = () => console.error("Could not delete database");
       deleteReq.onsuccess = () => console.log("Database deleted successfully");
 
-      // 2. Clear progress-related localStorage
       localStorage.removeItem('nurtrack_last_celebrated');
       
-      // To truly "start again" we clear settings but keep it in a state that forces onboarding
       const freshSettings = { ...INITIAL_SETTINGS, onboardingCompleted: false };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(freshSettings));
 
-      // 3. If signed in, sign out to prevent accidental re-sync of old data
       if (user) {
         await (supabase.auth as any).signOut();
       }
 
-      // 4. Hard reload to ensure clean slate and DB re-init
       window.location.reload();
     } catch (e) {
       alert("An error occurred while resetting data.");
