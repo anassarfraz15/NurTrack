@@ -1,8 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2, Target } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
+import { AppState } from '../types';
 
-const Tools: React.FC = () => {
+interface ToolsProps {
+  appState: AppState;
+}
+
+const Tools: React.FC<ToolsProps> = ({ appState }) => {
   const [tasbeehCount, setTasbeehCount] = useState(0);
   const [tasbeehGoal, setTasbeehGoal] = useState<number | null>(33);
   const [activeTool, setActiveTool] = useState('tasbeeh');
@@ -140,6 +145,12 @@ const Tools: React.FC = () => {
     };
   }, [activeTool, compassPermission]);
 
+  const triggerHaptics = () => {
+    if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(50);
+    }
+  };
+
   const playCalmBeep = () => {
     try {
       if (!audioCtxRef.current) {
@@ -173,10 +184,12 @@ const Tools: React.FC = () => {
   const handleTasbeehClick = (e?: React.MouseEvent | React.TouchEvent) => {
     if (tasbeehGoal !== null && tasbeehCount >= tasbeehGoal) {
       playCalmBeep();
+      triggerHaptics();
       return;
     }
     const nextCount = tasbeehCount + 1;
     setTasbeehCount(nextCount);
+    triggerHaptics();
     if (tasbeehGoal !== null && nextCount === tasbeehGoal) {
       playCalmBeep();
     }

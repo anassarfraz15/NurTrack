@@ -43,6 +43,7 @@ export interface AppSettings {
   manualTimings: Record<PrayerName, string>;
   onboardingCompleted?: boolean;
   intentions?: string[];
+  hapticsEnabled: boolean;
   location: {
     lat: number;
     lng: number;

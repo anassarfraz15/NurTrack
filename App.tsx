@@ -30,6 +30,7 @@ const INITIAL_SETTINGS: AppSettings = {
     Isha: '20:00'
   },
   onboardingCompleted: false,
+  hapticsEnabled: true,
   location: null
 };
 
@@ -191,6 +192,13 @@ const App: React.FC = () => {
     }));
   };
 
+  const toggleHaptics = () => {
+    setAppState(prev => ({
+      ...prev,
+      settings: { ...prev.settings, hapticsEnabled: !prev.settings.hapticsEnabled }
+    }));
+  };
+
   const cycleStrictness = () => {
     const modes: ('soft' | 'normal' | 'strict')[] = ['soft', 'normal', 'strict'];
     setAppState(prev => {
@@ -301,13 +309,13 @@ const App: React.FC = () => {
 
   // 3. Finally Main App
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab} drawerContent={<Settings appState={appState} onToggleTheme={toggleTheme} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />} user={user}>
+    <Layout activeTab={activeTab} setActiveTab={setActiveTab} drawerContent={<Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />} user={user}>
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
         {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} />}
         {activeTab === 'analytics' && <Analytics appState={appState} />}
         {activeTab === 'dua' && <Dua />}
-        {activeTab === 'tools' && <Tools />}
-        {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />}
+        {activeTab === 'tools' && <Tools appState={appState} />}
+        {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />}
       </div>
       {showAchievement && <AchievementPopup onClose={() => setShowAchievement(false)} userName={appState.settings.userName} />}
     </Layout>

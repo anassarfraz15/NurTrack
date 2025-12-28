@@ -1,12 +1,12 @@
-
 import React from 'react';
-import { Moon, Sun, Globe, Bell, MapPin, ShieldCheck, Download, Trash2, User, Clock } from 'lucide-react';
+import { Moon, Sun, Globe, Bell, MapPin, ShieldCheck, Download, Trash2, User, Clock, Smartphone } from 'lucide-react';
 import { AppState, PrayerName } from '../types';
 import { PRAYER_NAMES } from '../constants';
 
 interface SettingsProps {
   appState: AppState;
   onToggleTheme: () => void;
+  onToggleHaptics: () => void;
   onCycleStrictness: () => void;
   setUserName: (name: string) => void;
   setTimingMode: (mode: 'auto' | 'manual') => void;
@@ -15,7 +15,8 @@ interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = ({ 
   appState, 
-  onToggleTheme, 
+  onToggleTheme,
+  onToggleHaptics,
   onCycleStrictness, 
   setUserName,
   setTimingMode,
@@ -66,9 +67,16 @@ const Settings: React.FC<SettingsProps> = ({
       ]
     },
     {
-      title: 'Notifications',
+      title: 'Experience',
       items: [
-        { icon: Bell, label: 'Athan', action: 'toggle', value: true },
+        { 
+          icon: Smartphone, 
+          label: 'Haptic Feedback', 
+          action: 'toggle', 
+          value: appState.settings.hapticsEnabled,
+          onClick: onToggleHaptics
+        },
+        { icon: Bell, label: 'Athan Notifications', action: 'toggle', value: true },
         { 
           icon: ShieldCheck, 
           label: 'Strictness', 
@@ -141,7 +149,7 @@ const Settings: React.FC<SettingsProps> = ({
           </div>
         ))}
 
-        {/* Appearance & Notifications */}
+        {/* Appearance & Experience */}
         {appSections.map((section, idx) => (
           <div key={idx} className="space-y-2">
             <h3 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">{section.title}</h3>
