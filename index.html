@@ -36,29 +36,6 @@
     .arabic-font {
       font-family: 'Amiri', serif;
     }
-    
-    /* Islamic Background Pattern & Mesh Gradient */
-    .spiritual-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      background-color: #f8fafc; /* Light Base */
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(251, 191, 36, 0.03) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.05) 0px, transparent 50%),
-        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0l5.24 13.76L59 13l-6 13 13 6-13 6 6 13-13.76-5.24L40 60l-5.24-13.76L21 47l6-13-13-6 13-6-6-13 13.76 5.24L40 0zM0 40l5.24 13.76L19 53l-6 13 13 6-13 6 6 13-13.76-5.24L0 80l-5.24-13.76L-19 67l6-13-13-6 13-6-6-13 13.76 5.24L0 40zm80 0l5.24 13.76L99 53l-6 13 13 6-13 6 6 13-13.76-5.24L80 80l-5.24-13.76L61 67l6-13-13-6 13-6-6-13 13.76 5.24L80 40z' fill='%2310b981' fill-opacity='0.04' fill-rule='evenodd'/%3E%3C/svg%3E");
-    }
-
-    .dark .spiritual-bg {
-      background-color: #020617; /* Dark Base */
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(6, 78, 59, 0.3) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(2, 6, 23, 0.8) 0px, transparent 50%),
-        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0l5.24 13.76L59 13l-6 13 13 6-13 6 6 13-13.76-5.24L40 60l-5.24-13.76L21 47l6-13-13-6 13-6-6-13 13.76 5.24L40 0zM0 40l5.24 13.76L19 53l-6 13 13 6-13 6 6 13-13.76-5.24L0 80l-5.24-13.76L-19 67l6-13-13-6 13-6-6-13 13.76 5.24L0 40zm80 0l5.24 13.76L99 53l-6 13 13 6-13 6 6 13-13.76-5.24L80 80l-5.24-13.76L61 67l6-13-13-6 13-6-6-13 13.76 5.24L80 40z' fill='%2334d399' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
-    }
-
     .glass-effect {
       background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(10px);
@@ -99,9 +76,7 @@
 }
 </script>
 </head>
-<body class="text-slate-900 dark:text-slate-50 transition-colors duration-500 min-h-screen">
-  <!-- Spiritual Background Layer -->
-  <div class="spiritual-bg"></div>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-500 min-h-screen">
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
 </body>
