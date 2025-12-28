@@ -27,36 +27,70 @@ const formatTime12h = (timeStr: string) => {
   return `${displayH}:${displayM} ${ampm}`;
 };
 
-export const getNextPrayer = (settings: AppSettings) => {
+export const getPrayerContext = (settings: AppSettings) => {
   const now = new Date();
   const currentMinutes = now.getHours() * 60 + now.getMinutes();
-  
   const timings = settings.timingMode === 'manual' ? settings.manualTimings : DEFAULT_TIMINGS;
-  
   const prayerOrder: PrayerName[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-  
-  for (const name of prayerOrder) {
-    const timeStr = timings[name];
-    const [h, m] = timeStr.split(':').map(Number);
-    const prayerMinutes = h * 60 + m;
+
+  // Create a mapping of minutes for comparison
+  const prayerMinutes = prayerOrder.map(name => {
+    const [h, m] = timings[name].split(':').map(Number);
+    return { name, mins: h * 60 + m };
+  });
+
+  let currentIndex = -1;
+  let nextIndex = -1;
+
+  // Find the current period
+  for (let i = 0; i < prayerMinutes.length; i++) {
+    const current = prayerMinutes[i];
+    const next = prayerMinutes[(i + 1) % prayerMinutes.length];
     
-    if (prayerMinutes > currentMinutes) {
-      return { 
-        name, 
-        time: formatTime12h(timeStr),
-        rawTime: timeStr,
-        isTomorrow: false
-      };
+    // Check if it's after the last prayer (Isha) but before midnight or after midnight but before Fajr
+    if (i === prayerMinutes.length - 1) {
+       if (currentMinutes >= current.mins || currentMinutes < prayerMinutes[0].mins) {
+         currentIndex = i;
+         nextIndex = 0;
+         break;
+       }
+    } else {
+       if (currentMinutes >= current.mins && currentMinutes < next.mins) {
+         currentIndex = i;
+         nextIndex = i + 1;
+         break;
+       }
     }
   }
-  
-  // If all prayers today are passed, return Fajr tomorrow
-  return { 
-    name: 'Fajr' as PrayerName, 
-    time: formatTime12h(timings['Fajr']),
-    rawTime: timings['Fajr'],
-    isTomorrow: true
+
+  // Handle case before Fajr starts (Midnight to Fajr)
+  if (currentIndex === -1 && currentMinutes < prayerMinutes[0].mins) {
+    currentIndex = 4; // Isha from yesterday
+    nextIndex = 0; // Fajr today
+  }
+
+  const currentPrayer = prayerMinutes[currentIndex];
+  const nextPrayer = prayerMinutes[nextIndex];
+
+  return {
+    current: {
+      name: currentPrayer.name,
+      startTime: formatTime12h(timings[currentPrayer.name]),
+      endTime: formatTime12h(timings[nextPrayer.name]),
+      isOngoing: true
+    },
+    next: {
+      name: nextPrayer.name,
+      startTime: formatTime12h(timings[nextPrayer.name]),
+      rawTime: timings[nextPrayer.name],
+      isTomorrow: nextIndex === 0 && currentMinutes >= prayerMinutes[4].mins
+    }
   };
+};
+
+export const getNextPrayer = (settings: AppSettings) => {
+  const context = getPrayerContext(settings);
+  return context.next;
 };
 
 export const getTimeRemaining = (rawTime: string, isTomorrow: boolean) => {
