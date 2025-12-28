@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, X, Calendar, ArrowRight } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, ShieldAlert, X, Sparkles, Calendar } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState } from '../types';
-import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
+import { getTodayDateString, formatDisplayDate, getNextPrayer, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
 import { getSpiritualMotivation } from '../services/gemini';
 
@@ -16,13 +16,14 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, lockTodayLog, onOpenDrawer }) => {
   const today = getTodayDateString();
   const todayLog = appState.logs[today] || { date: today, prayers: {}, isLocked: false };
-  const [prayerContext, setPrayerContext] = useState(getPrayerContext(appState.settings));
-  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(prayerContext.next.rawTime, prayerContext.next.isTomorrow));
+  const [nextPrayerData, setNextPrayerData] = useState(getNextPrayer(appState.settings));
+  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(nextPrayerData.rawTime, nextPrayerData.isTomorrow));
   const [isTimingsPopupOpen, setIsTimingsPopupOpen] = useState(false);
   
   const [motivation, setMotivation] = useState<{message: string, source: string, reflection: string} | null>(null);
   const [loadingMotivation, setLoadingMotivation] = useState(false);
   
+  // Local UI state for toggling card interactivity
   const [isEditing, setIsEditing] = useState(!todayLog.isLocked);
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
@@ -41,9 +42,9 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const context = getPrayerContext(appState.settings);
-      setPrayerContext(context);
-      setTimeRemaining(getTimeRemaining(context.next.rawTime, context.next.isTomorrow));
+      const next = getNextPrayer(appState.settings);
+      setNextPrayerData(next);
+      setTimeRemaining(getTimeRemaining(next.rawTime, next.isTomorrow));
     }, 60000);
     return () => clearInterval(timer);
   }, [appState.settings]);
@@ -98,6 +99,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
+      {/* Header - Minimal padding */}
       <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-4">
         <button 
           onClick={onOpenDrawer}
@@ -141,62 +143,42 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         </div>
       </header>
 
-      {/* New Redesigned Next Prayer Banner */}
-      <div className="relative overflow-hidden bg-emerald-700 dark:bg-emerald-800 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white shadow-xl shadow-emerald-200/40 dark:shadow-none transition-all duration-500">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* Next Prayer Highlight - Reduced Padding and Minimalist Scale */}
+      <div className="relative overflow-hidden bg-emerald-700 dark:bg-emerald-800 rounded-[1.75rem] md:rounded-[2.5rem] p-4 md:p-10 text-white shadow-xl shadow-emerald-200/40 dark:shadow-none transition-all duration-500">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+          <div className="flex flex-col gap-1 md:gap-2">
+            <div className="flex items-center gap-2 mb-0.5 md:mb-1">
+              <span className="px-2 py-0.5 md:px-3 md:py-1 bg-white/10 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] ring-1 ring-white/20 flex items-center gap-1.5">
+                <span className="w-1 h-1 md:w-1.5 md:h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
+                Next Prayer
+              </span>
+              <span className="px-2 py-0.5 md:px-3 md:py-1 bg-emerald-600/40 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 backdrop-blur-sm">
+                <Timer size={10} className="opacity-80" />
+                {timeRemaining}
+              </span>
+            </div>
+            <h3 className="text-4xl md:text-7xl font-black tracking-tighter leading-none">
+              {nextPrayerData.name}
+              {nextPrayerData.isTomorrow && <span className="text-sm md:text-2xl font-medium opacity-60 ml-2 block md:inline tracking-normal">Tomorrow</span>}
+            </h3>
+          </div>
           
-          {/* Left: Current Prayer Section */}
-          <div className="flex-1 flex flex-col gap-1">
-             <div className="flex items-center gap-2 mb-1">
-                <span className="px-2 py-0.5 bg-emerald-600/50 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-white/10">
-                   Active Period
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
-             </div>
-             <h3 className="text-3xl md:text-5xl font-black tracking-tighter leading-none flex items-baseline gap-2">
-                {prayerContext.current.name}
-                <span className="text-xs md:text-sm font-medium opacity-60 font-mono tracking-normal">
-                   {prayerContext.current.startTime} — {prayerContext.current.endTime}
-                </span>
-             </h3>
+          <div className="flex items-center justify-between md:justify-end gap-6 border-t border-white/10 md:border-none pt-3 md:pt-0">
+            <div className="text-left md:text-right">
+              <p className="text-2xl md:text-5xl font-mono font-bold tracking-tighter leading-none">
+                {nextPrayerData.time}
+              </p>
+              <p className="text-emerald-200/60 text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mt-1 md:mt-3 block">Athan notification enabled</p>
+            </div>
+            <button 
+              onClick={() => setIsTimingsPopupOpen(true)}
+              className="w-10 h-10 md:w-16 md:h-16 bg-white/10 rounded-xl md:rounded-[1.5rem] flex items-center justify-center backdrop-blur-xl ring-1 ring-white/20 transition-transform active:scale-90 cursor-pointer group hover:bg-white/20"
+            >
+              <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
-
-          {/* Middle: Progress Arrow */}
-          <div className="hidden md:flex items-center justify-center px-4">
-             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10 animate-pulse">
-                <ArrowRight size={20} className="text-emerald-200" />
-             </div>
-          </div>
-
-          {/* Right: Next Prayer Section */}
-          <div className="flex-1 flex flex-col md:items-end gap-1">
-             <div className="flex items-center md:justify-end gap-2 mb-1">
-                <span className="px-2 py-0.5 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 ring-1 ring-white/20 backdrop-blur-sm">
-                   <Timer size={10} className="opacity-80" />
-                   Upcoming {timeRemaining}
-                </span>
-             </div>
-             <div className="md:text-right">
-                <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-emerald-200/80 mb-0.5">
-                   Starts at {prayerContext.next.startTime}
-                </p>
-                <h3 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">
-                   {prayerContext.next.name}
-                   {prayerContext.next.isTomorrow && <span className="text-[10px] md:text-xs font-medium opacity-50 ml-2 uppercase">Tomorrow</span>}
-                </h3>
-             </div>
-          </div>
-
-          <button 
-            onClick={() => setIsTimingsPopupOpen(true)}
-            className="md:hidden absolute top-4 right-4 w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-xl ring-1 ring-white/20 active:scale-90"
-          >
-            <ChevronRight size={18} />
-          </button>
         </div>
-
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-60 h-60 md:w-80 md:h-80 bg-emerald-400/20 rounded-full blur-[70px] md:blur-[90px]"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-48 h-48 bg-emerald-900/40 rounded-full blur-[60px] opacity-50"></div>
       </div>
 
       {/* Prayer Timings Modal */}
@@ -228,14 +210,14 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                   <div 
                     key={timing.name} 
                     className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${
-                      timing.name === prayerContext.next.name 
+                      timing.name === nextPrayerData.name 
                       ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' 
                       : 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800/50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        timing.name === prayerContext.next.name 
+                        timing.name === nextPrayerData.name 
                         ? 'bg-emerald-600 text-white' 
                         : 'bg-white dark:bg-slate-700 text-slate-400 shadow-sm'
                       }`}>
