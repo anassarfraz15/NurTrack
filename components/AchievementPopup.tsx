@@ -25,76 +25,31 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ onClose, userName }
   const [particles, setParticles] = useState<Particle[]>([]);
 
   useEffect(() => {
-    // Generate 60-80 particles for a rich explosion effect
+    // Generate 100 particles for a dense, screen-filling explosion
     const newParticles: Particle[] = [];
-    const colors = ['#fbbf24', '#fcd34d', '#f59e0b', '#10b981', '#ffffff'];
+    const colors = ['#fbbf24', '#fcd34d', '#f59e0b', '#fbbf24', '#10b981', '#ffffff'];
     
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 100; i++) {
       newParticles.push({
         id: i,
         x: 50, // Center origin %
         y: 50, // Center origin %
         color: colors[Math.floor(Math.random() * colors.length)],
-        size: Math.random() * 8 + 4,
-        delay: Math.random() * 0.2,
-        duration: 1.5 + Math.random() * 2,
+        size: Math.random() * 10 + 4,
+        delay: Math.random() * 0.3,
+        duration: 2 + Math.random() * 2,
         angle: Math.random() * 360,
-        distance: 100 + Math.random() * 300,
-        rotation: Math.random() * 720
+        distance: 150 + Math.random() * 450,
+        rotation: Math.random() * 1080
       });
     }
     setParticles(newParticles);
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-500 overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-500 overflow-hidden">
       
-      {/* Golden Glitter / Particle Spray Layer */}
-      <div className="absolute inset-0 pointer-events-none z-0">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="absolute rounded-full blur-[0.5px]"
-            style={{
-              left: '50%',
-              top: '50%',
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              backgroundColor: p.color,
-              boxShadow: `0 0 ${p.size}px ${p.color}88`,
-              opacity: 0,
-              animation: `particle-spray-${p.id} ${p.duration}s ease-out ${p.delay}s forwards`
-            }}
-          />
-        ))}
-      </div>
-
-      <style>{`
-        ${particles.map(p => `
-          @keyframes particle-spray-${p.id} {
-            0% {
-              transform: translate(-50%, -50%) rotate(0deg) scale(0);
-              opacity: 0;
-            }
-            15% {
-              opacity: 1;
-              transform: translate(-50%, -50%) rotate(${p.rotation / 4}deg) scale(1.2);
-            }
-            100% {
-              transform: 
-                translate(
-                  calc(-50% + ${Math.cos(p.angle * Math.PI / 180) * p.distance}px), 
-                  calc(-50% + ${Math.sin(p.angle * Math.PI / 180) * p.distance}px + 150px)
-                ) 
-                rotate(${p.rotation}deg) 
-                scale(0);
-              opacity: 0;
-            }
-          }
-        `).join('')}
-      `}</style>
-
-      {/* Main Popup Content */}
+      {/* Main Popup Content - Lower Z-Index (z-10) */}
       <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3rem] overflow-hidden shadow-2xl shadow-emerald-500/30 border border-emerald-100 dark:border-emerald-900/50 animate-in zoom-in-95 duration-500 relative z-10">
         {/* Top Decorative Section */}
         <div className="h-48 bg-gradient-to-br from-emerald-600 to-emerald-800 relative flex items-center justify-center overflow-hidden">
@@ -142,6 +97,54 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ onClose, userName }
           </div>
         </div>
       </div>
+
+      {/* Golden Glitter / Particle Spray Layer - Higher Z-Index (z-20) to spray OVER the card */}
+      <div className="absolute inset-0 pointer-events-none z-20">
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="absolute rounded-full blur-[0.2px]"
+            style={{
+              left: '50%',
+              top: '50%',
+              width: `${p.size}px`,
+              height: `${p.size}px`,
+              backgroundColor: p.color,
+              boxShadow: `0 0 ${p.size * 1.5}px ${p.color}aa`,
+              opacity: 0,
+              animation: `particle-spray-${p.id} ${p.duration}s cubic-bezier(0.1, 0, 0.3, 1) ${p.delay}s forwards`
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        ${particles.map(p => `
+          @keyframes particle-spray-${p.id} {
+            0% {
+              transform: translate(-50%, -50%) rotate(0deg) scale(0);
+              opacity: 0;
+            }
+            10% {
+              opacity: 1;
+              transform: translate(-50%, -50%) rotate(${p.rotation / 4}deg) scale(1.3);
+            }
+            70% {
+              opacity: 1;
+            }
+            100% {
+              transform: 
+                translate(
+                  calc(-50% + ${Math.cos(p.angle * Math.PI / 180) * p.distance}px), 
+                  calc(-50% + ${Math.sin(p.angle * Math.PI / 180) * p.distance}px + 200px)
+                ) 
+                rotate(${p.rotation}deg) 
+                scale(0);
+              opacity: 0;
+            }
+          }
+        `).join('')}
+      `}</style>
     </div>
   );
 };
