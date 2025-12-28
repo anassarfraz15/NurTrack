@@ -54,10 +54,12 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
-        entries: []
+        entries: [],
+        isLocked: false
       };
     }
     logs[entry.prayer_date].prayers[entry.prayer_name] = entry.prayer_status;
+    if (entry.is_locked) logs[entry.prayer_date].isLocked = true;
     
     // Replace or add entry in the list
     const existingIdx = logs[entry.prayer_date].entries?.findIndex(e => e.prayer_name === entry.prayer_name) ?? -1;
@@ -222,6 +224,11 @@ const App: React.FC = () => {
     
     // Find if we already have an entry for this specific prayer/day combo to update it
     const currentLog = appState.logs[today];
+
+    if (currentLog?.isLocked && appState.settings.strictness === 'strict') {
+      return; // Cannot edit locked day in strict mode
+    }
+
     const existingEntry = currentLog?.entries?.find(e => e.prayer_name === name);
 
     const newEntry: PrayerEntry = {
@@ -232,7 +239,8 @@ const App: React.FC = () => {
       prayer_status: status,
       prayer_timestamp: Date.now(),
       synced: false,
-      created_at: existingEntry?.created_at || Date.now()
+      created_at: existingEntry?.created_at || Date.now(),
+      is_locked: currentLog?.isLocked || false
     };
 
     // 1. Persist to IndexedDB
@@ -249,7 +257,8 @@ const App: React.FC = () => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
-        entries: []
+        entries: [],
+        isLocked: false
       };
 
       const updatedPrayers = { ...currentLog.prayers, [name]: status };
@@ -285,6 +294,36 @@ const App: React.FC = () => {
     if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
       navigator.vibrate(status === PrayerStatus.NOT_MARKED ? 30 : 15);
     }
+  };
+
+  const lockTodayLog = async () => {
+    const today = getTodayDateString();
+    const currentLog = appState.logs[today];
+    if (!currentLog) return;
+
+    // Mark all entries for today as locked
+    const updatedEntriesPromises = (currentLog.entries || []).map(async entry => {
+      const lockedEntry = { ...entry, is_locked: true, synced: false };
+      await db.saveEntry(lockedEntry);
+      return lockedEntry;
+    });
+
+    const newEntries = await Promise.all(updatedEntriesPromises);
+
+    setAppState(prev => ({
+      ...prev,
+      logs: {
+        ...prev.logs,
+        [today]: {
+          ...currentLog,
+          entries: newEntries,
+          isLocked: true
+        }
+      }
+    }));
+
+    if (isOnline && user) syncEngine.sync(user.id);
+    if (appState.settings.hapticsEnabled && 'vibrate' in navigator) navigator.vibrate([50, 30, 50]);
   };
 
   const toggleTheme = () => {
@@ -402,7 +441,7 @@ const App: React.FC = () => {
       )}
 
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
-        {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} onOpenDrawer={handleOpenDrawer} />}
+        {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} lockTodayLog={lockTodayLog} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'analytics' && <Analytics appState={appState} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'dua' && <Dua onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} />}
