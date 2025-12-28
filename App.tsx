@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { AppState, PrayerStatus, PrayerName, AppSettings, UserStats, DailyLog, PrayerEntry } from './types.ts';
+import { AppState, PrayerStatus, PrayerName, PrayerMode, AppSettings, UserStats, DailyLog, PrayerEntry } from './types.ts';
 import Layout from './components/Layout.tsx';
 import Dashboard from './components/Dashboard.tsx';
 import Analytics from './components/Analytics.tsx';
@@ -54,11 +54,18 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
+        modes: {},
         entries: [],
         isLocked: false
       };
     }
     logs[entry.prayer_date].prayers[entry.prayer_name] = entry.prayer_status;
+    
+    if (entry.prayer_mode) {
+      if (!logs[entry.prayer_date].modes) logs[entry.prayer_date].modes = {};
+      logs[entry.prayer_date].modes![entry.prayer_name] = entry.prayer_mode;
+    }
+
     if (entry.is_locked) logs[entry.prayer_date].isLocked = true;
     
     // Replace or add entry in the list
@@ -218,7 +225,7 @@ const App: React.FC = () => {
     }
   }, [appState.settings]);
 
-  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus) => {
+  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus, mode?: PrayerMode) => {
     const today = getTodayDateString();
     const userId = user?.id || 'guest_user';
     
@@ -237,6 +244,7 @@ const App: React.FC = () => {
       prayer_name: name,
       prayer_date: today,
       prayer_status: status,
+      prayer_mode: mode,
       prayer_timestamp: Date.now(),
       synced: false,
       created_at: existingEntry?.created_at || Date.now(),
@@ -257,11 +265,20 @@ const App: React.FC = () => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
+        modes: {},
         entries: [],
         isLocked: false
       };
 
       const updatedPrayers = { ...currentLog.prayers, [name]: status };
+      const updatedModes = { ...(currentLog.modes || {}) };
+      
+      if (mode) {
+        updatedModes[name] = mode;
+      } else if (status === PrayerStatus.NOT_MARKED || status === PrayerStatus.LATE || status === PrayerStatus.MISSED) {
+        // Clear mode if status is not ON_TIME or explicitly passed
+        delete updatedModes[name];
+      }
       
       // Update entry list
       const updatedEntries = [...(currentLog.entries || [])];
@@ -269,7 +286,7 @@ const App: React.FC = () => {
       if (eIdx > -1) updatedEntries[eIdx] = newEntry;
       else updatedEntries.push(newEntry);
 
-      const updatedLog = { ...currentLog, prayers: updatedPrayers, entries: updatedEntries };
+      const updatedLog = { ...currentLog, prayers: updatedPrayers, modes: updatedModes, entries: updatedEntries };
       const updatedLogs = { ...prev.logs, [today]: updatedLog };
       
       const newStats = calculateStatsFromLogs(updatedLogs);

@@ -8,12 +8,18 @@ export enum PrayerStatus {
   MISSED = 'MISSED'
 }
 
+export enum PrayerMode {
+  INDIVIDUAL = 'INDIVIDUAL',
+  CONGREGATION = 'CONGREGATION'
+}
+
 export interface PrayerEntry {
   id: string; // UUID for local and remote tracking
   user_id: string;
   prayer_name: PrayerName;
   prayer_date: string; // YYYY-MM-DD
   prayer_status: PrayerStatus;
+  prayer_mode?: PrayerMode;
   prayer_timestamp: number;
   synced: boolean;
   created_at: number;
@@ -23,6 +29,7 @@ export interface PrayerEntry {
 export interface DailyLog {
   date: string; // YYYY-MM-DD
   prayers: Record<PrayerName, PrayerStatus>;
+  modes?: Partial<Record<PrayerName, PrayerMode>>;
   entries?: PrayerEntry[]; // Detailed entries for offline-first tracking
   isLocked?: boolean; // New: UI state for finalized logs
 }
