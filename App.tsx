@@ -40,7 +40,10 @@ const INITIAL_SETTINGS: AppSettings = {
 // Helper to construct UI logs from flat DB entries
 const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
   const logs: Record<string, DailyLog> = {};
-  entries.forEach(entry => {
+  // Sort entries by timestamp so the latest update for a specific prayer wins
+  const sortedEntries = [...entries].sort((a, b) => a.prayer_timestamp - b.prayer_timestamp);
+  
+  sortedEntries.forEach(entry => {
     if (!logs[entry.prayer_date]) {
       logs[entry.prayer_date] = {
         date: entry.prayer_date,
@@ -55,7 +58,14 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
       };
     }
     logs[entry.prayer_date].prayers[entry.prayer_name] = entry.prayer_status;
-    logs[entry.prayer_date].entries?.push(entry);
+    
+    // Replace or add entry in the list
+    const existingIdx = logs[entry.prayer_date].entries?.findIndex(e => e.prayer_name === entry.prayer_name) ?? -1;
+    if (existingIdx > -1) {
+      logs[entry.prayer_date].entries![existingIdx] = entry;
+    } else {
+      logs[entry.prayer_date].entries?.push(entry);
+    }
   });
   return logs;
 };
@@ -155,27 +165,19 @@ const App: React.FC = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        // Load Settings from LocalStorage (Separated from logs now)
         const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
         const settings = savedSettings ? JSON.parse(savedSettings) : INITIAL_SETTINGS;
 
-        // Hydrate Logs from IndexedDB
         const entries = await db.getAllLogs();
         const logs = entriesToLogs(entries);
         const stats = calculateStatsFromLogs(logs);
 
-        setAppState(prev => ({
-          ...prev,
-          settings,
-          logs,
-          stats
-        }));
+        setAppState(prev => ({ ...prev, settings, logs, stats }));
 
-        // Auth
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
       } catch (e) {
-        console.warn("Init bypassed:", e);
+        console.warn("Init failed:", e);
       } finally {
         setLoading(false);
       }
@@ -196,7 +198,6 @@ const App: React.FC = () => {
     if (user && isOnline) {
       const interval = setInterval(() => syncEngine.sync(user.id), 30000);
       syncEngine.hydrateLocal(user.id).then(() => {
-        // Refresh local state after hydration
         db.getAllLogs().then(entries => {
           const logs = entriesToLogs(entries);
           setAppState(prev => ({ ...prev, logs, stats: calculateStatsFromLogs(logs) }));
@@ -206,7 +207,6 @@ const App: React.FC = () => {
     }
   }, [user, isOnline]);
 
-  // Sync Settings to LocalStorage
   useEffect(() => {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appState.settings));
     if (appState.settings.theme === 'dark') {
@@ -215,6 +215,77 @@ const App: React.FC = () => {
       document.documentElement.classList.remove('dark');
     }
   }, [appState.settings]);
+
+  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus) => {
+    const today = getTodayDateString();
+    const userId = user?.id || 'guest_user';
+    
+    // Find if we already have an entry for this specific prayer/day combo to update it
+    const currentLog = appState.logs[today];
+    const existingEntry = currentLog?.entries?.find(e => e.prayer_name === name);
+
+    const newEntry: PrayerEntry = {
+      id: existingEntry?.id || crypto.randomUUID(), // Reuse ID to overwrite in IndexedDB and Supabase
+      user_id: userId,
+      prayer_name: name,
+      prayer_date: today,
+      prayer_status: status,
+      prayer_timestamp: Date.now(),
+      synced: false,
+      created_at: existingEntry?.created_at || Date.now()
+    };
+
+    // 1. Persist to IndexedDB
+    await db.saveEntry(newEntry);
+
+    // 2. Update Local React State
+    setAppState(prev => {
+      const currentLog = prev.logs[today] || { 
+        date: today, 
+        prayers: {
+          Fajr: PrayerStatus.NOT_MARKED,
+          Dhuhr: PrayerStatus.NOT_MARKED,
+          Asr: PrayerStatus.NOT_MARKED,
+          Maghrib: PrayerStatus.NOT_MARKED,
+          Isha: PrayerStatus.NOT_MARKED
+        },
+        entries: []
+      };
+
+      const updatedPrayers = { ...currentLog.prayers, [name]: status };
+      
+      // Update entry list
+      const updatedEntries = [...(currentLog.entries || [])];
+      const eIdx = updatedEntries.findIndex(e => e.prayer_name === name);
+      if (eIdx > -1) updatedEntries[eIdx] = newEntry;
+      else updatedEntries.push(newEntry);
+
+      const updatedLog = { ...currentLog, prayers: updatedPrayers, entries: updatedEntries };
+      const updatedLogs = { ...prev.logs, [today]: updatedLog };
+      
+      const newStats = calculateStatsFromLogs(updatedLogs);
+
+      const allOnTime = (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
+        updatedPrayers[p] === PrayerStatus.ON_TIME
+      );
+
+      if (allOnTime && lastCelebratedDate !== today) {
+        setShowAchievement(true);
+        setLastCelebratedDate(today);
+        localStorage.setItem('nurtrack_last_celebrated', today);
+      }
+
+      return { ...prev, logs: updatedLogs, stats: newStats };
+    });
+
+    // 3. Trigger Sync
+    if (isOnline && user) syncEngine.sync(user.id);
+    
+    // Haptic feedback
+    if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(status === PrayerStatus.NOT_MARKED ? 30 : 15);
+    }
+  };
 
   const toggleTheme = () => {
     setAppState(prev => ({
@@ -276,62 +347,6 @@ const App: React.FC = () => {
     }));
   };
 
-  const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus) => {
-    const today = getTodayDateString();
-    const userId = user?.id || 'guest_user';
-    
-    // 1. Create the new entry with local UUID
-    const newEntry: PrayerEntry = {
-      id: crypto.randomUUID(),
-      user_id: userId,
-      prayer_name: name,
-      prayer_date: today,
-      prayer_status: status,
-      prayer_timestamp: Date.now(),
-      synced: false,
-      created_at: Date.now()
-    };
-
-    // 2. Persist to IndexedDB First
-    await db.saveEntry(newEntry);
-
-    // 3. Update Local React State for immediate UI feedback
-    setAppState(prev => {
-      const currentLog = prev.logs[today] || { 
-        date: today, 
-        prayers: {
-          Fajr: PrayerStatus.NOT_MARKED,
-          Dhuhr: PrayerStatus.NOT_MARKED,
-          Asr: PrayerStatus.NOT_MARKED,
-          Maghrib: PrayerStatus.NOT_MARKED,
-          Isha: PrayerStatus.NOT_MARKED
-        },
-        entries: []
-      };
-
-      const updatedPrayers = { ...currentLog.prayers, [name]: status };
-      const updatedLog = { ...currentLog, prayers: updatedPrayers, entries: [...(currentLog.entries || []), newEntry] };
-      const updatedLogs = { ...prev.logs, [today]: updatedLog };
-      
-      const newStats = calculateStatsFromLogs(updatedLogs);
-
-      const allOnTime = (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
-        updatedPrayers[p] === PrayerStatus.ON_TIME
-      );
-
-      if (allOnTime && lastCelebratedDate !== today) {
-        setShowAchievement(true);
-        setLastCelebratedDate(today);
-        localStorage.setItem('nurtrack_last_celebrated', today);
-      }
-
-      return { ...prev, logs: updatedLogs, stats: newStats };
-    });
-
-    // 4. Trigger Sync immediately if online
-    if (isOnline && user) syncEngine.sync(user.id);
-  };
-
   const handleOpenDrawer = () => setIsDrawerOpen(true);
   const handleCloseDrawer = () => setIsDrawerOpen(false);
 
@@ -377,7 +392,6 @@ const App: React.FC = () => {
       } 
       user={user}
     >
-      {/* Connectivity Banner */}
       {!isOnline && (
         <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center justify-center gap-3 animate-in fade-in slide-in-from-top-4">
           <WifiOff size={16} className="text-amber-600 dark:text-amber-400" />
