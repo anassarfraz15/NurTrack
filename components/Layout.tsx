@@ -86,8 +86,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         </div>
       </main>
 
-      {/* Mobile Bottom Dock */}
-      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border border-slate-200 dark:border-slate-800 rounded-3xl p-1.5 flex items-center justify-around shadow-2xl z-40">
+      {/* Mobile Bottom Dock - Aligned with justify-between for perfect spacing */}
+      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border border-slate-200 dark:border-slate-800 rounded-3xl p-1.5 px-3 flex items-center justify-between shadow-2xl z-40">
         {mainTabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
