@@ -261,7 +261,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
           >
             <div className="flex flex-col items-center gap-2 pointer-events-none">
               <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40">
-                <Sparkles size={16} />
+                <Fingerprint size={16} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap anywhere to count</span>
               </div>
             </div>
