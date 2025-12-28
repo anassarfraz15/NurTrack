@@ -100,7 +100,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto no-scrollbar relative transition-colors duration-500 pb-24 lg:pb-0" style={{ overscrollBehaviorY: 'contain' }}>
+      <main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar relative transition-colors duration-500 pb-24 lg:pb-0" style={{ overscrollBehaviorY: 'contain' }}>
         <div className="max-w-5xl mx-auto w-full p-4 lg:p-8">
           {children}
         </div>

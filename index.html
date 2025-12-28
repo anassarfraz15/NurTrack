@@ -1,8 +1,9 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="overflow-x-hidden">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NurTrack - Salah Companion</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -28,6 +29,9 @@
     body {
       font-family: 'Inter', sans-serif;
       transition: background-color 0.5s ease, color 0.5s ease;
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
     }
     .arabic-font {
       font-family: 'Amiri', serif;
@@ -53,6 +57,8 @@
     }
     html {
       background-color: #f8fafc;
+      width: 100%;
+      overflow-x: hidden;
     }
   </style>
 <script type="importmap">
@@ -72,7 +78,6 @@
 </head>
 <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-50 transition-colors duration-500 min-h-screen">
   <div id="root"></div>
-  <!-- Added the missing module script to load the app -->
   <script type="module" src="./index.tsx"></script>
 </body>
 </html>

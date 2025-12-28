@@ -145,9 +145,17 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     };
   }, [activeTool, compassPermission]);
 
-  const triggerHaptics = () => {
-    if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
-      navigator.vibrate(50);
+  const triggerHaptics = (strength: 'light' | 'heavy' = 'light') => {
+    if (!appState.settings.hapticsEnabled) return;
+    
+    if ('vibrate' in navigator) {
+      // 15ms feels like a "click", 40ms feels like a "heavy bump"
+      const duration = strength === 'heavy' ? 40 : 15;
+      try {
+        navigator.vibrate(duration);
+      } catch (e) {
+        console.debug("Haptics failed to trigger", e);
+      }
     }
   };
 
@@ -181,17 +189,21 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     }
   };
 
-  const handleTasbeehClick = (e?: React.MouseEvent | React.TouchEvent) => {
+  const handleTasbeehIncrement = () => {
     if (tasbeehGoal !== null && tasbeehCount >= tasbeehGoal) {
       playCalmBeep();
-      triggerHaptics();
+      triggerHaptics('heavy');
       return;
     }
     const nextCount = tasbeehCount + 1;
     setTasbeehCount(nextCount);
-    triggerHaptics();
+    
+    // Check if goal reached
     if (tasbeehGoal !== null && nextCount === tasbeehGoal) {
       playCalmBeep();
+      triggerHaptics('heavy');
+    } else {
+      triggerHaptics('light');
     }
   };
 
@@ -199,6 +211,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     setTasbeehGoal(goal);
     setTasbeehCount(0);
     setShowGoalModal(false);
+    triggerHaptics('light');
   };
 
   const handleCustomGoalSubmit = (e: React.FormEvent) => {
@@ -219,24 +232,28 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
       <header>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Daily Tools</h2>
         <p className="text-slate-500">Your everyday Muslim companions</p>
       </header>
 
-      <div className="flex gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit">
+      {/* Tool switcher with flex-wrap to prevent horizontal overflow */}
+      <div className="flex flex-wrap gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit max-w-full">
         {tools.map((tool) => (
           <button
             key={tool.id}
-            onClick={() => setActiveTool(tool.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+            onClick={() => {
+              setActiveTool(tool.id);
+              triggerHaptics('light');
+            }}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
               activeTool === tool.id 
               ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' 
               : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            <tool.icon size={18} />
+            <tool.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
             {tool.label}
           </button>
         ))}
@@ -246,8 +263,9 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
         {activeTool === 'tasbeeh' && (
           <>
             <div 
-              onClick={() => handleTasbeehClick()}
-              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] cursor-pointer active:bg-slate-50/50 dark:active:bg-slate-900/20 transition-colors rounded-[3rem] select-none"
+              onMouseDown={(e) => { e.preventDefault(); handleTasbeehIncrement(); }}
+              onTouchStart={(e) => { e.preventDefault(); handleTasbeehIncrement(); }}
+              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[450px] sm:min-h-[500px] cursor-pointer transition-all rounded-[3rem] select-none active:bg-slate-50/50 dark:active:bg-slate-900/20"
             >
               <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none">
                 <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40 animate-pulse">
@@ -256,10 +274,11 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-8 md:gap-16">
+              <div className="flex items-center gap-6 sm:gap-8 md:gap-16">
                 <div className="relative pointer-events-none">
+                  {/* Scaled down for very small mobile screens */}
                   <div 
-                    className={`w-64 h-64 rounded-full border-8 transition-all duration-500 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden ${
+                    className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden active:scale-95 ${
                       tasbeehGoal && tasbeehCount >= tasbeehGoal 
                       ? 'border-emerald-500 shadow-emerald-500/20' 
                       : 'border-emerald-100 dark:border-emerald-900/30 shadow-emerald-200/50 dark:shadow-none'
@@ -272,15 +291,15 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                       />
                     )}
                     <div className="relative z-10 flex flex-col items-center">
-                      <span className={`text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                      <span className={`text-5xl sm:text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}`}>
                         {tasbeehCount}
                       </span>
                       <div className="flex flex-col items-center mt-1">
-                        <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+                        <span className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
                           {tasbeehGoal ? `Goal: ${tasbeehGoal}` : 'Free Count'}
                         </span>
                         {tasbeehGoal && tasbeehCount >= tasbeehGoal && (
-                          <span className="text-emerald-500 text-[10px] font-black uppercase mt-1 flex items-center gap-1">
+                          <span className="text-emerald-500 text-[9px] sm:text-[10px] font-black uppercase mt-1 flex items-center gap-1">
                             <CheckCircle2 size={10} /> Completed
                           </span>
                         )}
@@ -289,32 +308,38 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-3 sm:gap-4">
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); triggerHaptics('heavy'); }}
                     title="Reset Counter"
-                    className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
+                    className="p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
                   >
-                    <RotateCcw size={24} />
+                    <RotateCcw size={20} className="sm:w-6 sm:h-6" />
                   </button>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); triggerHaptics('light'); }}
                     title="Set Goal"
-                    className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
+                    className="p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
                   >
-                    <Settings2 size={24} />
+                    <Settings2 size={20} className="sm:w-6 sm:h-6" />
                   </button>
                 </div>
               </div>
               
               <div className="flex flex-col items-center gap-4 w-full pt-4">
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pointer-events-none">Quick Goals</p>
-                <div className="grid grid-cols-3 gap-4 w-full max-sm:px-4 max-w-sm z-20">
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-sm:px-4 max-w-sm z-20">
                   {[33, 99, 100].map(val => (
                     <button 
                       key={val}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => e.stopPropagation()}
                       onClick={(e) => { e.stopPropagation(); selectGoal(val); }}
-                      className={`py-3 px-4 rounded-xl border transition-all font-black text-sm ${
+                      className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border transition-all font-black text-xs sm:text-sm ${
                         tasbeehGoal === val 
                         ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
                         : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
@@ -329,7 +354,11 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
             {/* Custom Goal Modal */}
             {showGoalModal && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300">
+              <div 
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
                 <div 
                   className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
                   onClick={(e) => e.stopPropagation()}
@@ -342,7 +371,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                       <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Set Custom Goal</h3>
                     </div>
                     <button 
-                      onClick={() => setShowGoalModal(false)}
+                      onClick={() => { setShowGoalModal(false); triggerHaptics('light'); }}
                       className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     >
                       <X size={20} />
@@ -420,7 +449,8 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                   {isAligned ? 'Pointing to Kaaba' : 'Rotate your phone'}
                 </div>
 
-                <div className="relative w-72 h-72">
+                {/* Slightly responsive compass container */}
+                <div className="relative w-64 h-64 sm:w-72 sm:h-72">
                   <div className={`absolute inset-0 rounded-full border-4 transition-all duration-700 ${
                     isAligned 
                     ? 'border-emerald-500 scale-110 opacity-100 blur-[2px]' 
@@ -470,13 +500,13 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                         <div className="w-4 h-4 rounded-full bg-rose-500 blur-sm opacity-50"></div>
                     </div>
 
-                    <div className={`transition-all duration-500 p-6 rounded-full shadow-2xl flex flex-col items-center justify-center z-50 border backdrop-blur-md ${
+                    <div className={`transition-all duration-500 p-4 sm:p-6 rounded-full shadow-2xl flex flex-col items-center justify-center z-50 border backdrop-blur-md ${
                       isAligned 
                       ? 'bg-emerald-600 border-emerald-400 text-white scale-110' 
                       : 'bg-white/90 dark:bg-slate-900/90 border-slate-100 dark:border-slate-800 text-slate-900 dark:text-white'
                     }`}>
                       <span className="text-[9px] uppercase font-black tracking-[0.2em] opacity-60">Qibla</span>
-                      <span className="text-3xl font-black tabular-nums">{Math.round(qiblaAngle)}°</span>
+                      <span className="text-2xl sm:text-3xl font-black tabular-nums">{Math.round(qiblaAngle)}°</span>
                     </div>
                   </div>
                 </div>
@@ -487,20 +517,20 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
         {activeTool === 'calendar' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-10 shadow-sm border border-slate-100 dark:border-slate-800 text-center">
-              <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-emerald-200/50">
-                <CalendarIcon size={40} />
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 dark:border-slate-800 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6 sm:mb-8 shadow-xl shadow-emerald-200/50">
+                <CalendarIcon size={32} className="sm:w-[40px] sm:h-[40px]" />
               </div>
-              <h3 className="text-4xl font-black arabic-font mb-2">{hijriDate || 'Calculating...'}</h3>
-              <p className="text-slate-500 text-lg mb-4">Islamic Hijri Calendar</p>
+              <h3 className="text-2xl sm:text-4xl font-black arabic-font mb-2 leading-tight">{hijriDate || 'Calculating...'}</h3>
+              <p className="text-slate-500 text-sm sm:text-lg mb-4">Islamic Hijri Calendar</p>
               
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 inline-flex items-center gap-3">
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-2xl border border-slate-100 dark:border-slate-800 inline-flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Astronomical Calculation</span>
+                 <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500">Live Astronomical Calculation</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {loadingCalendar ? (
                 <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
                   <Loader2 className="animate-spin" size={32} />
@@ -508,18 +538,18 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                 </div>
               ) : islamicEvents.length > 0 ? (
                 islamicEvents.map((event, idx) => (
-                  <div key={idx} className="p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group">
+                  <div key={idx} className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group">
                     <div className="flex justify-between items-start mb-4">
-                      <span className="text-[10px] text-slate-400 uppercase font-black tracking-widest block">{event.hijriDate}</span>
-                      <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[10px] font-bold">
+                      <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-black tracking-widest block">{event.hijriDate}</span>
+                      <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[9px] sm:text-[10px] font-bold">
                         Upcoming
                       </div>
                     </div>
-                    <h4 className="text-2xl font-black text-slate-900 dark:text-white mb-2">{event.name}</h4>
-                    <p className="text-slate-500 text-sm mb-6 leading-relaxed">{event.description || `Expected on ${new Date(event.gregorianDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}`}</p>
+                    <h4 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mb-2 leading-tight">{event.name}</h4>
+                    <p className="text-slate-500 text-xs sm:text-sm mb-6 leading-relaxed">{event.description || `Expected on ${new Date(event.gregorianDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}`}</p>
                     <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-slate-800">
-                      <span className="text-xs font-bold text-slate-400">Countdown</span>
-                      <span className="text-emerald-600 font-black text-sm">{calculateDaysRemaining(event.gregorianDate)}</span>
+                      <span className="text-[10px] sm:text-xs font-bold text-slate-400">Countdown</span>
+                      <span className="text-emerald-600 font-black text-xs sm:text-sm">{calculateDaysRemaining(event.gregorianDate)}</span>
                     </div>
                   </div>
                 ))
@@ -534,31 +564,31 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
         {activeTool === 'fasting' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
-             <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex items-center justify-between shadow-sm">
-               <div>
-                 <h4 className="font-bold text-slate-800 dark:text-white text-xl tracking-tight">Sunnah Fasting</h4>
-                 <p className="text-slate-500 font-medium">Track your Monday & Thursday fasts</p>
+             <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+               <div className="text-center sm:text-left">
+                 <h4 className="font-bold text-slate-800 dark:text-white text-lg sm:text-xl tracking-tight leading-tight">Sunnah Fasting</h4>
+                 <p className="text-slate-500 text-sm font-medium">Track your Monday & Thursday fasts</p>
                </div>
-               <button className="px-8 py-3 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95">Track Fast</button>
+               <button className="w-full sm:w-auto px-8 py-3 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95 text-sm">Track Fast</button>
              </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-8 bg-amber-50 dark:bg-amber-900/20 rounded-[2.5rem] border border-amber-100 dark:border-amber-900/30 shadow-sm">
-                  <h5 className="font-bold text-amber-800 dark:text-amber-400 text-lg mb-2">Ramadan Preparation</h5>
-                  <p className="text-amber-700 dark:text-amber-500/80 text-sm mb-6 leading-relaxed">Make up for missed fasts before the next Ramadan begins.</p>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div className="p-6 sm:p-8 bg-amber-50 dark:bg-amber-900/20 rounded-[2.5rem] border border-amber-100 dark:border-amber-900/30 shadow-sm">
+                  <h5 className="font-bold text-amber-800 dark:text-amber-400 text-lg mb-2 leading-tight">Ramadan Preparation</h5>
+                  <p className="text-amber-700 dark:text-amber-500/80 text-xs sm:text-sm mb-6 leading-relaxed">Make up for missed fasts before the next Ramadan begins.</p>
                   <div className="h-3 bg-amber-200/50 dark:bg-amber-900/50 rounded-full overflow-hidden mb-3">
                     <div className="h-full bg-amber-500 w-3/4 rounded-full"></div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <p className="text-xs text-amber-600 font-bold uppercase tracking-widest">Steady Progress</p>
+                    <p className="text-[9px] sm:text-[10px] text-amber-600 font-bold uppercase tracking-widest">Steady Progress</p>
                   </div>
                 </div>
-                <div className="p-8 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div className="p-6 sm:p-8 bg-slate-50 dark:bg-slate-800 rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between min-h-[160px]">
                   <div>
-                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-2">Ayam al-Bid</h5>
-                    <p className="text-slate-500 text-sm leading-relaxed">The "White Days" are the 13th, 14th, and 15th of every lunar month.</p>
+                    <h5 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-2 leading-tight">Ayam al-Bid</h5>
+                    <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">The "White Days" are the 13th, 14th, and 15th of every lunar month.</p>
                   </div>
-                  <div className="mt-6 flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-widest">
-                    <CalendarIcon size={14} /> View upcoming moon cycles
+                  <div className="mt-6 flex items-center gap-2 text-emerald-600 font-bold text-[10px] sm:text-xs uppercase tracking-widest">
+                    <CalendarIcon size={14} /> View upcoming cycles
                   </div>
                 </div>
              </div>
