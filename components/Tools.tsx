@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2 } from 'lucide-react';
+import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2, Target } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 
 const Tools: React.FC = () => {
@@ -232,87 +231,145 @@ const Tools: React.FC = () => {
 
       <div className="min-h-[450px]">
         {activeTool === 'tasbeeh' && (
-          <div 
-            onClick={() => handleTasbeehClick()}
-            className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] cursor-pointer active:bg-slate-50/50 dark:active:bg-slate-900/20 transition-colors rounded-[3rem] select-none"
-          >
-            <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none">
-              <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40 animate-pulse">
-                <Fingerprint size={16} />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap anywhere to count</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-8 md:gap-16">
-              <div className="relative pointer-events-none">
-                <div 
-                  className={`w-64 h-64 rounded-full border-8 transition-all duration-500 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden ${
-                    tasbeehGoal && tasbeehCount >= tasbeehGoal 
-                    ? 'border-emerald-500 shadow-emerald-500/20' 
-                    : 'border-emerald-100 dark:border-emerald-900/30 shadow-emerald-200/50 dark:shadow-none'
-                  }`}
-                >
-                  {tasbeehGoal && (
-                    <div 
-                      className="absolute bottom-0 left-0 right-0 bg-emerald-50 dark:bg-emerald-900/10 transition-all duration-300 pointer-events-none"
-                      style={{ height: `${Math.min((tasbeehCount / tasbeehGoal) * 100, 100)}%` }}
-                    />
-                  )}
-                  <div className="relative z-10 flex flex-col items-center">
-                    <span className={`text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}`}>
-                      {tasbeehCount}
-                    </span>
-                    <div className="flex flex-col items-center mt-1">
-                      <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">
-                        {tasbeehGoal ? `Goal: ${tasbeehGoal}` : 'Free Count'}
-                      </span>
-                      {tasbeehGoal && tasbeehCount >= tasbeehGoal && (
-                        <span className="text-emerald-500 text-[10px] font-black uppercase mt-1 flex items-center gap-1">
-                          <CheckCircle2 size={10} /> Completed
-                        </span>
-                      )}
-                    </div>
-                  </div>
+          <>
+            <div 
+              onClick={() => handleTasbeehClick()}
+              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] cursor-pointer active:bg-slate-50/50 dark:active:bg-slate-900/20 transition-colors rounded-[3rem] select-none"
+            >
+              <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none">
+                <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40 animate-pulse">
+                  <Fingerprint size={16} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap anywhere to count</span>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-4">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); }}
-                  title="Reset Counter"
-                  className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
-                >
-                  <RotateCcw size={24} />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); }}
-                  title="Set Goal"
-                  className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
-                >
-                  <Settings2 size={24} />
-                </button>
-              </div>
-            </div>
-            
-            <div className="flex flex-col items-center gap-4 w-full pt-4">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pointer-events-none">Quick Goals</p>
-              <div className="grid grid-cols-3 gap-4 w-full max-w-sm z-20">
-                {[33, 99, 100].map(val => (
-                  <button 
-                    key={val}
-                    onClick={(e) => { e.stopPropagation(); selectGoal(val); }}
-                    className={`py-3 px-4 rounded-xl border transition-all font-black text-sm ${
-                      tasbeehGoal === val 
-                      ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
-                      : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
+              <div className="flex items-center gap-8 md:gap-16">
+                <div className="relative pointer-events-none">
+                  <div 
+                    className={`w-64 h-64 rounded-full border-8 transition-all duration-500 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden ${
+                      tasbeehGoal && tasbeehCount >= tasbeehGoal 
+                      ? 'border-emerald-500 shadow-emerald-500/20' 
+                      : 'border-emerald-100 dark:border-emerald-900/30 shadow-emerald-200/50 dark:shadow-none'
                     }`}
                   >
-                    {val}
+                    {tasbeehGoal && (
+                      <div 
+                        className="absolute bottom-0 left-0 right-0 bg-emerald-50 dark:bg-emerald-900/10 transition-all duration-300 pointer-events-none"
+                        style={{ height: `${Math.min((tasbeehCount / tasbeehGoal) * 100, 100)}%` }}
+                      />
+                    )}
+                    <div className="relative z-10 flex flex-col items-center">
+                      <span className={`text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                        {tasbeehCount}
+                      </span>
+                      <div className="flex flex-col items-center mt-1">
+                        <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+                          {tasbeehGoal ? `Goal: ${tasbeehGoal}` : 'Free Count'}
+                        </span>
+                        {tasbeehGoal && tasbeehCount >= tasbeehGoal && (
+                          <span className="text-emerald-500 text-[10px] font-black uppercase mt-1 flex items-center gap-1">
+                            <CheckCircle2 size={10} /> Completed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); }}
+                    title="Reset Counter"
+                    className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
+                  >
+                    <RotateCcw size={24} />
                   </button>
-                ))}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); }}
+                    title="Set Goal"
+                    className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
+                  >
+                    <Settings2 size={24} />
+                  </button>
+                </div>
+              </div>
+              
+              <div className="flex flex-col items-center gap-4 w-full pt-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pointer-events-none">Quick Goals</p>
+                <div className="grid grid-cols-3 gap-4 w-full max-sm:px-4 max-w-sm z-20">
+                  {[33, 99, 100].map(val => (
+                    <button 
+                      key={val}
+                      onClick={(e) => { e.stopPropagation(); selectGoal(val); }}
+                      className={`py-3 px-4 rounded-xl border transition-all font-black text-sm ${
+                        tasbeehGoal === val 
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
+                        : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
+
+            {/* Custom Goal Modal */}
+            {showGoalModal && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300">
+                <div 
+                  className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl">
+                        <Target size={20} />
+                      </div>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Set Custom Goal</h3>
+                    </div>
+                    <button 
+                      onClick={() => setShowGoalModal(false)}
+                      className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleCustomGoalSubmit} className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Goal Count</label>
+                      <input 
+                        autoFocus
+                        type="number" 
+                        value={customGoal}
+                        onChange={(e) => setCustomGoal(e.target.value)}
+                        placeholder="e.g. 500"
+                        className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
+                        min="1"
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button 
+                        type="button"
+                        onClick={() => selectGoal(null)}
+                        className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl hover:bg-slate-200 transition-all"
+                      >
+                        Free Mode
+                      </button>
+                      <button 
+                        type="submit"
+                        className="flex-2 py-4 px-8 bg-emerald-600 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95"
+                      >
+                        Set Goal
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         {activeTool === 'qibla' && (
