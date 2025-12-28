@@ -151,23 +151,24 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
 
   return (
     <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1 md:px-0">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-        <div className="flex flex-col md:flex-row md:items-center gap-4">
-          <div className="flex items-center gap-3">
-             <button 
-                onClick={onOpenDrawer}
-                className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
-                aria-label="Open Settings"
-              >
-                <Menu size={24} />
-              </button>
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Visual Streak Calendar</h2>
-          </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 md:mt-0 md:ml-0 ml-10">Identify your consistency patterns at a glance</p>
+      <header className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
+        {/* Mobile Hamburger - Left Corner */}
+        <button 
+          onClick={onOpenDrawer}
+          className="lg:hidden absolute left-0 top-1.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          aria-label="Open Settings"
+        >
+          <Menu size={24} />
+        </button>
+
+        <div className="flex flex-col items-center md:items-start w-full">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight text-center md:text-left">Visual Streak Calendar</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 text-center md:text-left">Identify your consistency patterns at a glance</p>
         </div>
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 px-5 py-2.5 md:px-6 md:py-3 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50 self-start md:self-auto ml-10 md:ml-0">
+        
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 px-5 py-2.5 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50 self-center md:self-auto">
           <Flame className="text-emerald-600 dark:text-emerald-400" size={18} fill="currentColor" />
-          <span className="font-bold text-sm md:text-base text-emerald-800 dark:text-emerald-200">{appState.stats.streak} Day Streak</span>
+          <span className="font-bold text-sm text-emerald-800 dark:text-emerald-200">{appState.stats.streak} Day Streak</span>
         </div>
       </header>
 

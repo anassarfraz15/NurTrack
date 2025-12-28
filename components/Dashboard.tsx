@@ -67,46 +67,46 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, onO
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
-      {/* Header - Centered on Mobile */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 text-center md:text-left">
-        <div className="flex flex-col items-center md:items-start">
-          <div className="flex items-center justify-center gap-3 mb-1">
-            <button 
-              onClick={onOpenDrawer}
-              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
-              aria-label="Open Settings"
-            >
-              <Menu size={24} />
-            </button>
+      {/* Header - Center aligned greeting and date */}
+      <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
+        {/* Mobile Hamburger - Positioned Left Corner */}
+        <button 
+          onClick={onOpenDrawer}
+          className="lg:hidden absolute left-0 top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          aria-label="Open Settings"
+        >
+          <Menu size={24} />
+        </button>
+
+        <div className="flex flex-col items-center md:items-start w-full md:w-auto">
+          <div className="mb-1 text-center md:text-left">
             <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {greeting}
             </h2>
           </div>
-          <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center justify-center md:justify-start gap-2">
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-center md:text-left">
             {formatDisplayDate(today)}
-            <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase text-[10px] tracking-widest">Active Session</span>
           </p>
         </div>
         
-        <div className="flex justify-center md:justify-end gap-4">
-          <div className="bg-white dark:bg-slate-900 px-5 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-4 transition-all hover:shadow-md">
-            <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
-              <Flame className="text-orange-500" fill="currentColor" size={20} />
+        <div className="flex justify-center md:justify-end gap-3 sm:gap-4">
+          <div className="bg-white dark:bg-slate-900 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-3 sm:gap-4 transition-all hover:shadow-md">
+            <div className="p-1.5 sm:p-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
+              <Flame className="text-orange-500" fill="currentColor" size={18} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.15em]">Streak</p>
-              <p className="font-bold text-slate-900 dark:text-white text-lg leading-tight">{appState.stats.streak} Days</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-black tracking-[0.15em]">Streak</p>
+              <p className="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-tight">{appState.stats.streak} Days</p>
             </div>
           </div>
           
-          <div className="bg-white dark:bg-slate-900 px-5 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-4 transition-all hover:shadow-md">
-            <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
-              <Star className="text-amber-500" fill="currentColor" size={20} />
+          <div className="bg-white dark:bg-slate-900 px-4 sm:px-5 py-2.5 sm:py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-3 sm:gap-4 transition-all hover:shadow-md">
+            <div className="p-1.5 sm:p-2 bg-amber-50 dark:bg-amber-900/20 rounded-xl">
+              <Star className="text-amber-500" fill="currentColor" size={18} />
             </div>
             <div>
-              <p className="text-[10px] text-slate-400 uppercase font-black tracking-[0.15em]">Score</p>
-              <p className="font-bold text-slate-900 dark:text-white text-lg leading-tight">{consistencyScore}%</p>
+              <p className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-black tracking-[0.15em]">Score</p>
+              <p className="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-tight">{consistencyScore}%</p>
             </div>
           </div>
         </div>
@@ -232,7 +232,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, onO
             <div className="space-y-4 animate-pulse">
               <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded-full w-full"></div>
               <div className="h-5 bg-slate-100 dark:bg-slate-800 rounded-full w-3/4"></div>
-              <div className="h-32 bg-slate-50 dark:bg-slate-800/50 rounded-[2rem] mt-6"></div>
             </div>
           ) : motivation ? (
             <div className="space-y-6">
@@ -241,11 +240,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, onO
                   "{motivation.message}"
                 </p>
                 <p className="text-emerald-600 dark:text-emerald-400 font-bold text-sm mt-3 tracking-wide uppercase">— {motivation.source}</p>
-              </div>
-              
-              <div className="bg-slate-50 dark:bg-slate-800/40 p-6 rounded-[2rem] text-slate-600 dark:text-slate-400 text-sm border border-slate-100 dark:border-slate-800 leading-relaxed shadow-inner">
-                <span className="font-black text-slate-400 dark:text-slate-500 uppercase text-[10px] tracking-[0.2em] block mb-2">Insight AI</span>
-                {motivation.reflection}
               </div>
             </div>
           ) : (

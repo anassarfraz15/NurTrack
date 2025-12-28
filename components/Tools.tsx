@@ -216,21 +216,23 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={onOpenDrawer}
-            className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
-            aria-label="Open Settings"
-          >
-            <Menu size={24} />
-          </button>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Daily Tools</h2>
+      <header className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+        {/* Mobile Hamburger - Positioned Left */}
+        <button 
+          onClick={onOpenDrawer}
+          className="lg:hidden absolute left-0 top-0.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          aria-label="Open Settings"
+        >
+          <Menu size={24} />
+        </button>
+
+        <div className="flex flex-col items-center md:items-start w-full">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight text-center md:text-left">Daily Tools</h2>
+          <p className="text-slate-500 text-sm md:text-base font-medium text-center md:text-left">Your everyday Muslim companions</p>
         </div>
-        <p className="text-slate-500 md:ml-0 ml-10">Your everyday Muslim companions</p>
       </header>
 
-      <div className="flex flex-wrap gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit max-w-full">
+      <div className="flex flex-wrap justify-center md:justify-start gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit max-w-full mx-auto md:mx-0">
         {tools.map((tool) => (
           <button
             key={tool.id}
@@ -410,7 +412,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
             )}
 
             {!locationError && compassPermission === 'prompt' && (
-              <div className="text-center space-y-4 p-10 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-2xl max-w-sm">
+              <div className="text-center space-y-4 p-10 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-2xl max-w-sm mx-auto">
                 <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
                   <Compass size={40} />
                 </div>
@@ -426,7 +428,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
             )}
 
             {compassPermission === 'granted' && qiblaAngle !== null && (
-              <div className="flex flex-col items-center gap-10 w-full max-w-md">
+              <div className="flex flex-col items-center gap-10 w-full max-w-md mx-auto">
                 <div className={`transition-all duration-500 px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-[0.3em] ${
                   isAligned 
                   ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 animate-pulse' 
@@ -502,7 +504,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
         {activeTool === 'calendar' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 dark:border-slate-800 text-center">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 dark:border-slate-800 text-center mx-auto max-w-2xl">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6 sm:mb-8 shadow-xl shadow-emerald-200/50">
                 <CalendarIcon size={32} className="sm:w-[40px] sm:h-[40px]" />
               </div>
@@ -523,7 +525,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
                 </div>
               ) : islamicEvents.length > 0 ? (
                 islamicEvents.map((event, idx) => (
-                  <div key={idx} className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group">
+                  <div key={idx} className="p-6 sm:p-8 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group mx-auto w-full max-w-md">
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-black tracking-widest block">{event.hijriDate}</span>
                       <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[9px] sm:text-[10px] font-bold">
@@ -549,14 +551,14 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
         {activeTool === 'fasting' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
-             <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+             <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm max-w-3xl mx-auto w-full">
                <div className="text-center sm:text-left">
                  <h4 className="font-bold text-slate-800 dark:text-white text-lg sm:text-xl tracking-tight leading-tight">Sunnah Fasting</h4>
                  <p className="text-slate-500 text-sm font-medium">Track your Monday & Thursday fasts</p>
                </div>
                <button className="w-full sm:w-auto px-8 py-3 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95 text-sm">Track Fast</button>
              </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-3xl mx-auto w-full">
                 <div className="p-6 sm:p-8 bg-amber-50 dark:bg-amber-900/20 rounded-[2.5rem] border border-amber-100 dark:border-amber-900/30 shadow-sm">
                   <h5 className="font-bold text-amber-800 dark:text-amber-400 text-lg mb-2 leading-tight">Ramadan Preparation</h5>
                   <p className="text-amber-700 dark:text-amber-500/80 text-xs sm:text-sm mb-6 leading-relaxed">Make up for missed fasts before the next Ramadan begins.</p>

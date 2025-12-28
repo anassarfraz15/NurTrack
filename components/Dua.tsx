@@ -98,21 +98,23 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700 pb-10">
-      <header className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-           <button 
-              onClick={onOpenDrawer}
-              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
-              aria-label="Open Settings"
-            >
-              <Menu size={24} />
-            </button>
+      <header className="relative mb-8 flex flex-col items-center">
+        {/* Mobile Hamburger - Left Corner */}
+        <button 
+          onClick={onOpenDrawer}
+          className="lg:hidden absolute left-0 top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          aria-label="Open Settings"
+        >
+          <Menu size={24} />
+        </button>
+
+        <div className="flex flex-col items-center gap-2 mb-2 w-full">
            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600">
              <BookOpen size={24} />
            </div>
-           <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Essential Duas</h2>
+           <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight text-center">Essential Duas</h2>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed md:ml-0 ml-10">Top 10 daily supplications for a blessed day.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed text-center max-w-xs">Top 10 daily supplications for a blessed day.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
