@@ -65,7 +65,9 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) =
     updatePrayerStatus(name, newStatus);
   };
 
-  const displayName = appState.settings.userName ? ` ${appState.settings.userName}` : '';
+  // Logic to extract only the first name and update greeting
+  const firstName = appState.settings.userName ? appState.settings.userName.trim().split(' ')[0] : '';
+  const greeting = firstName ? `Salam, ${firstName}` : 'Salam!';
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
@@ -73,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) =
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-1 tracking-tight">
-            Assalamu Alaikum{displayName}
+            {greeting}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
             {formatDisplayDate(today)}
