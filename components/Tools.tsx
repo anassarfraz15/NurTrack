@@ -145,9 +145,17 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     };
   }, [activeTool, compassPermission]);
 
-  const triggerHaptics = () => {
-    if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
-      navigator.vibrate(50);
+  const triggerHaptics = (strength: 'light' | 'heavy' = 'light') => {
+    if (!appState.settings.hapticsEnabled) return;
+    
+    if ('vibrate' in navigator) {
+      // 15ms feels like a "click", 40ms feels like a "heavy bump"
+      const duration = strength === 'heavy' ? 40 : 15;
+      try {
+        navigator.vibrate(duration);
+      } catch (e) {
+        console.debug("Haptics failed to trigger", e);
+      }
     }
   };
 
@@ -181,17 +189,21 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     }
   };
 
-  const handleTasbeehClick = (e?: React.MouseEvent | React.TouchEvent) => {
+  const handleTasbeehIncrement = () => {
     if (tasbeehGoal !== null && tasbeehCount >= tasbeehGoal) {
       playCalmBeep();
-      triggerHaptics();
+      triggerHaptics('heavy');
       return;
     }
     const nextCount = tasbeehCount + 1;
     setTasbeehCount(nextCount);
-    triggerHaptics();
+    
+    // Check if goal reached
     if (tasbeehGoal !== null && nextCount === tasbeehGoal) {
       playCalmBeep();
+      triggerHaptics('heavy');
+    } else {
+      triggerHaptics('light');
     }
   };
 
@@ -199,6 +211,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     setTasbeehGoal(goal);
     setTasbeehCount(0);
     setShowGoalModal(false);
+    triggerHaptics('light');
   };
 
   const handleCustomGoalSubmit = (e: React.FormEvent) => {
@@ -229,7 +242,10 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
         {tools.map((tool) => (
           <button
             key={tool.id}
-            onClick={() => setActiveTool(tool.id)}
+            onClick={() => {
+              setActiveTool(tool.id);
+              triggerHaptics('light');
+            }}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               activeTool === tool.id 
               ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' 
@@ -246,8 +262,9 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
         {activeTool === 'tasbeeh' && (
           <>
             <div 
-              onClick={() => handleTasbeehClick()}
-              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] cursor-pointer active:bg-slate-50/50 dark:active:bg-slate-900/20 transition-colors rounded-[3rem] select-none"
+              onMouseDown={(e) => { e.preventDefault(); handleTasbeehIncrement(); }}
+              onTouchStart={(e) => { e.preventDefault(); handleTasbeehIncrement(); }}
+              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] cursor-pointer transition-all rounded-[3rem] select-none active:bg-slate-50/50 dark:active:bg-slate-900/20"
             >
               <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none">
                 <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40 animate-pulse">
@@ -259,7 +276,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
               <div className="flex items-center gap-8 md:gap-16">
                 <div className="relative pointer-events-none">
                   <div 
-                    className={`w-64 h-64 rounded-full border-8 transition-all duration-500 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden ${
+                    className={`w-64 h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden active:scale-95 ${
                       tasbeehGoal && tasbeehCount >= tasbeehGoal 
                       ? 'border-emerald-500 shadow-emerald-500/20' 
                       : 'border-emerald-100 dark:border-emerald-900/30 shadow-emerald-200/50 dark:shadow-none'
@@ -291,14 +308,18 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
                 <div className="flex flex-col gap-4">
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); triggerHaptics('heavy'); }}
                     title="Reset Counter"
                     className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
                   >
                     <RotateCcw size={24} />
                   </button>
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); triggerHaptics('light'); }}
                     title="Set Goal"
                     className="p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
                   >
@@ -313,6 +334,8 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                   {[33, 99, 100].map(val => (
                     <button 
                       key={val}
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onTouchStart={(e) => e.stopPropagation()}
                       onClick={(e) => { e.stopPropagation(); selectGoal(val); }}
                       className={`py-3 px-4 rounded-xl border transition-all font-black text-sm ${
                         tasbeehGoal === val 
@@ -329,7 +352,11 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
             {/* Custom Goal Modal */}
             {showGoalModal && (
-              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300">
+              <div 
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
                 <div 
                   className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
                   onClick={(e) => e.stopPropagation()}
@@ -342,7 +369,7 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
                       <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Set Custom Goal</h3>
                     </div>
                     <button 
-                      onClick={() => setShowGoalModal(false)}
+                      onClick={() => { setShowGoalModal(false); triggerHaptics('light'); }}
                       className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
                     >
                       <X size={20} />
