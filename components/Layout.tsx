@@ -149,17 +149,22 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
             </div>
           </div>
           
-          <div className="p-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+          <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
              {user && (
-               <div className="mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800">
-                  <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Logged in as</p>
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">{user.email}</p>
-                  <button onClick={handleLogout} className="mt-3 text-[10px] font-black text-rose-500 uppercase flex items-center gap-1">
-                    <LogOut size={12} /> Sign Out
-                  </button>
+               <div className="mb-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Logged in as</span>
+                    <button 
+                      onClick={handleLogout} 
+                      className="text-[9px] font-black text-rose-500 hover:text-rose-600 uppercase flex items-center gap-1 transition-colors"
+                    >
+                      <LogOut size={10} /> Sign Out
+                    </button>
+                  </div>
+                  <p className="text-[11px] font-bold text-slate-700 dark:text-slate-300 truncate">{user.email}</p>
                </div>
              )}
-             <p className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">NurTrack v1.1.0 (Cloud Sync)</p>
+             <p className="text-center text-[8px] font-black text-slate-400 uppercase tracking-widest opacity-60">NurTrack v1.1.0 • Cloud Sync</p>
           </div>
         </div>
       </div>
