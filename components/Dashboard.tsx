@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Clock, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle } from 'lucide-react';
+import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -143,17 +143,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     todayLog.prayers[name as PrayerName] && todayLog.prayers[name as PrayerName] !== PrayerStatus.NOT_MARKED
   );
 
-  const getPrayerColor = (name: string) => {
-    switch(name) {
-      case 'Fajr': return 'bg-indigo-500';
-      case 'Dhuhr': return 'bg-amber-500';
-      case 'Asr': return 'bg-orange-500';
-      case 'Maghrib': return 'bg-rose-500';
-      case 'Isha': return 'bg-slate-700';
-      default: return 'bg-emerald-600';
-    }
-  };
-
   const firstName = appState.settings.userName ? appState.settings.userName.trim().split(' ')[0] : '';
   const greeting = firstName ? `Salam, ${firstName}` : 'Salam!';
 
@@ -254,14 +243,14 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-60 h-60 md:w-80 md:h-80 bg-emerald-400/20 rounded-full blur-[70px] md:blur-[90px]"></div>
       </div>
 
-      {/* Redesigned Prayer Marking Cards */}
+      {/* Redesigned Prayer Marking Cards - Compact & Mono Theme */}
       <section className="space-y-3 relative">
         {PRAYER_NAMES.map((name) => {
           const prayerName = name as PrayerName;
           const status = todayLog.prayers[prayerName] || PrayerStatus.NOT_MARKED;
           const mode = todayLog.modes?.[prayerName];
           const isEnabled = isPrayerEnabled(prayerName);
-          const prayerColor = getPrayerColor(name);
+          const time = prayerTimings.find(t => t.name === name)?.time;
 
           // Determine visual state
           const isCongregation = status === PrayerStatus.ON_TIME && mode === PrayerMode.CONGREGATION;
@@ -275,110 +264,121 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
               key={name}
               className={`flex overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-300 ${!isEnabled || !isEditing ? 'opacity-60 grayscale-[0.3] pointer-events-none' : ''}`}
             >
-              {/* Left Section: Identity */}
-              <div className={`w-20 md:w-28 flex flex-col items-center justify-center text-white ${prayerColor} relative shrink-0`}>
-                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60 mb-0.5">Prayer</span>
-                <span className="text-sm md:text-lg font-black tracking-tight">{name}</span>
-                <div className="absolute bottom-0 left-0 w-full h-1 bg-black/10"></div>
+              {/* Left Section: Identity - Fixed Width & Mono Color */}
+              <div className={`w-12 md:w-32 flex flex-col items-center justify-center text-white bg-emerald-600 relative shrink-0 transition-colors`}>
+                <div className="flex flex-col items-center gap-0.5 md:gap-1 -rotate-90 md:rotate-0 whitespace-nowrap">
+                   <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">
+                     {time?.split(' ')[0]}
+                   </span>
+                   <span className="text-xs md:text-xl font-black tracking-tight uppercase md:normal-case">
+                     {name}
+                   </span>
+                </div>
+                {/* Subtle pattern for texture */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-20"></div>
               </div>
 
-              {/* Right Section: Actions */}
-              <div className="flex-1 flex items-center justify-between px-3 md:px-6 py-3 relative overflow-x-auto no-scrollbar gap-4">
+              {/* Right Section: Actions - Compressed for Mobile */}
+              <div className="flex-1 flex items-center justify-between px-2 md:px-6 py-2 md:py-3 relative gap-1 md:gap-4 overflow-hidden">
                 
                 {/* Status Icons Container */}
-                <div className="flex items-center gap-2 md:gap-4 flex-1 justify-center md:justify-start">
+                <div className="flex items-center justify-around flex-1 gap-1 md:gap-4">
                   
                   {/* Congregation Button */}
                   <button
                     onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.CONGREGATION)}
                     disabled={!isEnabled}
-                    className={`flex flex-col items-center gap-1 min-w-[3.5rem] md:min-w-[4.5rem] p-1 rounded-xl transition-all ${
+                    className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                       isCongregation 
-                      ? 'text-emerald-600 scale-105' 
-                      : 'text-slate-300 dark:text-slate-700 hover:text-slate-400'
+                      ? 'text-emerald-600' 
+                      : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                     }`}
                   >
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all border-2 ${
+                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                       isCongregation 
-                      ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500 shadow-md shadow-emerald-500/20' 
+                      ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
                       : 'border-transparent bg-slate-50 dark:bg-slate-800'
                     }`}>
-                       <Users size={20} className={isCongregation ? 'fill-current' : ''} />
+                       <Users size={18} className={`md:w-5 md:h-5 ${isCongregation ? 'fill-current' : ''}`} />
                     </div>
+                    <span className="hidden md:block text-[9px] font-bold mt-1">Jamaat</span>
                   </button>
 
                   {/* Individual Button */}
                   <button
                     onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.INDIVIDUAL)}
                     disabled={!isEnabled}
-                    className={`flex flex-col items-center gap-1 min-w-[3.5rem] md:min-w-[4.5rem] p-1 rounded-xl transition-all ${
+                    className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                       isIndividual 
-                      ? 'text-emerald-600 scale-105' 
-                      : 'text-slate-300 dark:text-slate-700 hover:text-slate-400'
+                      ? 'text-emerald-600' 
+                      : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                     }`}
                   >
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all border-2 ${
+                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                       isIndividual 
-                      ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-500 shadow-md shadow-emerald-500/20' 
+                      ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
                       : 'border-transparent bg-slate-50 dark:bg-slate-800'
                     }`}>
-                       <User size={20} className={isIndividual ? 'fill-current' : ''} />
+                       <User size={18} className={`md:w-5 md:h-5 ${isIndividual ? 'fill-current' : ''}`} />
                     </div>
+                    <span className="hidden md:block text-[9px] font-bold mt-1">Alone</span>
                   </button>
 
                   {/* Late Button */}
                   <button
                     onClick={() => handleStatusUpdate(prayerName, PrayerStatus.LATE)}
                     disabled={!isEnabled}
-                    className={`flex flex-col items-center gap-1 min-w-[3.5rem] md:min-w-[4.5rem] p-1 rounded-xl transition-all ${
+                    className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                       isLate 
-                      ? 'text-amber-500 scale-105' 
-                      : 'text-slate-300 dark:text-slate-700 hover:text-slate-400'
+                      ? 'text-amber-500' 
+                      : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                     }`}
                   >
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all border-2 ${
+                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                       isLate 
-                      ? 'bg-amber-100 dark:bg-amber-900/30 border-amber-500 shadow-md shadow-amber-500/20' 
+                      ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-500 shadow-sm' 
                       : 'border-transparent bg-slate-50 dark:bg-slate-800'
                     }`}>
-                       <Clock size={20} className={isLate ? 'fill-current' : ''} />
+                       <Clock size={18} className={`md:w-5 md:h-5 ${isLate ? 'fill-current' : ''}`} />
                     </div>
+                    <span className="hidden md:block text-[9px] font-bold mt-1">Late</span>
                   </button>
 
                   {/* Missed Button */}
                   <button
                     onClick={() => handleStatusUpdate(prayerName, PrayerStatus.MISSED)}
                     disabled={!isEnabled}
-                    className={`flex flex-col items-center gap-1 min-w-[3.5rem] md:min-w-[4.5rem] p-1 rounded-xl transition-all ${
+                    className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                       isMissed 
-                      ? 'text-rose-500 scale-105' 
-                      : 'text-slate-300 dark:text-slate-700 hover:text-slate-400'
+                      ? 'text-rose-500' 
+                      : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
                     }`}
                   >
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-2xl flex items-center justify-center transition-all border-2 ${
+                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                       isMissed 
-                      ? 'bg-rose-100 dark:bg-rose-900/30 border-rose-500 shadow-md shadow-rose-500/20' 
+                      ? 'bg-rose-50 dark:bg-rose-900/30 border-rose-500 shadow-sm' 
                       : 'border-transparent bg-slate-50 dark:bg-slate-800'
                     }`}>
-                       <XCircle size={20} className={isMissed ? 'fill-current' : ''} />
+                       <XCircle size={18} className={`md:w-5 md:h-5 ${isMissed ? 'fill-current' : ''}`} />
                     </div>
+                    <span className="hidden md:block text-[9px] font-bold mt-1">Missed</span>
                   </button>
                 </div>
 
                 {/* Completion Checkmark */}
-                <div className="pl-2 border-l border-slate-100 dark:border-slate-800/50">
+                <div className="pl-2 md:pl-4 border-l border-slate-100 dark:border-slate-800/50 flex items-center justify-center">
                   <button 
                     onClick={() => handleCheckmarkClick(prayerName)}
                     disabled={!isEnabled}
-                    className={`w-10 h-10 md:w-12 md:h-12 rounded-full border-2 flex items-center justify-center transition-all active:scale-90 ${
+                    className={`w-10 h-10 md:w-14 md:h-14 rounded-full border-2 flex items-center justify-center transition-all active:scale-90 ${
                       isMarked 
-                      ? (isLate ? 'bg-amber-500 border-amber-500 text-white shadow-lg shadow-amber-500/30' : 
-                         isMissed ? 'bg-rose-500 border-rose-500 text-white shadow-lg shadow-rose-500/30' :
-                         'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/30')
-                      : 'border-slate-200 dark:border-slate-800 text-slate-200 dark:text-slate-800 bg-transparent'
+                      ? (isLate ? 'bg-amber-500 border-amber-500 text-white shadow-md' : 
+                         isMissed ? 'bg-rose-500 border-rose-500 text-white shadow-md' :
+                         'bg-emerald-600 border-emerald-600 text-white shadow-md')
+                      : 'border-slate-200 dark:border-slate-700 text-slate-300 dark:text-slate-600 bg-transparent'
                     }`}
                   >
-                    {isMarked ? <CheckCircle size={20} /> : <Circle size={20} />}
+                    {isMarked ? <CheckCircle size={20} className="md:w-6 md:h-6" /> : <Circle size={20} className="md:w-6 md:h-6" />}
                   </button>
                 </div>
               </div>
