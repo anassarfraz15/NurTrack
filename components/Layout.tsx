@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, Pocket, Activity, Menu, X, Settings as SettingsIcon, LogOut, User as UserIcon } from 'lucide-react';
+import { LayoutDashboard, Pocket, Activity, Menu, X, Settings as SettingsIcon, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
 import { supabase } from '../services/supabase.ts';
 import { Logo } from '../constants.tsx';
 
@@ -17,6 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
   const mainTabs = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Today' },
     { id: 'analytics', icon: Activity, label: 'Stats' },
+    { id: 'dua', icon: BookOpen, label: 'Duas' },
     { id: 'tools', icon: Pocket, label: 'Tools' },
   ];
 
@@ -106,21 +107,21 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       </main>
 
       {/* Mobile Bottom Dock */}
-      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border border-slate-200 dark:border-slate-800 rounded-3xl p-2 flex items-center justify-around shadow-2xl z-40">
+      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border border-slate-200 dark:border-slate-800 rounded-3xl p-1.5 flex items-center justify-around shadow-2xl z-40">
         {mainTabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all ${
+              className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all ${
                 isActive 
                 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30' 
                 : 'text-slate-400 dark:text-slate-500'
               }`}
             >
-              <tab.icon size={22} className={isActive ? 'animate-bounce-short' : ''} />
-              <span className="text-[10px] font-bold uppercase tracking-widest">{tab.label}</span>
+              <tab.icon size={20} className={isActive ? 'animate-bounce-short' : ''} />
+              <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
             </button>
           );
         })}

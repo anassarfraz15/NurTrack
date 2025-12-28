@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard.tsx';
 import Analytics from './components/Analytics.tsx';
 import Tools from './components/Tools.tsx';
 import Settings from './components/Settings.tsx';
+import Dua from './components/Dua.tsx';
 import AchievementPopup from './components/AchievementPopup.tsx';
 import Auth from './components/Auth.tsx';
 import Onboarding from './components/Onboarding.tsx';
@@ -304,6 +305,7 @@ const App: React.FC = () => {
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
         {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} />}
         {activeTab === 'analytics' && <Analytics appState={appState} />}
+        {activeTab === 'dua' && <Dua />}
         {activeTab === 'tools' && <Tools />}
         {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />}
       </div>
