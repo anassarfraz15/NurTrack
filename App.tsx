@@ -326,6 +326,38 @@ const App: React.FC = () => {
     if (appState.settings.hapticsEnabled && 'vibrate' in navigator) navigator.vibrate([50, 30, 50]);
   };
 
+  const resetAllData = async () => {
+    if (!window.confirm("⚠️ ATTENTION: This will permanently delete your prayer logs, reset your streaks, and clear all achievement data. This action cannot be undone. Are you sure?")) {
+      return;
+    }
+
+    try {
+      // 1. Clear IndexedDB
+      const DB_NAME = 'NurTrackDB';
+      const deleteReq = indexedDB.deleteDatabase(DB_NAME);
+      
+      deleteReq.onerror = () => console.error("Could not delete database");
+      deleteReq.onsuccess = () => console.log("Database deleted successfully");
+
+      // 2. Clear progress-related localStorage
+      localStorage.removeItem('nurtrack_last_celebrated');
+      
+      // To truly "start again" we clear settings but keep it in a state that forces onboarding
+      const freshSettings = { ...INITIAL_SETTINGS, onboardingCompleted: false };
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(freshSettings));
+
+      // 3. If signed in, sign out to prevent accidental re-sync of old data
+      if (user) {
+        await (supabase.auth as any).signOut();
+      }
+
+      // 4. Hard reload to ensure clean slate and DB re-init
+      window.location.reload();
+    } catch (e) {
+      alert("An error occurred while resetting data.");
+    }
+  };
+
   const toggleTheme = () => {
     setAppState(prev => ({
       ...prev,
@@ -427,6 +459,7 @@ const App: React.FC = () => {
           setUserName={setUserName} 
           setTimingMode={setTimingMode} 
           setManualTiming={setManualTiming} 
+          onResetData={resetAllData}
         />
       } 
       user={user}
@@ -445,7 +478,7 @@ const App: React.FC = () => {
         {activeTab === 'analytics' && <Analytics appState={appState} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'dua' && <Dua onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} />}
-        {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />}
+        {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} onResetData={resetAllData} />}
       </div>
       {showAchievement && <AchievementPopup onClose={() => setShowAchievement(false)} userName={appState.settings.userName} />}
     </Layout>

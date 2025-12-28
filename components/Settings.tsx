@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Moon, Sun, Globe, Bell, MapPin, ShieldCheck, Download, Trash2, User, Clock, Smartphone } from 'lucide-react';
 import { AppState, PrayerName } from '../types';
@@ -11,6 +12,7 @@ interface SettingsProps {
   setUserName: (name: string) => void;
   setTimingMode: (mode: 'auto' | 'manual') => void;
   setManualTiming: (prayer: PrayerName, time: string) => void;
+  onResetData: () => void;
 }
 
 const Settings: React.FC<SettingsProps> = ({ 
@@ -20,7 +22,8 @@ const Settings: React.FC<SettingsProps> = ({
   onCycleStrictness, 
   setUserName,
   setTimingMode,
-  setManualTiming
+  setManualTiming,
+  onResetData
 }) => {
   const isDark = appState.settings.theme === 'dark';
 
@@ -193,13 +196,8 @@ const Settings: React.FC<SettingsProps> = ({
         {/* Data Management */}
         <div className="pt-2">
            <button 
-            onClick={() => {
-              if(confirm("Are you sure? This will delete all data.")) {
-                localStorage.removeItem('nurtrack_state_v1');
-                window.location.reload();
-              }
-            }}
-            className="w-full flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 dark:bg-rose-900/10 rounded-2xl"
+            onClick={onResetData}
+            className="w-full flex items-center justify-center gap-2 py-3 text-[10px] font-black uppercase tracking-widest text-rose-500 bg-rose-50 dark:bg-rose-900/10 rounded-2xl transition-all active:scale-[0.98] hover:bg-rose-100 dark:hover:bg-rose-900/20"
           >
             <Trash2 size={14} /> Reset Data
           </button>
