@@ -114,11 +114,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
             <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {greeting}
             </h2>
-            {todayLog.isLocked && (
-              <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 text-[8px] font-black uppercase tracking-widest rounded-md border border-emerald-500/20 flex items-center gap-1">
-                <Lock size={10} /> Finalized
-              </span>
-            )}
           </div>
           <p className="text-slate-500 dark:text-slate-400 font-medium text-center md:text-left">
             {formatDisplayDate(today)}
