@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, ShieldAlert, X, Sparkles } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState } from '../types';
 import { getTodayDateString, formatDisplayDate, getNextPrayer, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -18,6 +18,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const todayLog = appState.logs[today] || { date: today, prayers: {}, isLocked: false };
   const [nextPrayerData, setNextPrayerData] = useState(getNextPrayer(appState.settings));
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(nextPrayerData.rawTime, nextPrayerData.isTomorrow));
+  const [isTimingsPopupOpen, setIsTimingsPopupOpen] = useState(false);
   
   const [motivation, setMotivation] = useState<{message: string, source: string, reflection: string} | null>(null);
   const [loadingMotivation, setLoadingMotivation] = useState(false);
@@ -169,21 +170,88 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
               </p>
               <p className="text-emerald-200/60 text-[10px] font-black uppercase tracking-[0.2em] mt-3 block">Athan notification enabled</p>
             </div>
-            <div className="w-14 h-14 md:w-16 md:h-16 bg-white/10 rounded-[1.5rem] flex items-center justify-center backdrop-blur-xl ring-1 ring-white/20 transition-transform active:scale-90 cursor-pointer group">
+            <button 
+              onClick={() => setIsTimingsPopupOpen(true)}
+              className="w-14 h-14 md:w-16 md:h-16 bg-white/10 rounded-[1.5rem] flex items-center justify-center backdrop-blur-xl ring-1 ring-white/20 transition-transform active:scale-90 cursor-pointer group hover:bg-white/20"
+            >
               <ChevronRight size={28} className="group-hover:translate-x-1 transition-transform" />
-            </div>
+            </button>
           </div>
         </div>
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-emerald-400/20 rounded-full blur-[90px]"></div>
       </div>
+
+      {/* Prayer Timings Modal */}
+      {isTimingsPopupOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
+          <div 
+            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[3rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-500 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div>
+                  <div className="flex items-center gap-2 text-emerald-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1">
+                    <Sparkles size={12} />
+                    Schedule
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Prayer Timings</h3>
+                </div>
+                <button 
+                  onClick={() => setIsTimingsPopupOpen(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800 rounded-xl"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {prayerTimings.map((timing) => (
+                  <div 
+                    key={timing.name} 
+                    className={`flex items-center justify-between p-5 rounded-2xl border transition-all ${
+                      timing.name === nextPrayerData.name 
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' 
+                      : 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        timing.name === nextPrayerData.name 
+                        ? 'bg-emerald-600 text-white' 
+                        : 'bg-white dark:bg-slate-700 text-slate-400 shadow-sm'
+                      }`}>
+                         {timing.name === 'Fajr' && <Star size={18} />}
+                         {timing.name === 'Dhuhr' && <Sun size={18} />}
+                         {timing.name === 'Asr' && <Clock size={18} />}
+                         {timing.name === 'Maghrib' && <Star size={18} />}
+                         {timing.name === 'Isha' && <Moon size={18} />}
+                      </div>
+                      <span className="font-bold text-slate-800 dark:text-slate-100">{timing.name}</span>
+                    </div>
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-sm">
+                      {timing.time}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-slate-50 dark:border-slate-800/50 flex items-center justify-center gap-2">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mode:</span>
+                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-md">
+                  {appState.settings.timingMode}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Prayer Status Tracking */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 relative">
         {PRAYER_NAMES.map((name) => {
           const status = todayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
           const timing = prayerTimings.find(t => t.name === name);
-          const isStrict = appState.settings.strictness === 'strict';
-          const isLocked = isStrict && todayLog.isLocked;
           
           let cardStyle = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800";
           let accentText = "text-slate-400";
@@ -271,7 +339,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         })}
       </section>
 
-      {/* Save & Edit Buttons */}
+      {/* Save & Edit Buttons - Appears after all marked */}
       {allPrayersMarked && (
         <div className="flex items-center justify-center gap-4 py-4 animate-in slide-in-from-bottom-4">
           {isEditing ? (
@@ -341,5 +409,9 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     </div>
   );
 };
+
+// Internal icons for modal
+const Sun = ({ size, className }: { size: number, className: string }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>;
+const Moon = ({ size, className }: { size: number, className: string }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
 
 export default Dashboard;
