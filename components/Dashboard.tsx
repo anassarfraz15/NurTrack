@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check, Save, Edit3, ShieldAlert } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu, Check } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState } from '../types';
 import { getTodayDateString, formatDisplayDate, getNextPrayer, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -9,35 +9,23 @@ import { getSpiritualMotivation } from '../services/gemini';
 interface DashboardProps {
   appState: AppState;
   updatePrayerStatus: (name: PrayerName, status: PrayerStatus) => void;
-  lockTodayLog: () => void;
   onOpenDrawer: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, lockTodayLog, onOpenDrawer }) => {
+const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, onOpenDrawer }) => {
   const today = getTodayDateString();
-  const todayLog = appState.logs[today] || { date: today, prayers: {}, isLocked: false };
+  const todayLog = appState.logs[today] || { date: today, prayers: {} };
   const [nextPrayerData, setNextPrayerData] = useState(getNextPrayer(appState.settings));
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(nextPrayerData.rawTime, nextPrayerData.isTomorrow));
   
   const [motivation, setMotivation] = useState<{message: string, source: string, reflection: string} | null>(null);
   const [loadingMotivation, setLoadingMotivation] = useState(false);
-  
-  // Local UI state for toggling card interactivity
-  const [isEditing, setIsEditing] = useState(!todayLog.isLocked);
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
-
-  const allPrayersMarked = PRAYER_NAMES.every(name => 
-    todayLog.prayers[name as PrayerName] && todayLog.prayers[name as PrayerName] !== PrayerStatus.NOT_MARKED
-  );
 
   const consistencyScore = appState.stats.totalPrayers 
     ? Math.round((appState.stats.onTimeCount / appState.stats.totalPrayers) * 100) 
     : 0;
-
-  useEffect(() => {
-    setIsEditing(!todayLog.isLocked);
-  }, [todayLog.isLocked]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -62,37 +50,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   }, [appState.stats.streak, consistencyScore]);
 
   const handleStatusUpdate = (name: PrayerName, newStatus: PrayerStatus) => {
-    if (!isEditing) return;
     const currentStatus = todayLog.prayers[name] || PrayerStatus.NOT_MARKED;
+    const isStrict = appState.settings.strictness === 'strict';
+
+    // If clicking the same status, unmark it (Toggle)
     const finalStatus = currentStatus === newStatus ? PrayerStatus.NOT_MARKED : newStatus;
-    updatePrayerStatus(name, finalStatus);
-  };
 
-  const handleSave = () => {
-    const isStrict = appState.settings.strictness === 'strict';
-    if (isStrict) {
-      const confirmSave = window.confirm(
-        "Strict Mode Confirmation: Are you sure you want to save today's prayer data? Once saved, you will NOT be able to change it later."
-      );
-      if (confirmSave) {
-        lockTodayLog();
-        setIsEditing(false);
-      }
-    } else {
-      // In normal mode, we just visually finalize, but Edit stays available
-      setIsEditing(false);
-      // We still update the locked state in DB for consistency across devices
-      lockTodayLog();
-    }
-  };
-
-  const handleEdit = () => {
-    const isStrict = appState.settings.strictness === 'strict';
-    if (isStrict && todayLog.isLocked) {
-      alert("Strict Mode: This day has already been locked and cannot be edited.");
+    if (isStrict && currentStatus !== PrayerStatus.NOT_MARKED) {
+      alert(`Strict Mode: You have already marked ${name}. Locked.`);
       return;
     }
-    setIsEditing(true);
+
+    updatePrayerStatus(name, finalStatus);
   };
 
   const firstName = appState.settings.userName ? appState.settings.userName.trim().split(' ')[0] : '';
@@ -104,13 +73,14 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
       <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
         <button 
           onClick={onOpenDrawer}
-          className="lg:hidden absolute left-0 top-1.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          className="lg:hidden absolute left-0 top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          aria-label="Open Settings"
         >
           <Menu size={24} />
         </button>
 
         <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-          <div className="flex items-center gap-3 mb-1">
+          <div className="mb-1 text-center md:text-left">
             <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {greeting}
             </h2>
@@ -175,14 +145,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
             </div>
           </div>
         </div>
+        
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-emerald-400/20 rounded-full blur-[90px]"></div>
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-300/10 rounded-full blur-[70px]"></div>
       </div>
 
       {/* Prayer Status Tracking */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 relative">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         {PRAYER_NAMES.map((name) => {
           const status = todayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
           const timing = prayerTimings.find(t => t.name === name);
+          const isStrict = appState.settings.strictness === 'strict';
+          const isLocked = isStrict && status !== PrayerStatus.NOT_MARKED;
           
           let cardStyle = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800";
           let accentText = "text-slate-400";
@@ -205,27 +179,23 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           return (
             <div 
               key={name}
-              className={`p-4 sm:p-5 rounded-[2.5rem] border transition-all duration-300 flex flex-col justify-between group relative overflow-hidden ${cardStyle} ${shadowStyle} ${!isEditing ? 'opacity-80 grayscale-[0.3]' : ''}`}
+              className={`p-4 sm:p-5 rounded-[2.5rem] border transition-all duration-300 flex flex-col justify-between group ${cardStyle} ${shadowStyle} ${isLocked ? 'opacity-80' : ''}`}
             >
-              {!isEditing && (
-                <div className="absolute inset-0 bg-slate-100/10 dark:bg-slate-950/20 backdrop-blur-[1px] z-10 pointer-events-none" />
-              )}
-              
-              <div className="flex justify-between items-start mb-5 relative z-20">
+              <div className="flex justify-between items-start mb-5">
                 <div>
                   <h4 className={`font-black text-sm tracking-tight uppercase ${status === PrayerStatus.NOT_MARKED ? 'text-slate-800 dark:text-slate-200' : accentText}`}>
                     {name}
                   </h4>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{timing?.time}</p>
                 </div>
-                {!isEditing && (
-                  <div className="p-1.5 bg-white/50 dark:bg-slate-800/50 rounded-lg text-slate-400">
+                {isLocked && (
+                  <div className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-lg text-slate-400">
                     <Lock size={12} />
                   </div>
                 )}
               </div>
               
-              <div className={`grid grid-cols-3 gap-1.5 relative z-20 ${!isEditing ? 'pointer-events-none' : ''}`}>
+              <div className={`grid grid-cols-3 gap-1.5 ${isLocked ? 'pointer-events-none' : ''}`}>
                 <button 
                   onClick={() => handleStatusUpdate(name as PrayerName, PrayerStatus.ON_TIME)}
                   className={`flex flex-col items-center justify-center py-3 rounded-2xl transition-all ${
@@ -233,6 +203,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     ? 'bg-emerald-600 text-white shadow-md shadow-emerald-500/30 scale-105 z-10' 
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-600'
                   }`}
+                  title="On Time"
                 >
                   {status === PrayerStatus.ON_TIME ? <Check size={16} /> : <CheckCircle2 size={16} />}
                 </button>
@@ -244,6 +215,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     ? 'bg-amber-500 text-white shadow-md shadow-amber-500/30 scale-105 z-10' 
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-amber-50 dark:hover:bg-amber-900/30 hover:text-amber-600'
                   }`}
+                  title="Late"
                 >
                   <Clock size={16} />
                 </button>
@@ -255,12 +227,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     ? 'bg-rose-500 text-white shadow-md shadow-rose-500/30 scale-105 z-10' 
                     : 'bg-slate-100 dark:bg-slate-800 text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-900/30 hover:text-rose-600'
                   }`}
+                  title="Missed"
                 >
                   <AlertCircle size={16} />
                 </button>
               </div>
               
-              <div className="mt-3 text-center relative z-20">
+              <div className="mt-3 text-center">
                 <span className={`text-[8px] font-black uppercase tracking-[0.2em] opacity-40 transition-opacity ${status !== PrayerStatus.NOT_MARKED ? 'opacity-100' : 'opacity-0'}`}>
                   {status.replace('_', ' ')}
                 </span>
@@ -269,38 +242,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           );
         })}
       </section>
-
-      {/* Save & Edit Buttons - Appears after all marked */}
-      {allPrayersMarked && (
-        <div className="flex items-center justify-center gap-4 py-4 animate-in slide-in-from-bottom-4">
-          {isEditing ? (
-            <button
-              onClick={handleSave}
-              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-3xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center gap-3 min-w-[160px] justify-center"
-            >
-              <Save size={20} />
-              Save Log
-            </button>
-          ) : (
-            <button
-              onClick={handleEdit}
-              className={`px-8 py-4 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white font-black rounded-3xl shadow-xl transition-all active:scale-95 flex items-center gap-3 min-w-[160px] justify-center ${
-                appState.settings.strictness === 'strict' && todayLog.isLocked ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <Edit3 size={20} />
-              Edit Prayers
-            </button>
-          )}
-          
-          {appState.settings.strictness === 'strict' && isEditing && (
-            <div className="hidden sm:flex items-center gap-2 text-amber-600 dark:text-amber-500 text-[10px] font-bold uppercase tracking-widest bg-amber-50 dark:bg-amber-900/10 px-4 py-4 rounded-3xl border border-amber-200 dark:border-amber-900/30">
-              <ShieldAlert size={16} />
-              <span>Strict Mode: Review before saving</span>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Reflection Card */}
       <section className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">

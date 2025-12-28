@@ -17,14 +17,12 @@ export interface PrayerEntry {
   prayer_timestamp: number;
   synced: boolean;
   created_at: number;
-  is_locked?: boolean; // New: track if this entry is part of a locked log
 }
 
 export interface DailyLog {
   date: string; // YYYY-MM-DD
   prayers: Record<PrayerName, PrayerStatus>;
-  entries?: PrayerEntry[];
-  isLocked?: boolean; // New: UI state for finalized logs
+  entries?: PrayerEntry[]; // Detailed entries for offline-first tracking
 }
 
 export interface UserStats {

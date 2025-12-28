@@ -37,8 +37,10 @@ const INITIAL_SETTINGS: AppSettings = {
   location: null
 };
 
+// Helper to construct UI logs from flat DB entries
 const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
   const logs: Record<string, DailyLog> = {};
+  // Sort entries by timestamp so the latest update for a specific prayer wins
   const sortedEntries = [...entries].sort((a, b) => a.prayer_timestamp - b.prayer_timestamp);
   
   sortedEntries.forEach(entry => {
@@ -52,13 +54,12 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
           Maghrib: PrayerStatus.NOT_MARKED,
           Isha: PrayerStatus.NOT_MARKED
         },
-        entries: [],
-        isLocked: false
+        entries: []
       };
     }
     logs[entry.prayer_date].prayers[entry.prayer_name] = entry.prayer_status;
-    if (entry.is_locked) logs[entry.prayer_date].isLocked = true;
     
+    // Replace or add entry in the list
     const existingIdx = logs[entry.prayer_date].entries?.findIndex(e => e.prayer_name === entry.prayer_name) ?? -1;
     if (existingIdx > -1) {
       logs[entry.prayer_date].entries![existingIdx] = entry;
@@ -144,12 +145,14 @@ const App: React.FC = () => {
     settings: INITIAL_SETTINGS
   });
 
+  // Handle Online/Offline Detection
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
       if (user) syncEngine.sync(user.id);
     };
     const handleOffline = () => setIsOnline(false);
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     return () => {
@@ -158,15 +161,19 @@ const App: React.FC = () => {
     };
   }, [user]);
 
+  // Load Settings & Initialize Auth
   useEffect(() => {
     const init = async () => {
       try {
         const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
         const settings = savedSettings ? JSON.parse(savedSettings) : INITIAL_SETTINGS;
+
         const entries = await db.getAllLogs();
         const logs = entriesToLogs(entries);
         const stats = calculateStatsFromLogs(logs);
+
         setAppState(prev => ({ ...prev, settings, logs, stats }));
+
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
       } catch (e) {
@@ -175,14 +182,18 @@ const App: React.FC = () => {
         setLoading(false);
       }
     };
+
     init();
+
     const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       if (session?.user) setGuestMode(false);
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
+  // Background Sync Trigger
   useEffect(() => {
     if (user && isOnline) {
       const interval = setInterval(() => syncEngine.sync(user.id), 30000);
@@ -208,43 +219,50 @@ const App: React.FC = () => {
   const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus) => {
     const today = getTodayDateString();
     const userId = user?.id || 'guest_user';
+    
+    // Find if we already have an entry for this specific prayer/day combo to update it
     const currentLog = appState.logs[today];
-
-    if (currentLog?.isLocked && appState.settings.strictness === 'strict') {
-      console.warn("NurTrack: Day is locked in strict mode.");
-      return;
-    }
-
     const existingEntry = currentLog?.entries?.find(e => e.prayer_name === name);
+
     const newEntry: PrayerEntry = {
-      id: existingEntry?.id || crypto.randomUUID(),
+      id: existingEntry?.id || crypto.randomUUID(), // Reuse ID to overwrite in IndexedDB and Supabase
       user_id: userId,
       prayer_name: name,
       prayer_date: today,
       prayer_status: status,
       prayer_timestamp: Date.now(),
       synced: false,
-      created_at: existingEntry?.created_at || Date.now(),
-      is_locked: currentLog?.isLocked || false
+      created_at: existingEntry?.created_at || Date.now()
     };
 
+    // 1. Persist to IndexedDB
     await db.saveEntry(newEntry);
 
+    // 2. Update Local React State
     setAppState(prev => {
-      const current = prev.logs[today] || { 
+      const currentLog = prev.logs[today] || { 
         date: today, 
-        prayers: { Fajr: PrayerStatus.NOT_MARKED, Dhuhr: PrayerStatus.NOT_MARKED, Asr: PrayerStatus.NOT_MARKED, Maghrib: PrayerStatus.NOT_MARKED, Isha: PrayerStatus.NOT_MARKED },
-        entries: [],
-        isLocked: false
+        prayers: {
+          Fajr: PrayerStatus.NOT_MARKED,
+          Dhuhr: PrayerStatus.NOT_MARKED,
+          Asr: PrayerStatus.NOT_MARKED,
+          Maghrib: PrayerStatus.NOT_MARKED,
+          Isha: PrayerStatus.NOT_MARKED
+        },
+        entries: []
       };
-      const updatedPrayers = { ...current.prayers, [name]: status };
-      const updatedEntries = [...(current.entries || [])];
+
+      const updatedPrayers = { ...currentLog.prayers, [name]: status };
+      
+      // Update entry list
+      const updatedEntries = [...(currentLog.entries || [])];
       const eIdx = updatedEntries.findIndex(e => e.prayer_name === name);
       if (eIdx > -1) updatedEntries[eIdx] = newEntry;
       else updatedEntries.push(newEntry);
 
-      const updatedLog = { ...current, prayers: updatedPrayers, entries: updatedEntries };
+      const updatedLog = { ...currentLog, prayers: updatedPrayers, entries: updatedEntries };
       const updatedLogs = { ...prev.logs, [today]: updatedLog };
+      
       const newStats = calculateStatsFromLogs(updatedLogs);
 
       const allOnTime = (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
@@ -260,41 +278,13 @@ const App: React.FC = () => {
       return { ...prev, logs: updatedLogs, stats: newStats };
     });
 
+    // 3. Trigger Sync
     if (isOnline && user) syncEngine.sync(user.id);
+    
+    // Haptic feedback
     if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
       navigator.vibrate(status === PrayerStatus.NOT_MARKED ? 30 : 15);
     }
-  };
-
-  const lockTodayLog = async () => {
-    const today = getTodayDateString();
-    const userId = user?.id || 'guest_user';
-    const currentLog = appState.logs[today];
-    if (!currentLog) return;
-
-    // To lock, we update all entries for today with is_locked = true
-    const updatedEntriesPromises = (currentLog.entries || []).map(async entry => {
-      const lockedEntry = { ...entry, is_locked: true, synced: false };
-      await db.saveEntry(lockedEntry);
-      return lockedEntry;
-    });
-
-    const newEntries = await Promise.all(updatedEntriesPromises);
-
-    setAppState(prev => ({
-      ...prev,
-      logs: {
-        ...prev.logs,
-        [today]: {
-          ...currentLog,
-          entries: newEntries,
-          isLocked: true
-        }
-      }
-    }));
-
-    if (isOnline && user) syncEngine.sync(user.id);
-    if (appState.settings.hapticsEnabled && 'vibrate' in navigator) navigator.vibrate([50, 30, 50]);
   };
 
   const toggleTheme = () => {
@@ -375,8 +365,13 @@ const App: React.FC = () => {
     );
   }
 
-  if (!user && !guestMode) return <Auth onGuestMode={() => setGuestMode(true)} />;
-  if (!appState.settings.onboardingCompleted) return <Onboarding onComplete={completeOnboarding} />;
+  if (!user && !guestMode) {
+    return <Auth onGuestMode={() => setGuestMode(true)} />;
+  }
+
+  if (!appState.settings.onboardingCompleted) {
+    return <Onboarding onComplete={completeOnboarding} />;
+  }
 
   return (
     <Layout 
@@ -407,7 +402,7 @@ const App: React.FC = () => {
       )}
 
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
-        {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} lockTodayLog={lockTodayLog} onOpenDrawer={handleOpenDrawer} />}
+        {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'analytics' && <Analytics appState={appState} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'dua' && <Dua onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} />}
