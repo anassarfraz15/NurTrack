@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { LayoutDashboard, Pocket, Activity, Menu, X, Settings as SettingsIcon, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
+import React from 'react';
+import { LayoutDashboard, Pocket, Activity, X, Settings as SettingsIcon, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
 import { supabase } from '../services/supabase.ts';
 import { Logo } from '../constants.tsx';
 
@@ -9,11 +9,11 @@ interface LayoutProps {
   setActiveTab: (tab: string) => void;
   drawerContent?: React.ReactNode; 
   user: any;
+  isDrawerOpen: boolean;
+  onCloseDrawer: () => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, drawerContent, user }) => {
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-
+const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, drawerContent, user, isDrawerOpen, onCloseDrawer }) => {
   const mainTabs = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Today' },
     { id: 'analytics', icon: Activity, label: 'Stats' },
@@ -21,11 +21,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
     { id: 'tools', icon: Pocket, label: 'Tools' },
   ];
 
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
-
   const handleTabClick = (id: string) => {
     setActiveTab(id);
-    if (isDrawerOpen) setIsDrawerOpen(false);
+    if (isDrawerOpen) onCloseDrawer();
   };
 
   const handleLogout = async () => {
@@ -36,24 +34,6 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
   return (
     <div className="fixed inset-0 flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-hidden">
       
-      {/* Mobile Header */}
-      <header className="lg:hidden h-16 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 shrink-0 z-50">
-        <button 
-          onClick={toggleDrawer}
-          className="p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-          aria-label="Open Settings"
-        >
-          <Menu size={24} />
-        </button>
-        
-        <div className="flex items-center gap-2">
-          <Logo size={36} />
-          <h1 className="text-lg font-bold text-slate-800 dark:text-white tracking-tight">NurTrack</h1>
-        </div>
-        
-        <div className="w-10"></div>
-      </header>
-
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 transition-colors duration-500 flex-shrink-0">
         <div className="flex items-center gap-3 mb-10">
@@ -99,9 +79,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         )}
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Reduced top padding on mobile since header is gone */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar relative transition-colors duration-500 pb-24 lg:pb-0" style={{ overscrollBehaviorY: 'contain' }}>
-        <div className="max-w-5xl mx-auto w-full p-4 lg:p-8">
+        <div className="max-w-5xl mx-auto w-full p-4 lg:p-8 pt-6 lg:pt-8">
           {children}
         </div>
       </main>
@@ -131,7 +111,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       <div 
         className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
-        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={toggleDrawer}></div>
+        <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={onCloseDrawer}></div>
         <div 
           className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white dark:bg-slate-950 shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
@@ -140,7 +120,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
               <SettingsIcon className="text-emerald-600" size={24} />
               <h2 className="text-xl font-bold dark:text-white">Settings</h2>
             </div>
-            <button onClick={toggleDrawer} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><X size={24} /></button>
+            <button onClick={onCloseDrawer} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><X size={24} /></button>
           </div>
 
           <div className="flex-1 overflow-y-auto no-scrollbar p-6">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sparkles, BookOpen, ChevronRight, Copy, Check } from 'lucide-react';
+import { X, Sparkles, BookOpen, ChevronRight, Copy, Check, Menu } from 'lucide-react';
 
 interface DuaItem {
   id: number;
@@ -82,7 +82,11 @@ const DUAS: DuaItem[] = [
   }
 ];
 
-const Dua: React.FC = () => {
+interface DuaProps {
+  onOpenDrawer: () => void;
+}
+
+const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
   const [selectedDua, setSelectedDua] = useState<DuaItem | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -96,12 +100,19 @@ const Dua: React.FC = () => {
     <div className="space-y-6 animate-in fade-in duration-700 pb-10">
       <header className="mb-8">
         <div className="flex items-center gap-3 mb-2">
+           <button 
+              onClick={onOpenDrawer}
+              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
+              aria-label="Open Settings"
+            >
+              <Menu size={24} />
+            </button>
            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600">
              <BookOpen size={24} />
            </div>
            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Essential Duas</h2>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">Top 10 daily supplications for a blessed day.</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed md:ml-0 ml-10">Top 10 daily supplications for a blessed day.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -125,14 +136,12 @@ const Dua: React.FC = () => {
         ))}
       </div>
 
-      {/* Selected Dua Modal */}
       {selectedDua && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300">
           <div 
             className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] p-8 md:p-10 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 relative overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Background pattern */}
             <div className="absolute top-0 right-0 p-8 text-slate-50 dark:text-slate-800/10 pointer-events-none rotate-12">
               <BookOpen size={160} />
             </div>

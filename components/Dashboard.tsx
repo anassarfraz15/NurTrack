@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Flame, Star, Quote, Lock, ChevronRight, Timer, Menu } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState } from '../types';
 import { getTodayDateString, formatDisplayDate, getNextPrayer, getTimeRemaining } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -9,9 +8,10 @@ import { getSpiritualMotivation } from '../services/gemini';
 interface DashboardProps {
   appState: AppState;
   updatePrayerStatus: (name: PrayerName, status: PrayerStatus) => void;
+  onOpenDrawer: () => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) => {
+const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, onOpenDrawer }) => {
   const today = getTodayDateString();
   const todayLog = appState.logs[today] || { date: today, prayers: {} };
   const [nextPrayerData, setNextPrayerData] = useState(getNextPrayer(appState.settings));
@@ -20,19 +20,16 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) =
   const [motivation, setMotivation] = useState<{message: string, source: string, reflection: string} | null>(null);
   const [loadingMotivation, setLoadingMotivation] = useState(false);
 
-  // Consistency Score Calculation
   const consistencyScore = appState.stats.totalPrayers 
     ? Math.round((appState.stats.onTimeCount / appState.stats.totalPrayers) * 100) 
     : 0;
 
-  // Update Countdown and next prayer
   useEffect(() => {
     const timer = setInterval(() => {
       const next = getNextPrayer(appState.settings);
       setNextPrayerData(next);
       setTimeRemaining(getTimeRemaining(next.rawTime, next.isTomorrow));
-    }, 60000); // Update every minute
-
+    }, 60000);
     return () => clearInterval(timer);
   }, [appState.settings]);
 
@@ -65,26 +62,34 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) =
     updatePrayerStatus(name, newStatus);
   };
 
-  // Logic to extract only the first name and update greeting
   const firstName = appState.settings.userName ? appState.settings.userName.trim().split(' ')[0] : '';
   const greeting = firstName ? `Salam, ${firstName}` : 'Salam!';
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
-      {/* Header & Persistent Stats */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-1 tracking-tight">
-            {greeting}
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+      {/* Header - Centered on Mobile */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 text-center md:text-left">
+        <div className="flex flex-col items-center md:items-start">
+          <div className="flex items-center justify-center gap-3 mb-1">
+            <button 
+              onClick={onOpenDrawer}
+              className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
+              aria-label="Open Settings"
+            >
+              <Menu size={24} />
+            </button>
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              {greeting}
+            </h2>
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center justify-center md:justify-start gap-2">
             {formatDisplayDate(today)}
             <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
             <span className="text-emerald-600 dark:text-emerald-400 font-bold uppercase text-[10px] tracking-widest">Active Session</span>
           </p>
         </div>
         
-        <div className="flex gap-4">
+        <div className="flex justify-center md:justify-end gap-4">
           <div className="bg-white dark:bg-slate-900 px-5 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-4 transition-all hover:shadow-md">
             <div className="p-2 bg-orange-50 dark:bg-orange-900/20 rounded-xl">
               <Flame className="text-orange-500" fill="currentColor" size={20} />
@@ -107,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) =
         </div>
       </header>
 
-      {/* Next Prayer Highlight - Fixed Mobile Formatting */}
+      {/* Next Prayer Highlight */}
       <div className="relative overflow-hidden bg-emerald-700 dark:bg-emerald-800 rounded-[2.5rem] p-6 md:p-10 text-white shadow-2xl shadow-emerald-200/50 dark:shadow-none transition-all duration-500">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-6">
           <div className="flex flex-col gap-2">
@@ -140,7 +145,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus }) =
           </div>
         </div>
         
-        {/* Decorative elements */}
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-emerald-400/20 rounded-full blur-[90px]"></div>
         <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-300/10 rounded-full blur-[70px]"></div>
       </div>

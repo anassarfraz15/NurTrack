@@ -96,6 +96,7 @@ const App: React.FC = () => {
   const [guestMode, setGuestMode] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const syncTimeoutRef = useRef<number | null>(null);
 
   const [lastCelebratedDate, setLastCelebratedDate] = useState<string | null>(() => {
@@ -140,7 +141,6 @@ const App: React.FC = () => {
 
     const { data: { subscription } } = (supabase.auth as any).onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
-      // Reset guest mode on auth change
       if (session?.user) setGuestMode(false);
     });
 
@@ -155,7 +155,6 @@ const App: React.FC = () => {
           if (cloudData) {
             setAppState(cloudData);
           } else {
-            // New cloud user: prioritize onboarding if local state says so
             syncUserData(user.id, appState);
           }
         } catch (e) {
@@ -282,6 +281,9 @@ const App: React.FC = () => {
     });
   };
 
+  const handleOpenDrawer = () => setIsDrawerOpen(true);
+  const handleCloseDrawer = () => setIsDrawerOpen(false);
+
   if (loading) {
     return (
       <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
@@ -297,24 +299,38 @@ const App: React.FC = () => {
     );
   }
 
-  // 1. Check Auth First
   if (!user && !guestMode) {
     return <Auth onGuestMode={() => setGuestMode(true)} />;
   }
 
-  // 2. Then Check Onboarding (for both Guests and Registered Users)
   if (!appState.settings.onboardingCompleted) {
     return <Onboarding onComplete={completeOnboarding} />;
   }
 
-  // 3. Finally Main App
   return (
-    <Layout activeTab={activeTab} setActiveTab={setActiveTab} drawerContent={<Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />} user={user}>
+    <Layout 
+      activeTab={activeTab} 
+      setActiveTab={setActiveTab} 
+      isDrawerOpen={isDrawerOpen}
+      onCloseDrawer={handleCloseDrawer}
+      drawerContent={
+        <Settings 
+          appState={appState} 
+          onToggleTheme={toggleTheme} 
+          onToggleHaptics={toggleHaptics} 
+          onCycleStrictness={cycleStrictness} 
+          setUserName={setUserName} 
+          setTimingMode={setTimingMode} 
+          setManualTiming={setManualTiming} 
+        />
+      } 
+      user={user}
+    >
       <div key={activeTab} className="max-w-4xl mx-auto py-2 lg:py-6 animate-in fade-in duration-500 fill-mode-forwards">
-        {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} />}
-        {activeTab === 'analytics' && <Analytics appState={appState} />}
-        {activeTab === 'dua' && <Dua />}
-        {activeTab === 'tools' && <Tools appState={appState} />}
+        {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} onOpenDrawer={handleOpenDrawer} />}
+        {activeTab === 'analytics' && <Analytics appState={appState} onOpenDrawer={handleOpenDrawer} />}
+        {activeTab === 'dua' && <Dua onOpenDrawer={handleOpenDrawer} />}
+        {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} />}
       </div>
       {showAchievement && <AchievementPopup onClose={() => setShowAchievement(false)} userName={appState.settings.userName} />}

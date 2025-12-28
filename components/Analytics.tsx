@@ -4,28 +4,27 @@ import {
 } from 'recharts';
 import { AppState, PrayerStatus, PrayerName, DailyLog } from '../types.ts';
 import { PRAYER_NAMES } from '../constants.tsx';
-import { TrendingUp, Award, Sparkles, Info, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame } from 'lucide-react';
-import { getTodayDateString, formatDisplayDate } from '../utils/dateTime.ts';
+import { TrendingUp, Award, Sparkles, Info, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame, Menu } from 'lucide-react';
+import { getTodayDateString } from '../utils/dateTime.ts';
 
 interface AnalyticsProps {
   appState: AppState;
+  onOpenDrawer: () => void;
 }
 
-const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
+const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
   const todayStr = getTodayDateString();
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(todayStr);
-  const [viewDate, setViewDate] = useState(new Date()); // Controls which month we are looking at
+  const [viewDate, setViewDate] = useState(new Date());
   
   const isDark = appState.settings.theme === 'dark';
 
-  // Theme-aware color constants
   const colors = {
     text: isDark ? '#94a3b8' : '#64748b',
     grid: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)',
     barBg: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(241, 245, 249, 0.8)',
   };
 
-  // Calendar Logic
   const viewMonth = viewDate.getMonth();
   const viewYear = viewDate.getFullYear();
 
@@ -42,13 +41,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
 
   const calendarDays = useMemo(() => {
     const days = [];
-    // Padding for start of month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push(null);
     }
-    // Real days
     for (let i = 1; i <= daysInMonth; i++) {
-      // Local construction of YYYY-MM-DD to avoid UTC shifting issues
       const dateKey = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       const log = appState.logs[dateKey];
       
@@ -71,10 +67,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
     return days;
   }, [appState.logs, viewMonth, viewYear, todayStr]);
 
-  // Selected Day Data
   const selectedDayLog = appState.logs[selectedCalendarDate] || { prayers: {} };
 
-  // Chart Data Computation
   const { weeklyTrend, overallDistribution, averageConsistency } = useMemo(() => {
     const trendDays = [];
     const today = new Date();
@@ -151,21 +145,33 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
     }
   };
 
+  const formatDisplayDateSimple = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
   return (
     <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1 md:px-0">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Visual Streak Calendar</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Identify your consistency patterns at a glance</p>
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex items-center gap-3">
+             <button 
+                onClick={onOpenDrawer}
+                className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
+                aria-label="Open Settings"
+              >
+                <Menu size={24} />
+              </button>
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Visual Streak Calendar</h2>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 md:mt-0 md:ml-0 ml-10">Identify your consistency patterns at a glance</p>
         </div>
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 px-5 py-2.5 md:px-6 md:py-3 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50 self-start md:self-auto">
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 px-5 py-2.5 md:px-6 md:py-3 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50 self-start md:self-auto ml-10 md:ml-0">
           <Flame className="text-emerald-600 dark:text-emerald-400" size={18} fill="currentColor" />
           <span className="font-bold text-sm md:text-base text-emerald-800 dark:text-emerald-200">{appState.stats.streak} Day Streak</span>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        {/* Streak Calendar Section */}
         <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80">
           <div className="flex items-center justify-between mb-6 md:mb-8">
             <div className="flex items-center gap-3 md:gap-4">
@@ -255,7 +261,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
           </div>
         </section>
 
-        {/* Selected Day Panel */}
         <section className="bg-slate-950 text-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col h-full border border-slate-800/50">
           <div className="absolute top-0 right-0 p-6 md:p-8 text-white/5 pointer-events-none">
             <CalendarDays size={140} />
@@ -266,7 +271,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
               <div>
                 <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-1">Historical Review</p>
                 <h3 className="text-xl md:text-2xl font-bold tracking-tight">
-                  {formatDisplayDate(selectedCalendarDate).split(',')[0]}
+                  {formatDisplayDateSimple(selectedCalendarDate).split(',')[0]}
                 </h3>
                 <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest">{selectedCalendarDate}</p>
               </div>
@@ -314,12 +319,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        {/* Weekly Trend Chart */}
         <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 relative">
           <div className="flex items-center justify-between mb-8 md:mb-10">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl flex items-center justify-center text-emerald-600">
-                <TrendingUp size={20} md:size={24} />
+                <TrendingUp size={24} />
               </div>
               <div>
                 <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-slate-100 tracking-tight">Discipline Progress</h3>
@@ -343,7 +347,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
           </div>
         </section>
 
-        {/* Global Distribution */}
         <section className="bg-white dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 flex flex-col">
           <div className="flex items-center gap-4 mb-6 md:mb-8">
             <div className="p-2.5 md:p-3 bg-amber-100 dark:bg-amber-900/20 rounded-xl md:rounded-2xl text-amber-600">
@@ -388,11 +391,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
         </section>
       </div>
 
-      {/* Insight Footer */}
       <div className="bg-slate-900 dark:bg-slate-950 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] text-white flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-2xl relative overflow-hidden border border-slate-800/50">
         <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-emerald-500/10 rounded-full blur-[60px] md:blur-[80px]"></div>
         <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-500/20 rounded-2xl md:rounded-3xl flex items-center justify-center ring-1 ring-emerald-500/30 backdrop-blur-md shrink-0">
-          <Sparkles size={30} md:size={38} className="text-emerald-400" />
+          <Sparkles size={38} className="text-emerald-400" />
         </div>
         <div className="flex-1 text-center md:text-left relative z-10">
           <h4 className="text-xl md:text-2xl font-bold mb-2 tracking-tight">Your History is Your Strength</h4>
@@ -401,7 +403,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
           </p>
         </div>
         <div className="flex items-center gap-2 md:gap-3 text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] bg-white/5 px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm">
-          <Info size={12} md:size={14} className="text-slate-600" />
+          <Info size={14} className="text-slate-600" />
           Insight AI
         </div>
       </div>

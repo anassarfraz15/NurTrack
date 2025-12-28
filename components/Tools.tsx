@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2, Target } from 'lucide-react';
+import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2, Target, Menu } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
 
 interface ToolsProps {
   appState: AppState;
+  onOpenDrawer: () => void;
 }
 
-const Tools: React.FC<ToolsProps> = ({ appState }) => {
+const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
   const [tasbeehCount, setTasbeehCount] = useState(0);
   const [tasbeehGoal, setTasbeehGoal] = useState<number | null>(33);
   const [activeTool, setActiveTool] = useState('tasbeeh');
@@ -164,16 +165,13 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     } catch (e) {}
   };
 
-  // Separation of Logic: Handle State Update
   const handleTasbeehIncrement = (e?: React.PointerEvent | React.TouchEvent) => {
     if (e) {
-      // Prevent multiple events from firing (touch + mouse)
       if (e.type === 'touchstart') e.preventDefault();
       e.stopPropagation();
     }
 
     setTasbeehCount((prev) => {
-      // If goal set and reached, don't increment, just trigger "complete" feedback
       if (tasbeehGoal !== null && prev >= tasbeehGoal) {
         return prev;
       }
@@ -181,7 +179,6 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
     });
   };
 
-  // Separation of Logic: Handle Feedback
   useEffect(() => {
     if (tasbeehCount === 0) return;
 
@@ -219,9 +216,18 @@ const Tools: React.FC<ToolsProps> = ({ appState }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
-      <header>
-        <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Daily Tools</h2>
-        <p className="text-slate-500">Your everyday Muslim companions</p>
+      <header className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={onOpenDrawer}
+            className="lg:hidden p-2 -ml-2 text-slate-400 hover:text-emerald-600 transition-colors"
+            aria-label="Open Settings"
+          >
+            <Menu size={24} />
+          </button>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white tracking-tight">Daily Tools</h2>
+        </div>
+        <p className="text-slate-500 md:ml-0 ml-10">Your everyday Muslim companions</p>
       </header>
 
       <div className="flex flex-wrap gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit max-w-full">
