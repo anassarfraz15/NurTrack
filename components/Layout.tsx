@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LayoutDashboard, Pocket, Activity, X, Settings as SettingsIcon, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
 import { supabase } from '../services/supabase.ts';
@@ -32,10 +33,10 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col lg:flex-row bg-slate-50 dark:bg-slate-950 transition-colors duration-500 overflow-hidden">
+    <div className="fixed inset-0 flex flex-col lg:flex-row transition-colors duration-500 overflow-hidden">
       
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 p-6 transition-colors duration-500 flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-64 bg-white/40 dark:bg-slate-900/40 backdrop-blur-md border-r border-slate-200/50 dark:border-slate-800/50 p-6 transition-colors duration-500 flex-shrink-0">
         <div className="flex items-center gap-3 mb-10">
           <Logo size={48} className="drop-shadow-lg" />
           <h1 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight">NurTrack</h1>
@@ -48,8 +49,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
               onClick={() => handleTabClick(tab.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === tab.id 
-                ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 font-semibold shadow-sm' 
-                : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
+                ? 'bg-emerald-600 dark:bg-emerald-600 text-white font-semibold shadow-lg shadow-emerald-600/20' 
+                : 'text-slate-500 dark:text-slate-400 hover:bg-white/50 dark:hover:bg-slate-800/50'
               }`}
             >
               <tab.icon size={20} />
@@ -59,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         </nav>
 
         {user && (
-          <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800">
+          <div className="mt-auto pt-6 border-t border-slate-100/50 dark:border-slate-800/50">
             <div className="flex items-center gap-3 px-2 mb-4">
               <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
                 <UserIcon size={16} />
@@ -70,7 +71,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
             </div>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all font-semibold"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-900/20 transition-all font-semibold"
             >
               <LogOut size={20} />
               Logout
@@ -79,15 +80,15 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         )}
       </aside>
 
-      {/* Main Content Area - Reduced top padding on mobile since header is gone */}
+      {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar relative transition-colors duration-500 pb-24 lg:pb-0" style={{ overscrollBehaviorY: 'contain' }}>
         <div className="max-w-5xl mx-auto w-full p-4 lg:p-8 pt-6 lg:pt-8">
           {children}
         </div>
       </main>
 
-      {/* Mobile Bottom Dock - Aligned with justify-between for perfect spacing */}
-      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border border-slate-200 dark:border-slate-800 rounded-3xl p-1.5 px-3 flex items-center justify-between shadow-2xl z-40">
+      {/* Mobile Bottom Dock */}
+      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/50 dark:border-slate-800/50 rounded-3xl p-1.5 px-3 flex items-center justify-between shadow-2xl z-40">
         {mainTabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -96,7 +97,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
               onClick={() => handleTabClick(tab.id)}
               className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all ${
                 isActive 
-                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30' 
+                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/30' 
                 : 'text-slate-400 dark:text-slate-500'
               }`}
             >
@@ -113,7 +114,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       >
         <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={onCloseDrawer}></div>
         <div 
-          className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white dark:bg-slate-950 shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -129,9 +130,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
             </div>
           </div>
           
-          <div className="p-4 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+          <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-md border-t border-slate-100 dark:border-slate-800">
              {user && (
-               <div className="mb-3 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+               <div className="mb-3 p-3 bg-white/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Logged in as</span>
                     <button 
