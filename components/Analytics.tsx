@@ -152,52 +152,52 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
   };
 
   return (
-    <div className="space-y-8 pb-24 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1 md:px-0">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Visual Streak Calendar</h2>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Identify your consistency patterns at a glance</p>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Visual Streak Calendar</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Identify your consistency patterns at a glance</p>
         </div>
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 px-6 py-3 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50">
-          <Flame className="text-emerald-600 dark:text-emerald-400" size={20} fill="currentColor" />
-          <span className="font-bold text-emerald-800 dark:text-emerald-200">{appState.stats.streak} Day Streak</span>
+        <div className="bg-emerald-50 dark:bg-emerald-900/20 px-5 py-2.5 md:px-6 md:py-3 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50 self-start md:self-auto">
+          <Flame className="text-emerald-600 dark:text-emerald-400" size={18} fill="currentColor" />
+          <span className="font-bold text-sm md:text-base text-emerald-800 dark:text-emerald-200">{appState.stats.streak} Day Streak</span>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Streak Calendar Section */}
-        <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-2xl text-emerald-600">
-                <CalendarDays size={22} />
+        <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80">
+          <div className="flex items-center justify-between mb-6 md:mb-8">
+            <div className="flex items-center gap-3 md:gap-4">
+              <div className="p-2.5 md:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl text-emerald-600">
+                <CalendarDays size={20} />
               </div>
-              <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 tracking-tight">
+              <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-slate-100 tracking-tight">
                 {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
               </h3>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1">
               <button 
                 onClick={handlePrevMonth}
-                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-600 dark:text-slate-400"
+                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-slate-400"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={18} />
               </button>
               <button 
                 onClick={handleNextMonth}
-                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-600 dark:text-slate-400"
+                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-slate-400"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-7 gap-2 md:gap-3 mb-6">
+          <div className="grid grid-cols-7 gap-1 md:gap-3 mb-4 md:mb-6">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-center text-[10px] font-black text-slate-400 uppercase tracking-widest py-2">{d}</div>
+              <div key={d} className="text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest py-1 md:py-2">{d}</div>
             ))}
             {calendarDays.map((dayObj, idx) => {
-              if (!dayObj) return <div key={`empty-${idx}`} className="h-12 md:h-16 lg:h-20" />;
+              if (!dayObj) return <div key={`empty-${idx}`} className="h-10 md:h-16 lg:h-20" />;
               
               const isSelected = selectedCalendarDate === dayObj.dateKey;
               const isToday = dayObj.dateKey === todayStr;
@@ -209,86 +209,86 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
               if (dayObj.status === 'perfect') {
                 bgClass = "bg-emerald-500 border-emerald-500";
                 textClass = "text-white";
-                shadowClass = "shadow-lg shadow-emerald-500/20";
+                shadowClass = "shadow-md md:shadow-lg shadow-emerald-500/20";
               } else if (dayObj.status === 'partial') {
                 bgClass = "bg-amber-400 border-amber-400";
                 textClass = "text-amber-950";
-                shadowClass = "shadow-lg shadow-amber-500/20";
+                shadowClass = "shadow-md md:shadow-lg shadow-amber-500/20";
               } else if (dayObj.status === 'missed') {
                 bgClass = "bg-rose-500 border-rose-500";
                 textClass = "text-white";
-                shadowClass = "shadow-lg shadow-rose-500/20";
+                shadowClass = "shadow-md md:shadow-lg shadow-rose-500/20";
               }
 
               return (
                 <button
                   key={dayObj.dateKey}
                   onClick={() => setSelectedCalendarDate(dayObj.dateKey)}
-                  className={`group relative h-12 md:h-16 lg:h-20 rounded-xl md:rounded-2xl transition-all flex flex-col items-center justify-center gap-1 border-2 ${
+                  className={`group relative h-10 md:h-16 lg:h-20 rounded-lg md:rounded-2xl transition-all flex flex-col items-center justify-center gap-0.5 md:gap-1 border-2 ${
                     isSelected 
                     ? 'ring-4 ring-slate-900/10 dark:ring-white/10 scale-105 z-10' 
                     : ''
                   } ${bgClass} ${textClass} ${shadowClass} hover:scale-[1.02] active:scale-95`}
                 >
-                  <span className="text-xs md:text-sm font-black">{dayObj.day}</span>
+                  <span className="text-[10px] md:text-sm font-black">{dayObj.day}</span>
                   {isToday && (
-                    <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-500 rounded-full border-2 border-white dark:border-slate-900" />
+                    <div className="absolute top-1 right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full border border-white dark:border-slate-900" />
                   )}
                 </button>
               );
             })}
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 md:gap-6 mt-8 pt-8 border-t border-slate-50 dark:border-slate-800/50">
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-4 h-4 rounded-lg bg-emerald-500 shadow-sm" /> Perfect Day
+          <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-6 pt-6 border-t border-slate-50 dark:border-slate-800/50">
+            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-emerald-500 shadow-sm" /> Perfect
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-4 h-4 rounded-lg bg-amber-400 shadow-sm" /> Partial
+            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-amber-400 shadow-sm" /> Partial
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-4 h-4 rounded-lg bg-rose-500 shadow-sm" /> Missed
+            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-rose-500 shadow-sm" /> Missed
             </div>
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest ml-auto">
-              <div className="w-4 h-4 rounded-lg border-2 border-slate-100 dark:border-slate-800" /> Future
+            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-auto">
+              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md border-2 border-slate-100 dark:border-slate-800" /> Future
             </div>
           </div>
         </section>
 
         {/* Selected Day Panel */}
-        <section className="bg-slate-950 text-white p-8 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col h-full border border-slate-800/50">
-          <div className="absolute top-0 right-0 p-8 text-white/5 pointer-events-none">
-            <CalendarDays size={180} />
+        <section className="bg-slate-950 text-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col h-full border border-slate-800/50">
+          <div className="absolute top-0 right-0 p-6 md:p-8 text-white/5 pointer-events-none">
+            <CalendarDays size={140} />
           </div>
           
           <div className="relative z-10 flex-1">
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
               <div>
                 <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-1">Historical Review</p>
-                <h3 className="text-2xl font-bold tracking-tight">
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight">
                   {formatDisplayDate(selectedCalendarDate).split(',')[0]}
                 </h3>
-                <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-widest">{selectedCalendarDate}</p>
+                <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest">{selectedCalendarDate}</p>
               </div>
-              <div className="p-3 bg-white/5 rounded-2xl border border-white/10">
-                <CalendarDays size={20} className="text-slate-400" />
+              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
+                <CalendarDays size={18} className="text-slate-400" />
               </div>
             </div>
 
-            <p className="text-xs text-slate-500 font-medium mb-6 uppercase tracking-widest">Prayer Log</p>
+            <p className="text-[10px] text-slate-500 font-medium mb-4 uppercase tracking-widest">Prayer Log</p>
             
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {PRAYER_NAMES.map((name) => {
                 const status = selectedDayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
                 return (
-                  <div key={name} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
-                    <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                  <div key={name} className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl md:rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-colors">
                         {getStatusIcon(status as PrayerStatus)}
                       </div>
                       <span className="font-bold text-sm tracking-tight">{name}</span>
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg ${
+                    <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md ${
                       status === PrayerStatus.ON_TIME ? 'bg-emerald-500/10 text-emerald-400' : 
                       status === PrayerStatus.LATE ? 'bg-amber-500/10 text-amber-400' : 
                       status === PrayerStatus.MISSED ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-800/50 text-slate-500'
@@ -301,10 +301,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
             </div>
           </div>
 
-          <div className="relative z-10 mt-8 pt-8 border-t border-white/5">
-            <div className="flex items-center gap-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
-              <Sparkles size={24} className="text-emerald-500 shrink-0" />
-              <p className="text-xs font-medium leading-relaxed text-slate-300">
+          <div className="relative z-10 mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/5">
+            <div className="flex items-center gap-3 md:gap-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+              <Sparkles size={20} className="text-emerald-500 shrink-0" />
+              <p className="text-[10px] md:text-xs font-medium leading-relaxed text-slate-300">
                 "Take account of yourselves before you are taken to account." 
                 <span className="block mt-1 text-emerald-400 font-bold">— Umar ibn al-Khattab</span>
               </p>
@@ -313,56 +313,56 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
         </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Weekly Trend Chart */}
-        <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 relative">
-          <div className="flex items-center justify-between mb-10">
+        <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 relative">
+          <div className="flex items-center justify-between mb-8 md:mb-10">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center text-emerald-600">
-                <TrendingUp size={24} />
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl flex items-center justify-center text-emerald-600">
+                <TrendingUp size={20} md:size={24} />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 tracking-tight">Discipline Progress</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Weekly performance breakdown</p>
+                <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-slate-100 tracking-tight">Discipline Progress</h3>
+                <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-medium">Weekly performance breakdown</p>
               </div>
             </div>
           </div>
 
-          <div className="h-72 w-full">
+          <div className="h-64 md:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyTrend} margin={{ top: 0, right: 0, left: -25, bottom: 0 }} barSize={36}>
+              <BarChart data={weeklyTrend} margin={{ top: 0, right: 0, left: -25, bottom: 0 }} barSize={window.innerWidth < 768 ? 20 : 36}>
                 <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={colors.grid} />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: colors.text, fontSize: 12, fontWeight: 600}} dy={12} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: colors.text, fontSize: 11}} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: colors.text, fontSize: 10, fontWeight: 600}} dy={12} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: colors.text, fontSize: 10}} domain={[0, 5]} ticks={[0, 1, 2, 3, 4, 5]} />
                 <Tooltip content={<CustomTooltip />} cursor={{fill: colors.barBg, radius: 10}} />
                 <Bar dataKey="onTime" name="On Time" fill="#10b981" stackId="a" />
                 <Bar dataKey="late" name="Late" fill="#f59e0b" stackId="a" />
-                <Bar dataKey="missed" name="Missed" fill="#f43f5e" stackId="a" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="missed" name="Missed" fill="#f43f5e" stackId="a" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </section>
 
         {/* Global Distribution */}
-        <section className="bg-white dark:bg-slate-900/50 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 flex flex-col">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-amber-100 dark:bg-amber-900/20 rounded-2xl text-amber-600">
-              <Award size={22} />
+        <section className="bg-white dark:bg-slate-900/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 flex flex-col">
+          <div className="flex items-center gap-4 mb-6 md:mb-8">
+            <div className="p-2.5 md:p-3 bg-amber-100 dark:bg-amber-900/20 rounded-xl md:rounded-2xl text-amber-600">
+              <Award size={20} />
             </div>
-            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 tracking-tight">Accuracy Ratio</h3>
+            <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-slate-100 tracking-tight">Accuracy Ratio</h3>
           </div>
           
-          <div className="flex-1 min-h-[220px] relative flex items-center justify-center">
+          <div className="flex-1 min-h-[200px] md:min-h-[220px] relative flex items-center justify-center">
              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={overallDistribution}
                     innerRadius="68%"
                     outerRadius="88%"
-                    paddingAngle={12}
+                    paddingAngle={8}
                     dataKey="value"
                     stroke="none"
-                    cornerRadius={10}
+                    cornerRadius={8}
                   >
                     {overallDistribution.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
@@ -372,16 +372,16 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
                 </PieChart>
              </ResponsiveContainer>
              <div className="absolute flex flex-col items-center pointer-events-none">
-               <span className="text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{averageConsistency}%</span>
-               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.25em] mt-1.5">Efficiency</span>
+               <span className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{averageConsistency}%</span>
+               <span className="text-[8px] md:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.25em] mt-1">Efficiency</span>
              </div>
           </div>
           
-          <div className="grid grid-cols-3 gap-3 mt-8">
+          <div className="grid grid-cols-3 gap-2 md:gap-3 mt-6 md:mt-8">
              {overallDistribution.map((item) => (
-               <div key={item.name} className="flex flex-col items-center p-3 bg-slate-50/80 dark:bg-slate-800/30 rounded-2xl border border-transparent">
-                 <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-1.5 tracking-wide">{item.name}</span>
-                 <span className="text-xl font-black" style={{ color: item.color }}>{item.value}</span>
+               <div key={item.name} className="flex flex-col items-center p-2.5 md:p-3 bg-slate-50/80 dark:bg-slate-800/30 rounded-xl md:rounded-2xl border border-transparent">
+                 <span className="text-[8px] md:text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase mb-1 tracking-wide">{item.name}</span>
+                 <span className="text-lg md:text-xl font-black" style={{ color: item.color }}>{item.value}</span>
                </div>
              ))}
           </div>
@@ -389,19 +389,19 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState }) => {
       </div>
 
       {/* Insight Footer */}
-      <div className="bg-slate-900 dark:bg-slate-950 p-10 rounded-[3rem] text-white flex flex-col md:flex-row items-center gap-10 shadow-2xl relative overflow-hidden border border-slate-800/50">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[80px]"></div>
-        <div className="w-20 h-20 bg-emerald-500/20 rounded-3xl flex items-center justify-center ring-1 ring-emerald-500/30 backdrop-blur-md shrink-0">
-          <Sparkles size={38} className="text-emerald-400" />
+      <div className="bg-slate-900 dark:bg-slate-950 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] text-white flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-2xl relative overflow-hidden border border-slate-800/50">
+        <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-emerald-500/10 rounded-full blur-[60px] md:blur-[80px]"></div>
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-500/20 rounded-2xl md:rounded-3xl flex items-center justify-center ring-1 ring-emerald-500/30 backdrop-blur-md shrink-0">
+          <Sparkles size={30} md:size={38} className="text-emerald-400" />
         </div>
         <div className="flex-1 text-center md:text-left relative z-10">
-          <h4 className="text-2xl font-bold mb-2 tracking-tight">Your History is Your Strength</h4>
-          <p className="text-slate-400 text-sm leading-relaxed max-w-xl">
+          <h4 className="text-xl md:text-2xl font-bold mb-2 tracking-tight">Your History is Your Strength</h4>
+          <p className="text-slate-400 text-xs md:text-sm leading-relaxed max-w-xl mx-auto md:mx-0">
             Each day on this calendar is a memory of your devotion. Don't be discouraged by a few red spots; look at the field of green you're building. Every prayer is a new beginning.
           </p>
         </div>
-        <div className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] bg-white/5 px-6 py-3 rounded-2xl backdrop-blur-sm">
-          <Info size={14} className="text-slate-600" />
+        <div className="flex items-center gap-2 md:gap-3 text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] bg-white/5 px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm">
+          <Info size={12} md:size={14} className="text-slate-600" />
           Insight AI
         </div>
       </div>
