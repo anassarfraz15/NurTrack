@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2, Target, Menu } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
@@ -165,12 +166,8 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
     } catch (e) {}
   };
 
-  const handleTasbeehIncrement = (e?: React.PointerEvent | React.TouchEvent) => {
-    if (e) {
-      if (e.type === 'touchstart') e.preventDefault();
-      e.stopPropagation();
-    }
-
+  const handleTasbeehIncrement = (e?: React.MouseEvent | React.TouchEvent) => {
+    // Only increment on intentional clicks, not during scrolls
     setTasbeehCount((prev) => {
       if (tasbeehGoal !== null && prev >= tasbeehGoal) {
         return prev;
@@ -217,7 +214,6 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
       <header className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-        {/* Mobile Hamburger - Positioned Left */}
         <button 
           onClick={onOpenDrawer}
           className="lg:hidden absolute left-0 top-0.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
@@ -254,90 +250,89 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
       <div className="min-h-[450px]">
         {activeTool === 'tasbeeh' && (
-          <>
-            <div 
-              onPointerDown={handleTasbeehIncrement}
-              style={{ touchAction: 'none' }}
-              className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[450px] sm:min-h-[500px] cursor-pointer transition-all rounded-[3rem] select-none active:bg-slate-50/30 dark:active:bg-slate-800/20"
-            >
-              <div className="flex flex-col items-center gap-2 mb-4 pointer-events-none">
-                <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40 animate-pulse">
-                  <Fingerprint size={16} />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap anywhere to count</span>
-                </div>
+          <div className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[450px] sm:min-h-[500px] select-none w-full">
+            <div className="flex flex-col items-center gap-2 pointer-events-none">
+              <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40">
+                <Fingerprint size={16} />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap the circle to count</span>
               </div>
+            </div>
 
-              <div className="flex items-center gap-6 sm:gap-8 md:gap-16">
-                <div className="relative pointer-events-none">
-                  <div 
-                    className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden active:scale-95 ${
-                      tasbeehGoal && tasbeehCount >= tasbeehGoal 
-                      ? 'border-emerald-500 shadow-emerald-500/20' 
-                      : 'border-emerald-100 dark:border-emerald-900/30 shadow-emerald-200/50 dark:shadow-none'
-                    }`}
-                  >
-                    {tasbeehGoal && (
-                      <div 
-                        className="absolute bottom-0 left-0 right-0 bg-emerald-50 dark:bg-emerald-900/10 transition-all duration-300 pointer-events-none"
-                        style={{ height: `${Math.min((tasbeehCount / tasbeehGoal) * 100, 100)}%` }}
-                      />
-                    )}
-                    <div className="relative z-10 flex flex-col items-center">
-                      <span className={`text-5xl sm:text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}`}>
-                        {tasbeehCount}
+            {/* Centered Counter Circle */}
+            <div className="flex flex-col items-center gap-8 w-full">
+              <button 
+                onClick={handleTasbeehIncrement}
+                className="group relative outline-none focus:ring-4 focus:ring-emerald-500/10 rounded-full"
+                aria-label="Increment Tasbeeh"
+              >
+                <div 
+                  className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-slate-900 shadow-2xl relative overflow-hidden active:scale-95 ${
+                    tasbeehGoal && tasbeehCount >= tasbeehGoal 
+                    ? 'border-emerald-500 shadow-emerald-500/20' 
+                    : 'border-emerald-100 dark:border-emerald-900/30 shadow-emerald-200/50 dark:shadow-none'
+                  }`}
+                >
+                  {tasbeehGoal && (
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 bg-emerald-50 dark:bg-emerald-900/10 transition-all duration-300 pointer-events-none"
+                      style={{ height: `${Math.min((tasbeehCount / tasbeehGoal) * 100, 100)}%` }}
+                    />
+                  )}
+                  <div className="relative z-10 flex flex-col items-center">
+                    <span className={`text-5xl sm:text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-slate-100'}`}>
+                      {tasbeehCount}
+                    </span>
+                    <div className="flex flex-col items-center mt-1">
+                      <span className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+                        {tasbeehGoal ? `Goal: ${tasbeehGoal}` : 'Free Count'}
                       </span>
-                      <div className="flex flex-col items-center mt-1">
-                        <span className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
-                          {tasbeehGoal ? `Goal: ${tasbeehGoal}` : 'Free Count'}
+                      {tasbeehGoal && tasbeehCount >= tasbeehGoal && (
+                        <span className="text-emerald-500 text-[9px] sm:text-[10px] font-black uppercase mt-1 flex items-center gap-1">
+                          <CheckCircle2 size={10} /> Completed
                         </span>
-                        {tasbeehGoal && tasbeehCount >= tasbeehGoal && (
-                          <span className="text-emerald-500 text-[9px] sm:text-[10px] font-black uppercase mt-1 flex items-center gap-1">
-                            <CheckCircle2 size={10} /> Completed
-                          </span>
-                        )}
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
+              </button>
 
-                <div className="flex flex-col gap-3 sm:gap-4">
-                  <button 
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setTasbeehCount(0); triggerHaptics('heavy'); }}
-                    title="Reset Counter"
-                    className="p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-110 z-20"
-                  >
-                    <RotateCcw size={20} className="sm:w-6 sm:h-6" />
-                  </button>
-                  <button 
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => { e.stopPropagation(); setShowGoalModal(true); triggerHaptics('light'); }}
-                    title="Set Goal"
-                    className="p-3 sm:p-4 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-110 z-20"
-                  >
-                    <Settings2 size={20} className="sm:w-6 sm:h-6" />
-                  </button>
-                </div>
+              {/* Reset and Settings Buttons moved under the circle */}
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => { setTasbeehCount(0); triggerHaptics('heavy'); }}
+                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all active:rotate-180 hover:scale-105"
+                  title="Reset Counter"
+                >
+                  <RotateCcw size={18} />
+                  <span className="text-xs font-bold uppercase tracking-widest">Reset</span>
+                </button>
+                <button 
+                  onClick={() => { setShowGoalModal(true); triggerHaptics('light'); }}
+                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-slate-800 rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-slate-700 transition-all hover:scale-105"
+                  title="Set Goal"
+                >
+                  <Settings2 size={18} />
+                  <span className="text-xs font-bold uppercase tracking-widest">Goal</span>
+                </button>
               </div>
-              
-              <div className="flex flex-col items-center gap-4 w-full pt-4">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pointer-events-none">Quick Goals</p>
-                <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-sm:px-4 max-w-sm z-20">
-                  {[33, 99, 100].map(val => (
-                    <button 
-                      key={val}
-                      onPointerDown={(e) => e.stopPropagation()}
-                      onClick={(e) => { e.stopPropagation(); selectGoal(val); }}
-                      className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border transition-all font-black text-xs sm:text-sm ${
-                        tasbeehGoal === val 
-                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
-                        : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
-                      }`}
-                    >
-                      {val}
-                    </button>
-                  ))}
-                </div>
+            </div>
+            
+            <div className="flex flex-col items-center gap-4 w-full pt-4">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] pointer-events-none">Quick Goals</p>
+              <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full max-sm:px-4 max-w-sm z-20">
+                {[33, 99, 100].map(val => (
+                  <button 
+                    key={val}
+                    onClick={() => selectGoal(val)}
+                    className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border transition-all font-black text-xs sm:text-sm ${
+                      tasbeehGoal === val 
+                      ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
+                      : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
+                    }`}
+                  >
+                    {val}
+                  </button>
+                ))}
               </div>
             </div>
 
@@ -345,7 +340,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
             {showGoalModal && (
               <div 
                 className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
-                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setShowGoalModal(false)}
               >
                 <div 
                   className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
@@ -399,7 +394,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
 
         {activeTool === 'qibla' && (
