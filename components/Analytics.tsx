@@ -1,10 +1,11 @@
+
 import React, { useMemo, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
-import { AppState, PrayerStatus, PrayerName, DailyLog } from '../types.ts';
+import { AppState, PrayerStatus, PrayerName, DailyLog, PrayerMode } from '../types.ts';
 import { PRAYER_NAMES } from '../constants.tsx';
-import { TrendingUp, Award, Sparkles, Info, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame, Menu } from 'lucide-react';
+import { TrendingUp, Award, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame, Menu, X, Users, User } from 'lucide-react';
 import { getTodayDateString } from '../utils/dateTime.ts';
 
 interface AnalyticsProps {
@@ -16,6 +17,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
   const todayStr = getTodayDateString();
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(todayStr);
   const [viewDate, setViewDate] = useState(new Date());
+  const [showDayPopup, setShowDayPopup] = useState(false);
   
   const isDark = appState.settings.theme === 'dark';
 
@@ -37,6 +39,12 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
 
   const handleNextMonth = () => {
     setViewDate(new Date(viewYear, viewMonth + 1, 1));
+  };
+
+  const handleDayClick = (dateKey: string) => {
+    if (dateKey > todayStr) return; // Disable future dates
+    setSelectedCalendarDate(dateKey);
+    setShowDayPopup(true);
   };
 
   const calendarDays = useMemo(() => {
@@ -67,7 +75,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
     return days;
   }, [appState.logs, viewMonth, viewYear, todayStr]);
 
-  const selectedDayLog = appState.logs[selectedCalendarDate] || { prayers: {} };
+  const selectedDayLog = appState.logs[selectedCalendarDate] || { prayers: {}, modes: {} };
 
   const { weeklyTrend, overallDistribution, averageConsistency } = useMemo(() => {
     const trendDays = [];
@@ -141,12 +149,12 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
       case PrayerStatus.ON_TIME: return <CheckCircle2 size={16} className="text-emerald-500" />;
       case PrayerStatus.LATE: return <Clock size={16} className="text-amber-500" />;
       case PrayerStatus.MISSED: return <AlertCircle size={16} className="text-rose-500" />;
-      default: return <Circle size={16} className="text-slate-200 dark:text-slate-800" />;
+      default: return <Circle size={16} className="text-slate-200 dark:text-slate-700" />;
     }
   };
 
   const formatDisplayDateSimple = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    return new Date(dateStr).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   };
 
   return (
@@ -172,47 +180,49 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div className="flex items-center gap-3 md:gap-4">
-              <div className="p-2.5 md:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl text-emerald-600">
-                <CalendarDays size={20} />
-              </div>
-              <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-slate-100 tracking-tight">
-                {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
-              </h3>
+      {/* Full Width Calendar Section */}
+      <section className="bg-white dark:bg-slate-900/50 backdrop-blur-sm p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 w-full">
+        <div className="flex items-center justify-between mb-6 md:mb-8">
+          <div className="flex items-center gap-3 md:gap-4">
+            <div className="p-2.5 md:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl text-emerald-600">
+              <CalendarDays size={20} />
             </div>
-            <div className="flex gap-1">
-              <button 
-                onClick={handlePrevMonth}
-                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-slate-400"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button 
-                onClick={handleNextMonth}
-                className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-slate-400"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
+            <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-slate-100 tracking-tight">
+              {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+            </h3>
           </div>
+          <div className="flex gap-1">
+            <button 
+              onClick={handlePrevMonth}
+              className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-slate-400"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button 
+              onClick={handleNextMonth}
+              className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-slate-400"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
 
-          <div className="grid grid-cols-7 gap-1 md:gap-3 mb-4 md:mb-6">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-              <div key={d} className="text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest py-1 md:py-2">{d}</div>
-            ))}
-            {calendarDays.map((dayObj, idx) => {
-              if (!dayObj) return <div key={`empty-${idx}`} className="h-10 md:h-16 lg:h-20" />;
-              
-              const isSelected = selectedCalendarDate === dayObj.dateKey;
-              const isToday = dayObj.dateKey === todayStr;
+        <div className="grid grid-cols-7 gap-1 md:gap-3 mb-4 md:mb-6">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+            <div key={d} className="text-center text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest py-1 md:py-2">{d}</div>
+          ))}
+          {calendarDays.map((dayObj, idx) => {
+            if (!dayObj) return <div key={`empty-${idx}`} className="h-10 md:h-16 lg:h-20" />;
+            
+            const isSelected = selectedCalendarDate === dayObj.dateKey;
+            const isToday = dayObj.dateKey === todayStr;
+            const isFuture = dayObj.dateKey > todayStr;
 
-              let bgClass = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/50";
-              let textClass = "text-slate-600 dark:text-slate-400";
-              let shadowClass = "";
+            let bgClass = "bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/50";
+            let textClass = "text-slate-600 dark:text-slate-400";
+            let shadowClass = "";
 
+            if (!isFuture) {
               if (dayObj.status === 'perfect') {
                 bgClass = "bg-emerald-500 border-emerald-500";
                 textClass = "text-white";
@@ -226,99 +236,47 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
                 textClass = "text-white";
                 shadowClass = "shadow-md md:shadow-lg shadow-rose-500/20";
               }
+            } else {
+              bgClass = "bg-slate-50 dark:bg-slate-800/20 border-transparent opacity-50";
+            }
 
-              return (
-                <button
-                  key={dayObj.dateKey}
-                  onClick={() => setSelectedCalendarDate(dayObj.dateKey)}
-                  className={`group relative h-10 md:h-16 lg:h-20 rounded-lg md:rounded-2xl transition-all flex flex-col items-center justify-center gap-0.5 md:gap-1 border-2 ${
-                    isSelected 
-                    ? 'ring-4 ring-slate-900/10 dark:ring-white/10 scale-105 z-10' 
-                    : ''
-                  } ${bgClass} ${textClass} ${shadowClass} hover:scale-[1.02] active:scale-95`}
-                >
-                  <span className="text-[10px] md:text-sm font-black">{dayObj.day}</span>
-                  {isToday && (
-                    <div className="absolute top-1 right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full border border-white dark:border-slate-900" />
-                  )}
-                </button>
-              );
-            })}
+            return (
+              <button
+                key={dayObj.dateKey}
+                disabled={isFuture}
+                onClick={() => handleDayClick(dayObj.dateKey)}
+                className={`group relative h-10 md:h-16 lg:h-20 rounded-lg md:rounded-2xl transition-all flex flex-col items-center justify-center gap-0.5 md:gap-1 border-2 ${
+                  isSelected 
+                  ? 'ring-4 ring-slate-900/10 dark:ring-white/10 z-10' 
+                  : ''
+                } ${bgClass} ${textClass} ${shadowClass} ${!isFuture ? 'hover:scale-[1.02] active:scale-95' : 'cursor-default'}`}
+              >
+                <span className="text-[10px] md:text-sm font-black">{dayObj.day}</span>
+                {isToday && (
+                  <div className="absolute top-1 right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-blue-500 rounded-full border border-white dark:border-slate-900" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-6 pt-6 border-t border-slate-50 dark:border-slate-800/50">
+          <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-emerald-500 shadow-sm" /> Perfect
           </div>
-
-          <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-6 pt-6 border-t border-slate-50 dark:border-slate-800/50">
-            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-emerald-500 shadow-sm" /> Perfect
-            </div>
-            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-amber-400 shadow-sm" /> Partial
-            </div>
-            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-rose-500 shadow-sm" /> Missed
-            </div>
-            <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-auto">
-              <div className="w-3 h-3 md:w-4 md:h-4 rounded-md border-2 border-slate-100 dark:border-slate-800" /> Future
-            </div>
+          <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-amber-400 shadow-sm" /> Partial
           </div>
-        </section>
-
-        <section className="bg-slate-950 text-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col h-full border border-slate-800/50">
-          <div className="absolute top-0 right-0 p-6 md:p-8 text-white/5 pointer-events-none">
-            <CalendarDays size={140} />
+          <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-rose-500 shadow-sm" /> Missed
           </div>
-          
-          <div className="relative z-10 flex-1">
-            <div className="flex items-center justify-between mb-6 md:mb-8">
-              <div>
-                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] mb-1">Historical Review</p>
-                <h3 className="text-xl md:text-2xl font-bold tracking-tight">
-                  {formatDisplayDateSimple(selectedCalendarDate).split(',')[0]}
-                </h3>
-                <p className="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest">{selectedCalendarDate}</p>
-              </div>
-              <div className="p-2.5 bg-white/5 rounded-xl border border-white/10">
-                <CalendarDays size={18} className="text-slate-400" />
-              </div>
-            </div>
-
-            <p className="text-[10px] text-slate-500 font-medium mb-4 uppercase tracking-widest">Prayer Log</p>
-            
-            <div className="space-y-2.5">
-              {PRAYER_NAMES.map((name) => {
-                const status = selectedDayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
-                return (
-                  <div key={name} className="flex items-center justify-between p-3.5 bg-white/5 rounded-xl md:rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 bg-white/5 rounded-lg flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                        {getStatusIcon(status as PrayerStatus)}
-                      </div>
-                      <span className="font-bold text-sm tracking-tight">{name}</span>
-                    </div>
-                    <span className={`text-[9px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md ${
-                      status === PrayerStatus.ON_TIME ? 'bg-emerald-500/10 text-emerald-400' : 
-                      status === PrayerStatus.LATE ? 'bg-amber-500/10 text-amber-400' : 
-                      status === PrayerStatus.MISSED ? 'bg-rose-500/10 text-rose-400' : 'bg-slate-800/50 text-slate-500'
-                    }`}>
-                      {status === PrayerStatus.NOT_MARKED ? 'No Data' : status.replace('_', ' ')}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-auto">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-md border-2 border-slate-100 dark:border-slate-800 opacity-50" /> Future
           </div>
+        </div>
+      </section>
 
-          <div className="relative z-10 mt-6 md:mt-8 pt-6 md:pt-8 border-t border-white/5">
-            <div className="flex items-center gap-3 md:gap-4 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
-              <Sparkles size={20} className="text-emerald-500 shrink-0" />
-              <p className="text-[10px] md:text-xs font-medium leading-relaxed text-slate-300">
-                "Take account of yourselves before you are taken to account." 
-                <span className="block mt-1 text-emerald-400 font-bold">— Umar ibn al-Khattab</span>
-              </p>
-            </div>
-          </div>
-        </section>
-      </div>
-
+      {/* Statistics Grids */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <section className="lg:col-span-2 bg-white dark:bg-slate-900/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800/80 relative">
           <div className="flex items-center justify-between mb-8 md:mb-10">
@@ -392,22 +350,75 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
         </section>
       </div>
 
-      <div className="bg-slate-900 dark:bg-slate-950 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] text-white flex flex-col md:flex-row items-center gap-6 md:gap-10 shadow-2xl relative overflow-hidden border border-slate-800/50">
-        <div className="absolute top-0 right-0 w-48 h-48 md:w-64 md:h-64 bg-emerald-500/10 rounded-full blur-[60px] md:blur-[80px]"></div>
-        <div className="w-16 h-16 md:w-20 md:h-20 bg-emerald-500/20 rounded-2xl md:rounded-3xl flex items-center justify-center ring-1 ring-emerald-500/30 backdrop-blur-md shrink-0">
-          <Sparkles size={38} className="text-emerald-400" />
+      {/* Detailed Day View Popup */}
+      {showDayPopup && (
+        <div 
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setShowDayPopup(false)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-300 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between mb-6 border-b border-slate-100 dark:border-slate-800 pb-4">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Daily Log</p>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {formatDisplayDateSimple(selectedCalendarDate)}
+                  </h3>
+                </div>
+                <button 
+                  onClick={() => setShowDayPopup(false)}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800 rounded-xl"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {PRAYER_NAMES.map((name) => {
+                  const status = selectedDayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
+                  const mode = selectedDayLog.modes?.[name as PrayerName];
+                  
+                  return (
+                    <div key={name} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                          status === PrayerStatus.ON_TIME ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' :
+                          status === PrayerStatus.LATE ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' :
+                          status === PrayerStatus.MISSED ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600' :
+                          'bg-slate-200 dark:bg-slate-700 text-slate-400'
+                        }`}>
+                          {getStatusIcon(status as PrayerStatus)}
+                        </div>
+                        <span className="font-bold text-sm text-slate-700 dark:text-slate-200">{name}</span>
+                      </div>
+                      
+                      <div className="flex flex-col items-end">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md mb-0.5 ${
+                          status === PrayerStatus.ON_TIME ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20' : 
+                          status === PrayerStatus.LATE ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/20' : 
+                          status === PrayerStatus.MISSED ? 'text-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'text-slate-400'
+                        }`}>
+                          {status === PrayerStatus.NOT_MARKED ? 'Untracked' : status.replace('_', ' ')}
+                        </span>
+                        
+                        {status === PrayerStatus.ON_TIME && mode && (
+                          <div className="flex items-center gap-1 text-[9px] font-bold text-slate-400">
+                            {mode === PrayerMode.CONGREGATION ? <Users size={10} /> : <User size={10} />}
+                            {mode === PrayerMode.CONGREGATION ? 'Jamaat' : 'Alone'}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex-1 text-center md:text-left relative z-10">
-          <h4 className="text-xl md:text-2xl font-bold mb-2 tracking-tight">Your History is Your Strength</h4>
-          <p className="text-slate-400 text-xs md:text-sm leading-relaxed max-w-xl mx-auto md:mx-0">
-            Each day on this calendar is a memory of your devotion. Don't be discouraged by a few red spots; look at the field of green you're building. Every prayer is a new beginning.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 md:gap-3 text-[8px] md:text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] bg-white/5 px-4 py-2 md:px-6 md:py-3 rounded-xl md:rounded-2xl backdrop-blur-sm">
-          <Info size={14} className="text-slate-600" />
-          Insight AI
-        </div>
-      </div>
+      )}
     </div>
   );
 };
