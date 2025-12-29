@@ -49,8 +49,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                <User size={36} />
             </div>
             
-            <div className="w-full space-y-4">
-              <div className="space-y-1.5">
+            <div className="w-full space-y-5">
+              <div className="space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Your Name</label>
                  <div className="relative w-full group">
                   <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={20} />
@@ -68,29 +68,42 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
               <div className="space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Gender</label>
-                 <div className="grid grid-cols-3 gap-2">
+                 <div className="space-y-2.5">
                     {[
-                      { id: 'male', label: 'Male', icon: User },
-                      { id: 'female', label: 'Female', icon: User2 },
-                      { id: 'other', label: 'Prefer not to say', icon: UserCircle2 }
+                      { id: 'male', label: 'Male', icon: User, desc: 'Optimized for congregation.' },
+                      { id: 'female', label: 'Female', icon: User2, desc: 'Optimized for privacy.' },
+                      { id: 'other', label: 'Prefer not to say', icon: UserCircle2, desc: 'Standard settings.' }
                     ].map((g) => (
                       <button
                         key={g.id}
                         onClick={() => setFormData({ ...formData, gender: g.id as any })}
-                        className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border-2 transition-all ${
+                        className={`w-full p-3.5 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-[0.98] ${
                           formData.gender === g.id 
-                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-700 dark:text-emerald-400' 
-                          : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-400'
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-sm' 
+                          : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-emerald-200'
                         }`}
                       >
-                         <g.icon size={20} />
-                         <span className="text-[10px] font-bold text-center leading-tight">{g.label}</span>
+                         <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                            formData.gender === g.id ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'
+                         }`}>
+                           <g.icon size={20} />
+                         </div>
+                         <div className="flex-1 text-left">
+                           <span className={`block text-sm font-bold ${formData.gender === g.id ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-200'}`}>
+                             {g.label}
+                           </span>
+                           <span className={`block text-[10px] ${formData.gender === g.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
+                             {g.desc}
+                           </span>
+                         </div>
+                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            formData.gender === g.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
+                         }`}>
+                            {formData.gender === g.id && <Check size={12} strokeWidth={4} />}
+                         </div>
                       </button>
                     ))}
                  </div>
-                 <p className="text-[9px] text-slate-400 text-center pt-1">
-                   {formData.gender === 'female' ? "We'll customize your dashboard for individual prayer options." : "This helps us tailor your prayer tracking experience."}
-                 </p>
               </div>
             </div>
           </div>
@@ -106,7 +119,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               <button
                 key={m.id}
                 onClick={() => setFormData({ ...formData, strictness: m.id as any })}
-                className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 group ${
+                className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 group active:scale-[0.98] ${
                   formData.strictness === m.id 
                   ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 shadow-md transform scale-[1.02]' 
                   : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'
@@ -146,7 +159,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 <button
                   key={goal}
                   onClick={() => toggleIntention(goal)}
-                  className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 ${
+                  className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 active:scale-[0.98] ${
                     isActive
                     ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 text-emerald-800 dark:text-emerald-300 shadow-sm' 
                     : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -225,14 +238,15 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </div>
           
           {/* Dynamic Content Area - Keyed for animation */}
-          <div className="flex-1 relative overflow-y-auto no-scrollbar mask-gradient-b">
+          {/* Added px-2 to prevent border clipping */}
+          <div className="flex-1 relative overflow-y-auto no-scrollbar mask-gradient-b px-2 -mx-2">
             <div key={step}>
               {renderStepContent()}
             </div>
           </div>
 
           {/* Footer Actions - Optimized Padding for Mobile */}
-          <div className="mt-8 flex items-center justify-between gap-4 flex-shrink-0 pt-4 border-t border-slate-50 dark:border-slate-800/50">
+          <div className="mt-8 flex items-center justify-between gap-3 flex-shrink-0 pt-4 border-t border-slate-50 dark:border-slate-800/50">
             {step < totalSteps && (
               <button 
                 onClick={handleSkip}
@@ -243,7 +257,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             )}
             <button 
               onClick={handleNext}
-              className={`py-3 px-6 sm:px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 group ${step === totalSteps ? 'w-full' : 'ml-auto'}`}
+              className={`py-3.5 px-6 sm:px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 group ${step === totalSteps ? 'w-full' : 'ml-auto'}`}
             >
               <span className="text-sm whitespace-nowrap">{step === totalSteps ? 'Start Journey' : 'Continue'}</span>
               <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />

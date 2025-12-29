@@ -64,7 +64,7 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
           <div className="px-5 sm:px-8 py-6 flex flex-col min-h-0 overflow-y-auto no-scrollbar">
             
             {/* Smooth Toggle Switch */}
-            <div className="relative flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-8 w-full border border-slate-200/50 dark:border-slate-700/50">
+            <div className="relative flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-8 w-full border border-slate-200/50 dark:border-slate-700/50 shrink-0">
               <div 
                 className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-slate-700 rounded-lg shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isLogin ? 'translate-x-0' : 'translate-x-[calc(100%+8px)]'}`} 
               />
@@ -122,12 +122,12 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full py-4 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group overflow-hidden relative"
+                className="w-full py-4 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group overflow-hidden relative max-w-full"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : (
                   <>
-                    <span className="relative z-10">{isLogin ? 'Enter App' : 'Create Account'}</span>
-                    <ChevronRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                    <span className="relative z-10 truncate">{isLogin ? 'Enter App' : 'Create Account'}</span>
+                    <ChevronRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform shrink-0" />
                   </>
                 )}
               </button>
@@ -142,10 +142,10 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
 
               <button 
                 onClick={onGuestMode}
-                className="w-full py-3.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all flex items-center justify-center gap-2 group active:scale-[0.99]"
+                className="w-full py-3.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all flex items-center justify-center gap-2 group active:scale-[0.99] max-w-full"
               >
-                <Heart size={14} className="text-rose-500 fill-rose-500/20 group-hover:scale-110 transition-transform" />
-                Continue as Guest
+                <Heart size={14} className="text-rose-500 fill-rose-500/20 group-hover:scale-110 transition-transform shrink-0" />
+                <span className="truncate">Continue as Guest</span>
               </button>
             </div>
           </div>

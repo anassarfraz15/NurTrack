@@ -1,105 +1,34 @@
+
 import React, { useState } from 'react';
-import { X, Sparkles, BookOpen, ChevronRight, Copy, Check, Menu } from 'lucide-react';
-
-interface DuaItem {
-  id: number;
-  name: string;
-  arabic: string;
-  translation: string;
-  category: string;
-}
-
-const DUAS: DuaItem[] = [
-  {
-    id: 1,
-    name: "Waking Up",
-    arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
-    translation: "All praise is for Allah who gave us life after having taken it from us and unto Him is the resurrection.",
-    category: "Morning"
-  },
-  {
-    id: 2,
-    name: "Before Sleeping",
-    arabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
-    translation: "In Your name, O Allah, I die and I live.",
-    category: "Evening"
-  },
-  {
-    id: 3,
-    name: "Before Eating",
-    arabic: "بِسْمِ اللَّهِ",
-    translation: "In the name of Allah.",
-    category: "Daily Life"
-  },
-  {
-    id: 4,
-    name: "After Eating",
-    arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلَنَا مُسْلِمِينَ",
-    translation: "Praise be to Allah Who has fed us and given us drink and made us Muslims.",
-    category: "Daily Life"
-  },
-  {
-    id: 5,
-    name: "Entering Home",
-    arabic: "بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى رَبِّنَا تَوَكَّلْنَا",
-    translation: "In the name of Allah we enter, and in the name of Allah we leave, and upon our Lord we rely.",
-    category: "Daily Life"
-  },
-  {
-    id: 6,
-    name: "Entering Mosque",
-    arabic: "اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
-    translation: "O Allah, open the gates of Your mercy for me.",
-    category: "Spirituality"
-  },
-  {
-    id: 7,
-    name: "Leaving Mosque",
-    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
-    translation: "O Allah, I ask You from Your favor.",
-    category: "Spirituality"
-  },
-  {
-    id: 8,
-    name: "Entering Bathroom",
-    arabic: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ",
-    translation: "O Allah, I seek refuge in You from the male and female evil spirits.",
-    category: "Daily Life"
-  },
-  {
-    id: 9,
-    name: "Leaving Bathroom",
-    arabic: "غُفْرَانَكَ",
-    translation: "I ask You for Your forgiveness.",
-    category: "Daily Life"
-  },
-  {
-    id: 10,
-    name: "Seeking Knowledge",
-    arabic: "رَبِّ زِدْنِي عِلْمًا",
-    translation: "My Lord, increase me in knowledge.",
-    category: "Spirituality"
-  }
-];
+import { X, BookOpen, Menu, ChevronLeft } from 'lucide-react';
 
 interface DuaProps {
   onOpenDrawer: () => void;
 }
 
-const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
-  const [selectedDua, setSelectedDua] = useState<DuaItem | null>(null);
-  const [copied, setCopied] = useState(false);
+const TABS = [
+  { id: 'namaz', label: 'Namaz' },
+  { id: 'wuzu', label: 'Wuzu' },
+  { id: 'fasting', label: 'Fasting' },
+  { id: 'duas', label: 'Duas' },
+];
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+const NAMAZ_STEPS = [
+  { id: 1, title: 'تکبیرِ تحریمہ' },
+  { id: 2, title: 'سورۃ الفاتحہ' },
+  { id: 3, title: 'رکوع' },
+  { id: 4, title: 'سجدہ' },
+  { id: 5, title: 'تشہد اور اہم دعائیں' }
+];
+
+const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
+  const [activeTab, setActiveTab] = useState('namaz');
+  const [selectedStep, setSelectedStep] = useState<{ id: number; title: string } | null>(null);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-700 pb-10">
-      <header className="relative mb-8 flex flex-col items-center">
-        {/* Mobile Hamburger - Left Corner */}
+    <div className="flex flex-col h-full animate-in fade-in duration-500 relative">
+      {/* Header Section */}
+      <header className="flex-shrink-0 mb-4 flex flex-col items-center relative">
         <button 
           onClick={onOpenDrawer}
           className="lg:hidden absolute left-0 top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
@@ -112,86 +41,100 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600">
              <BookOpen size={24} />
            </div>
-           <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight text-center">Essential Duas</h2>
+           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight text-center">Islamic Guide</h2>
         </div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed text-center max-w-xs">Top 10 daily supplications for a blessed day.</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-        {DUAS.map((dua) => (
-          <button
-            key={dua.id}
-            onClick={() => setSelectedDua(dua)}
-            className="group flex items-center justify-between p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:border-emerald-500/50 dark:hover:border-emerald-500/30 transition-all hover:scale-[1.01] text-left"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-emerald-600 font-black text-sm group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                {dua.id}
-              </div>
-              <div>
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">{dua.category}</span>
-                <h4 className="font-bold text-slate-800 dark:text-slate-100">{dua.name}</h4>
-              </div>
-            </div>
-            <ChevronRight size={18} className="text-slate-300 group-hover:text-emerald-500 transition-colors" />
-          </button>
-        ))}
+      {/* 1. Top Horizontal Tabs */}
+      <div className="flex-shrink-0 mb-6">
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+          {TABS.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-shrink-0 px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                  isActive
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-500/20'
+                    : 'bg-white dark:bg-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-100 dark:border-slate-800'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {selectedDua && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md animate-in fade-in duration-300">
+      {/* Main Content Area */}
+      <div className="flex-1 min-h-0 pb-20">
+        
+        {/* 3. Namaz Tab Structure */}
+        {activeTab === 'namaz' && (
+          <div className="space-y-3 animate-in slide-in-from-right-4 duration-300">
+            {NAMAZ_STEPS.map((step, index) => (
+              <button
+                key={step.id}
+                onClick={() => setSelectedStep(step)}
+                className="w-full bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-between group hover:border-emerald-500/50 transition-all active:scale-[0.98]"
+              >
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-bold text-xs group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/20 group-hover:text-emerald-600 transition-colors">
+                  {index + 1}
+                </div>
+                <span className="flex-1 text-right text-xl font-bold text-slate-800 dark:text-slate-100 arabic-font mr-4">
+                  {step.title}
+                </span>
+                <ChevronLeft size={20} className="text-slate-300 group-hover:text-emerald-500 transition-colors opacity-50" />
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Placeholders for other tabs */}
+        {activeTab !== 'namaz' && (
+          <div className="flex flex-col items-center justify-center h-64 text-center p-6 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-slate-800">
+            <BookOpen size={48} className="text-slate-300 mb-4" />
+            <h3 className="text-lg font-bold text-slate-400">Content Coming Soon</h3>
+            <p className="text-sm text-slate-400 mt-1">Authentic guidance for {TABS.find(t => t.id === activeTab)?.label} is being prepared.</p>
+          </div>
+        )}
+      </div>
+
+      {/* 4. Popup Structure */}
+      {selectedStep && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div 
-            className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[2.5rem] p-8 md:p-10 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 relative overflow-hidden"
+            className="bg-white dark:bg-slate-900 w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[80vh] rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 animate-in slide-in-from-bottom-10 duration-300 relative flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="absolute top-0 right-0 p-8 text-slate-50 dark:text-slate-800/10 pointer-events-none rotate-12">
-              <BookOpen size={160} />
+            {/* Popup Header */}
+            <div className="flex items-center justify-between mb-6 flex-shrink-0 border-b border-slate-100 dark:border-slate-800 pb-4">
+              <button 
+                onClick={() => setSelectedStep(null)}
+                className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800 rounded-xl"
+              >
+                <X size={20} />
+              </button>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white arabic-font">{selectedStep.title}</h3>
             </div>
 
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <div className="flex items-center gap-2 text-emerald-600 font-black uppercase text-[10px] tracking-[0.2em] mb-1">
-                    <Sparkles size={12} />
-                    Supplication
-                  </div>
-                  <h3 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter leading-none">{selectedDua.name}</h3>
-                </div>
-                <button 
-                  onClick={() => setSelectedDua(null)}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors bg-slate-50 dark:bg-slate-800 rounded-xl"
-                >
-                  <X size={20} />
-                </button>
+            {/* Popup Content Area (Scrollable) */}
+            <div className="flex-1 overflow-y-auto no-scrollbar relative">
+              <div className="flex flex-col items-center justify-center h-48 text-center opacity-50">
+                <BookOpen size={32} className="text-slate-300 mb-3" />
+                <p className="text-sm text-slate-400">Authentic Hadith content loading...</p>
               </div>
+            </div>
 
-              <div className="space-y-8">
-                <div className="bg-emerald-50 dark:bg-emerald-900/10 p-6 md:p-8 rounded-[2rem] border border-emerald-100 dark:border-emerald-800/50">
-                  <p className="text-3xl md:text-4xl leading-relaxed text-right arabic-font font-bold text-slate-900 dark:text-white dir-rtl">
-                    {selectedDua.arabic}
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Translation</span>
-                    <button 
-                      onClick={() => handleCopy(`${selectedDua.arabic}\n\n${selectedDua.translation}`)}
-                      className="flex items-center gap-1.5 text-emerald-600 font-bold text-[10px] uppercase hover:opacity-80 transition-opacity"
-                    >
-                      {copied ? <Check size={12} /> : <Copy size={12} />}
-                      {copied ? 'Copied' : 'Copy'}
-                    </button>
-                  </div>
-                  <p className="text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-medium italic">
-                    "{selectedDua.translation}"
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-10 pt-8 border-t border-slate-100 dark:border-slate-800 text-center">
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">May Allah accept your du'as</p>
-              </div>
+            {/* Popup Footer (Close Button) */}
+            <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex-shrink-0">
+              <button 
+                onClick={() => setSelectedStep(null)}
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
