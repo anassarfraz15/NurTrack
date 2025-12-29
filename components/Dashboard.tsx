@@ -209,7 +209,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           {/* Contextual Popup */}
           {activePopup && (
             <div className="absolute top-full right-0 mt-3 z-50 w-52 md:w-60">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-4 animate-in zoom-in-95 origin-top-right relative">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-4 animate-popup origin-top-right relative">
                  {/* Triangle Arrow */}
                  <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white dark:bg-slate-900 border-l border-t border-slate-100 dark:border-slate-800 transform rotate-45"></div>
                  
@@ -530,9 +530,9 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
       {/* Timings Popup */}
       {isTimingsPopupOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-overlay">
           <div 
-            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-500 relative"
+            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-popup relative"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 md:p-8">

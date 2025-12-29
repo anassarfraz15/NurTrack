@@ -353,11 +353,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
       {/* Detailed Day View Popup */}
       {showDayPopup && (
         <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-overlay"
           onClick={() => setShowDayPopup(false)}
         >
           <div 
-            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 duration-300 relative"
+            className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 animate-popup relative"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 md:p-8">
