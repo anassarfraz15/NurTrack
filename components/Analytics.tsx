@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie
@@ -152,11 +151,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
 
   return (
     <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1 md:px-0">
-      <header className="sticky top-0 z-30 flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6 -mx-4 px-4 pt-4 pb-2 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl lg:static lg:bg-transparent lg:backdrop-blur-none lg:mx-0 lg:px-0 lg:pt-0">
+      <header className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
         {/* Mobile Hamburger - Left Corner */}
         <button 
           onClick={onOpenDrawer}
-          className="lg:hidden absolute left-4 top-5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          className="lg:hidden absolute left-0 top-1.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
           aria-label="Open Settings"
         >
           <Menu size={24} />

@@ -162,8 +162,8 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
-      {/* Redesigned Header with Top-Right Stats - Fixed */}
-      <header className="sticky top-0 z-30 flex items-center justify-between h-16 md:h-20 mb-2 -mx-4 px-4 pt-4 pb-2 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl lg:static lg:bg-transparent lg:backdrop-blur-none lg:mx-0 lg:px-0 lg:pt-0 lg:h-auto">
+      {/* Redesigned Header with Top-Right Stats */}
+      <header className="relative flex items-center justify-between h-14 md:h-16 mb-2">
         {/* Left: Hamburger */}
         <button 
           onClick={onOpenDrawer}
@@ -174,7 +174,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         </button>
 
         {/* Center: Greeting & Date - Absolute Positioned to be perfectly centered */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[40%] text-center w-full max-w-[240px] z-10 pointer-events-none lg:translate-y-0 lg:static lg:transform-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[240px] z-10 pointer-events-none">
           <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
             {greeting}
           </h2>
