@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, PieChart, Check } from 'lucide-react';
+import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, Check } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -34,7 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const [isEditing, setIsEditing] = useState(!todayLog.isLocked);
   
   // Popup States
-  const [activePopup, setActivePopup] = useState<'streak' | 'score' | null>(null);
+  const [activePopup, setActivePopup] = useState<'streak' | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
@@ -173,15 +173,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           <Menu size={24} />
         </button>
 
-        {/* Center: Greeting - Absolute Positioned to be perfectly centered */}
+        {/* Center: Greeting & Date - Absolute Positioned to be perfectly centered */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[240px] z-10 pointer-events-none">
           <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
             {greeting}
           </h2>
+          <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5 uppercase tracking-wide">
+            {formatDisplayDate(today)}
+          </p>
         </div>
         
-        {/* Right: Stats Icons with Numbers */}
-        <div className="ml-auto relative z-20 flex gap-2" ref={popupRef}>
+        {/* Right: Streak Icon Only */}
+        <div className="ml-auto relative z-20" ref={popupRef}>
           <button 
             onClick={() => setActivePopup(activePopup === 'streak' ? null : 'streak')}
             className="flex items-center gap-1.5 px-3 py-1.5 h-10 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-orange-50 dark:hover:bg-orange-900/10 active:scale-95 transition-all group"
@@ -189,55 +192,31 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
             <Flame size={16} className="text-orange-500 group-hover:fill-current" />
             <span className="text-xs font-black text-slate-700 dark:text-slate-300 tabular-nums">{appState.stats.streak}</span>
           </button>
-          
-          <button 
-             onClick={() => setActivePopup(activePopup === 'score' ? null : 'score')}
-             className="flex items-center gap-1.5 px-3 py-1.5 h-10 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/10 active:scale-95 transition-all group"
-          >
-            <PieChart size={16} className="text-emerald-500 group-hover:fill-current" />
-            <span className="text-xs font-black text-slate-700 dark:text-slate-300 tabular-nums">{consistencyScore}%</span>
-          </button>
 
-          {/* Contextual Popups */}
+          {/* Contextual Popup */}
           {activePopup && (
             <div className="absolute top-full right-0 mt-3 z-50 w-52 md:w-60">
               <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-4 animate-in zoom-in-95 origin-top-right relative">
                  {/* Triangle Arrow */}
-                 <div className={`absolute -top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-l border-t border-slate-100 dark:border-slate-800 transform rotate-45 ${activePopup === 'streak' ? 'right-20' : 'right-4'}`}></div>
+                 <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white dark:bg-slate-900 border-l border-t border-slate-100 dark:border-slate-800 transform rotate-45"></div>
                  
                  <div className="relative z-10">
                    <div className="flex justify-between items-start mb-2">
-                      <div className={`p-1.5 rounded-lg ${activePopup === 'streak' ? 'bg-orange-50 text-orange-500' : 'bg-emerald-50 text-emerald-500'}`}>
-                        {activePopup === 'streak' ? <Flame size={14} fill="currentColor" /> : <PieChart size={14} fill="currentColor" />}
+                      <div className="p-1.5 rounded-lg bg-orange-50 text-orange-500">
+                        <Flame size={14} fill="currentColor" />
                       </div>
                       <button onClick={() => setActivePopup(null)} className="text-slate-300 hover:text-slate-500"><X size={14} /></button>
                    </div>
                    
-                   {activePopup === 'streak' ? (
-                     <>
-                       <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
-                         {appState.stats.streak > 0 ? "You're on fire!" : "Start your streak"}
-                       </h4>
-                       <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
-                         You've prayed consistently for <strong className="text-orange-500">{appState.stats.streak} days</strong>.
-                       </p>
-                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md inline-block">
-                         Best: {appState.stats.bestStreak} days
-                       </div>
-                     </>
-                   ) : (
-                     <>
-                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
-                         On-Time Score
-                       </h4>
-                       <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
-                         You have completed <strong className="text-emerald-500">{consistencyScore}%</strong> of your total recorded prayers on time.
-                       </p>
-                       <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-                          <div className="h-full bg-emerald-500" style={{ width: `${consistencyScore}%` }}></div>
-                       </div>
-                     </>
-                   )}
+                   <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                     {appState.stats.streak > 0 ? "You're on fire!" : "Start your streak"}
+                   </h4>
+                   <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
+                     You've prayed consistently for <strong className="text-orange-500">{appState.stats.streak} days</strong>.
+                   </p>
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md inline-block">
+                     Best: {appState.stats.bestStreak} days
+                   </div>
                  </div>
               </div>
             </div>
