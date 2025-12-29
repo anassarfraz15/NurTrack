@@ -175,7 +175,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
         {/* Center: Greeting & Date - Absolute Positioned to be perfectly centered */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[240px] z-10 pointer-events-none">
-          <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
+          <h2 className="text-2xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
             {greeting}
           </h2>
           <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-slate-400 mt-0.5 uppercase tracking-wide">
