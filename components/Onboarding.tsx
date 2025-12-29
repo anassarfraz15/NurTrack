@@ -91,11 +91,11 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 }`}>
                   <Shield size={20} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <span className="font-bold text-base block text-slate-900 dark:text-white leading-tight mb-0.5">{m.label}</span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight">{m.desc}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight truncate">{m.desc}</p>
                 </div>
-                <div className={`ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                <div className={`flex-shrink-0 ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                    formData.strictness === m.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
                 }`}>
                   {formData.strictness === m.id && <Check size={12} strokeWidth={4} />}
@@ -124,8 +124,8 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
-                  <span className="text-sm font-bold">{goal}</span>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                  <span className="text-sm font-bold text-left flex-1 mr-2">{goal}</span>
+                  <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                     isActive ? 'bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-300'
                   }`}>
                     {isActive ? <Check size={14} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" />}
@@ -185,7 +185,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           />
         </div>
 
-        <div className="flex flex-col h-full p-8 md:p-10">
+        <div className="flex flex-col h-full p-6 md:p-10">
           {/* Static Header Section - Prevents jumping */}
           <div className="flex-shrink-0 mb-6 transition-all duration-300">
             <h2 key={step + 'title'} className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter leading-none animate-fade-in-up">
@@ -203,7 +203,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             </div>
           </div>
 
-          {/* Footer Actions */}
+          {/* Footer Actions - Optimized Padding for Mobile */}
           <div className="mt-8 flex items-center justify-between gap-4 flex-shrink-0 pt-4 border-t border-slate-50 dark:border-slate-800/50">
             {step < totalSteps && (
               <button 
@@ -215,9 +215,9 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             )}
             <button 
               onClick={handleNext}
-              className={`py-4 px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 group ${step === totalSteps ? 'w-full' : 'ml-auto'}`}
+              className={`py-3 px-6 sm:px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 group ${step === totalSteps ? 'w-full' : 'ml-auto'}`}
             >
-              <span className="text-sm">{step === totalSteps ? 'Start Journey' : 'Continue'}</span>
+              <span className="text-sm whitespace-nowrap">{step === totalSteps ? 'Start Journey' : 'Continue'}</span>
               <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>

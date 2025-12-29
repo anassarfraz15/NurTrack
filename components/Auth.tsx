@@ -60,8 +60,8 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
             </div>
           </div>
 
-          {/* Form Section */}
-          <div className="px-8 py-6 flex flex-col min-h-0 overflow-y-auto no-scrollbar">
+          {/* Form Section - Adjusted padding for mobile */}
+          <div className="px-5 sm:px-8 py-6 flex flex-col min-h-0 overflow-y-auto no-scrollbar">
             
             {/* Smooth Toggle Switch */}
             <div className="relative flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-8 w-full border border-slate-200/50 dark:border-slate-700/50">
