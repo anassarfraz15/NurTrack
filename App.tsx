@@ -19,6 +19,7 @@ import { Logo } from './constants.tsx';
 
 const SETTINGS_STORAGE_KEY = 'nurtrack_settings_v1';
 const ACHIEVEMENTS_KEY = 'nurtrack_achievements_v1';
+const TASBEEH_STORAGE_KEY = 'nurtrack_total_tasbeeh_v1';
 
 const INITIAL_SETTINGS: AppSettings = {
   userName: '',
@@ -81,29 +82,33 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
   return logs;
 };
 
-const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats => {
+const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): Omit<UserStats, 'totalTasbeeh'> => {
   const safeLogs = logs || {};
   const dates = Object.keys(safeLogs).sort((a, b) => b.localeCompare(a)); // Newest first
   
   let totalPrayers = 0;
+  let totalMissed = 0;
   let onTimeCount = 0;
   
   Object.values(safeLogs).forEach(log => {
     if (!log?.prayers) return;
     Object.values(log.prayers).forEach(status => {
       if (status !== PrayerStatus.NOT_MARKED) {
-        totalPrayers++;
-        if (status === PrayerStatus.ON_TIME) onTimeCount++;
+        if (status === PrayerStatus.MISSED) {
+          totalMissed++;
+        } else {
+          totalPrayers++;
+          if (status === PrayerStatus.ON_TIME) onTimeCount++;
+        }
       }
     });
   });
 
   // Revised Streak Logic
   let streak = 0;
-  let bestStreak = 0; // Simplified calculation for now, would ideally need full history traversal
+  let bestStreak = 0; 
   
   // We iterate backwards from today
-  const todayStr = getTodayDateString();
   let currentDate = new Date();
   
   // Safety break
@@ -120,8 +125,6 @@ const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats 
     // Check Statuses
     const allCompleted = prayers.length === 5 && prayers.every(p => p === PrayerStatus.ON_TIME || p === PrayerStatus.LATE);
     const allMissed = prayers.length === 5 && prayers.every(p => p === PrayerStatus.MISSED);
-    const partial = !allCompleted && !allMissed && prayers.some(p => p !== PrayerStatus.NOT_MARKED);
-    const empty = !log || prayers.every(p => p === PrayerStatus.NOT_MARKED);
 
     if (allCompleted) {
       if (isCurrentChainActive) streak++;
@@ -139,7 +142,6 @@ const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats 
     }
     
     // Simple Best Streak Logic (Current implementation approximates based on current chain calculation)
-    // In a real app, we'd need to traverse the entire history to find the max
     bestStreak = Math.max(bestStreak, currentChain);
 
     // Go back one day
@@ -153,6 +155,7 @@ const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats 
     streak,
     bestStreak,
     totalPrayers,
+    totalMissed,
     onTimeCount,
     lastCompletedDate: dates.find(d => {
        const log = safeLogs[d];
@@ -175,7 +178,7 @@ const App: React.FC = () => {
 
   const [appState, setAppState] = useState<AppState>({
     logs: {},
-    stats: { streak: 0, bestStreak: 0, totalPrayers: 0, onTimeCount: 0, lastCompletedDate: null },
+    stats: { streak: 0, bestStreak: 0, totalPrayers: 0, totalMissed: 0, totalTasbeeh: 0, onTimeCount: 0, lastCompletedDate: null },
     settings: INITIAL_SETTINGS,
     unlockedAchievements: []
   });
@@ -202,14 +205,23 @@ const App: React.FC = () => {
       try {
         const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
         const savedAchievements = localStorage.getItem(ACHIEVEMENTS_KEY);
+        const savedTasbeeh = localStorage.getItem(TASBEEH_STORAGE_KEY);
+        
         const settings = savedSettings ? JSON.parse(savedSettings) : INITIAL_SETTINGS;
         const unlockedAchievements = savedAchievements ? JSON.parse(savedAchievements) : [];
+        const totalTasbeeh = savedTasbeeh ? parseInt(savedTasbeeh, 10) : 0;
 
         const entries = await db.getAllLogs();
         const logs = entriesToLogs(entries);
-        const stats = calculateStatsFromLogs(logs);
+        const calculatedStats = calculateStatsFromLogs(logs);
 
-        setAppState(prev => ({ ...prev, settings, logs, stats, unlockedAchievements }));
+        setAppState(prev => ({ 
+          ...prev, 
+          settings, 
+          logs, 
+          stats: { ...calculatedStats, totalTasbeeh }, 
+          unlockedAchievements 
+        }));
 
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
@@ -237,7 +249,11 @@ const App: React.FC = () => {
       syncEngine.hydrateLocal(user.id).then(() => {
         db.getAllLogs().then(entries => {
           const logs = entriesToLogs(entries);
-          setAppState(prev => ({ ...prev, logs, stats: calculateStatsFromLogs(logs) }));
+          setAppState(prev => ({ 
+            ...prev, 
+            logs, 
+            stats: { ...calculateStatsFromLogs(logs), totalTasbeeh: prev.stats.totalTasbeeh } 
+          }));
         });
       });
       return () => clearInterval(interval);
@@ -349,7 +365,9 @@ const App: React.FC = () => {
       const updatedLog = { ...currentLog, prayers: updatedPrayers, modes: updatedModes, entries: updatedEntries };
       const updatedLogs = { ...prev.logs, [today]: updatedLog };
       
-      const newStats = calculateStatsFromLogs(updatedLogs);
+      // Calculate Stats but keep the existing totalTasbeeh
+      const prayerStats = calculateStatsFromLogs(updatedLogs);
+      const newStats = { ...prayerStats, totalTasbeeh: prev.stats.totalTasbeeh };
       
       // Check Achievements
       const { newUnlocked, justUnlocked } = checkAchievements(newStats, updatedLogs, prev.unlockedAchievements);
@@ -366,6 +384,17 @@ const App: React.FC = () => {
     if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
       navigator.vibrate(status === PrayerStatus.NOT_MARKED ? 30 : 15);
     }
+  };
+
+  const incrementTotalTasbeeh = () => {
+    setAppState(prev => {
+      const newTotal = prev.stats.totalTasbeeh + 1;
+      localStorage.setItem(TASBEEH_STORAGE_KEY, String(newTotal));
+      return {
+        ...prev,
+        stats: { ...prev.stats, totalTasbeeh: newTotal }
+      };
+    });
   };
 
   const lockTodayLog = async () => {
@@ -411,6 +440,7 @@ const App: React.FC = () => {
 
       localStorage.removeItem('nurtrack_last_celebrated');
       localStorage.removeItem(ACHIEVEMENTS_KEY);
+      localStorage.removeItem(TASBEEH_STORAGE_KEY);
       
       const freshSettings = { ...INITIAL_SETTINGS, onboardingCompleted: false };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(freshSettings));
@@ -544,7 +574,7 @@ const App: React.FC = () => {
         {activeTab === 'dashboard' && <Dashboard appState={appState} updatePrayerStatus={updatePrayerStatus} lockTodayLog={lockTodayLog} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'analytics' && <Analytics appState={appState} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'dua' && <Dua onOpenDrawer={handleOpenDrawer} />}
-        {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} />}
+        {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} onIncrementTasbeeh={incrementTotalTasbeeh} />}
         {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} onResetData={resetAllData} />}
       </div>
       {showAchievement && <AchievementPopup onClose={() => setShowAchievement(null)} title={showAchievement.title} message={showAchievement.message} />}

@@ -1,15 +1,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Menu, Trophy, Medal, Crown, Star } from 'lucide-react';
+import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Menu, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
 
 interface ToolsProps {
   appState: AppState;
   onOpenDrawer: () => void;
+  onIncrementTasbeeh?: () => void;
 }
 
-const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
+const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbeeh }) => {
   const [tasbeehCount, setTasbeehCount] = useState(0);
   const [tasbeehGoal, setTasbeehGoal] = useState<number | null>(33);
   const [activeTool, setActiveTool] = useState('tasbeeh');
@@ -27,6 +28,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
   const tools = [
     { id: 'tasbeeh', icon: Heart, label: 'Tasbeeh' },
+    { id: 'records', icon: ClipboardList, label: 'Records' },
     { id: 'achievements', icon: Trophy, label: 'Awards' },
     { id: 'calendar', icon: CalendarIcon, label: 'Hijri' },
     { id: 'fasting', icon: UtensilsCrossed, label: 'Fasting' },
@@ -106,6 +108,9 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
     setTasbeehCount((prev) => {
       if (tasbeehGoal !== null && prev >= tasbeehGoal) {
         return prev;
+      }
+      if (onIncrementTasbeeh) {
+        onIncrementTasbeeh();
       }
       return prev + 1;
     });
@@ -342,6 +347,47 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTool === 'records' && (
+          <div className="space-y-6 animate-in slide-in-from-right duration-300">
+             <div className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm text-center">
+                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
+                  <ClipboardList size={32} />
+                </div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Lifetime Statistics</h3>
+                <p className="text-slate-500 text-sm">Your total spiritual journey at a glance.</p>
+             </div>
+             
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Total Prayers */}
+                <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-[2rem] border border-emerald-100 dark:border-emerald-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-3 bg-emerald-100 dark:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 rounded-xl mb-3">
+                     <CheckCircle2 size={24} />
+                   </div>
+                   <h4 className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mb-1">{appState.stats.totalPrayers}</h4>
+                   <p className="text-xs font-bold uppercase tracking-widest text-emerald-600/80 dark:text-emerald-400/80">Prayers Offered</p>
+                </div>
+
+                {/* Total Missed */}
+                <div className="p-6 bg-rose-50 dark:bg-rose-900/20 rounded-[2rem] border border-rose-100 dark:border-rose-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-3 bg-rose-100 dark:bg-rose-800/50 text-rose-600 dark:text-rose-400 rounded-xl mb-3">
+                     <AlertCircle size={24} />
+                   </div>
+                   <h4 className="text-3xl font-black text-rose-900 dark:text-rose-100 mb-1">{appState.stats.totalMissed}</h4>
+                   <p className="text-xs font-bold uppercase tracking-widest text-rose-600/80 dark:text-rose-400/80">Prayers Missed</p>
+                </div>
+
+                {/* Total Tasbeeh */}
+                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-[2rem] border border-blue-100 dark:border-blue-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-3 bg-blue-100 dark:bg-blue-800/50 text-blue-600 dark:text-blue-400 rounded-xl mb-3">
+                     <Infinity size={24} />
+                   </div>
+                   <h4 className="text-3xl font-black text-blue-900 dark:text-blue-100 mb-1">{appState.stats.totalTasbeeh}</h4>
+                   <p className="text-xs font-bold uppercase tracking-widest text-blue-600/80 dark:text-blue-400/80">Total Tasbeeh</p>
+                </div>
+             </div>
           </div>
         )}
 

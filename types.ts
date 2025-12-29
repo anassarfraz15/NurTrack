@@ -38,6 +38,8 @@ export interface UserStats {
   streak: number;
   bestStreak: number;
   totalPrayers: number;
+  totalMissed: number; // New
+  totalTasbeeh: number; // New
   onTimeCount: number;
   lastCompletedDate: string | null;
 }
