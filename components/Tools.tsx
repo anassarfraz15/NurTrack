@@ -172,7 +172,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
         </div>
       </header>
 
-      <div className="flex flex-wrap justify-center md:justify-start gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl w-fit max-w-full mx-auto md:mx-0">
+      <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl overflow-x-auto no-scrollbar w-full md:w-fit max-w-full">
         {tools.map((tool) => (
           <button
             key={tool.id}
@@ -181,7 +181,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
               setActiveTool(tool.id);
               triggerHaptics('light');
             }}
-            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+            className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
               activeTool === tool.id 
               ? 'bg-white dark:bg-slate-800 text-emerald-600 shadow-sm' 
               : 'text-slate-500 hover:text-slate-700'
