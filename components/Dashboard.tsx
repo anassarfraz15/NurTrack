@@ -238,10 +238,10 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
       </header>
 
       {/* Redesigned Minimal Prayer Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#2f5d40] to-[#1a3826] dark:from-[#064e3b] dark:to-[#022c22] rounded-[2.2rem] shadow-xl shadow-emerald-900/10 text-white transition-all duration-500">
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2f5d40] to-[#1a3826] dark:from-[#064e3b] dark:to-[#022c22] rounded-[2.2rem] shadow-xl shadow-emerald-900/10 text-white transition-all duration-500 group">
         
         {/* Top Section - Current Prayer */}
-        <div className="p-7 flex items-center justify-between relative z-10">
+        <div className="p-7 pr-20 flex items-center justify-between relative z-10">
           <div className="flex items-center gap-5">
              <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/5">
                 {getPrayerIcon(prayerContext.current.name, 32)}
@@ -261,7 +261,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         <div className="mx-7 h-px bg-white/10" />
 
         {/* Bottom Section - Next Prayer */}
-        <div className="p-7 flex items-center justify-between relative z-10">
+        <div className="p-7 pr-20 flex items-center justify-between relative z-10">
            <div className="flex items-center gap-5">
              <div className="w-12 h-12 rounded-2xl bg-black/20 flex items-center justify-center backdrop-blur-sm border border-white/5 text-emerald-100/80">
                 {getPrayerIcon(prayerContext.next.name, 22)}
@@ -272,14 +272,20 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
              </div>
           </div>
           
-          <button 
-            onClick={() => setIsTimingsPopupOpen(true)}
-            className="bg-white/10 rounded-2xl px-5 py-3 backdrop-blur-md flex items-center gap-3 border border-white/10 hover:bg-white/15 transition-colors active:scale-95 group"
-          >
-             <Timer size={18} className="text-emerald-200 group-hover:text-white transition-colors" />
+          <div className="bg-white/10 rounded-2xl px-5 py-3 backdrop-blur-md flex items-center gap-3 border border-white/10">
+             <Timer size={18} className="text-emerald-200" />
              <span className="text-lg font-bold tabular-nums tracking-tight">{timeRemaining.replace('in ', '')}</span>
-          </button>
+          </div>
         </div>
+
+        {/* Dedicated Timings Icon */}
+        <button
+          onClick={() => setIsTimingsPopupOpen(true)}
+          className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all text-emerald-200 hover:text-white z-20"
+          aria-label="View Prayer Timings"
+        >
+          <Calendar size={22} strokeWidth={1.5} />
+        </button>
 
         {/* Background Decorative Blobs */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-400/10 rounded-full blur-[80px]"></div>
