@@ -1,6 +1,6 @@
 
-import React, { useEffect, useState } from 'react';
-import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, PieChart } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -32,6 +32,10 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const [loadingMotivation, setLoadingMotivation] = useState(false);
   
   const [isEditing, setIsEditing] = useState(!todayLog.isLocked);
+  
+  // Popup States
+  const [activePopup, setActivePopup] = useState<'streak' | 'score' | null>(null);
+  const popupRef = useRef<HTMLDivElement>(null);
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
 
@@ -65,14 +69,24 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     fetchMotivation();
   }, [appState.stats.streak, consistencyScore]);
 
-  // Helper to check if a prayer time has passed (enabled) or is in the future (disabled)
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+        setActivePopup(null);
+      }
+    };
+    if (activePopup) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activePopup]);
+
   const isPrayerEnabled = (name: PrayerName) => {
-    // If strict mode and locked, disable editing
     if (appState.settings.strictness === 'strict' && todayLog.isLocked) return false;
-    // If viewing a past date (log exists and date != today), usually we allow editing unless strict
     if (today !== getTodayDateString()) return !todayLog.isLocked;
 
-    // For today, check times
     const timings = appState.settings.timingMode === 'manual' ? appState.settings.manualTimings : DEFAULT_TIMINGS;
     const timeStr = timings[name];
     if (!timeStr) return true;
@@ -82,14 +96,12 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    // Enable if current time is past the prayer start time
     return currentMinutes >= prayerMinutes;
   };
 
   const handleStatusUpdate = (name: PrayerName, status: PrayerStatus, mode?: PrayerMode) => {
     if (!isEditing) return;
     
-    // If clicking the same state, toggle off
     const currentStatus = todayLog.prayers[name];
     const currentMode = todayLog.modes?.[name];
     
@@ -109,7 +121,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         updatePrayerStatus(name, PrayerStatus.NOT_MARKED);
       }
     } else {
-      // Default to Individual On Time if nothing selected
       updatePrayerStatus(name, PrayerStatus.ON_TIME, PrayerMode.INDIVIDUAL);
     }
   };
@@ -148,46 +159,85 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
-      <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-4">
+      {/* Redesigned Header with Top-Right Stats */}
+      <header className="relative flex items-start justify-between gap-4">
         <button 
           onClick={onOpenDrawer}
-          className="lg:hidden absolute left-0 top-0.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          className="lg:hidden absolute -left-1 -top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
           aria-label="Open Settings"
         >
-          <Menu size={20} />
+          <Menu size={24} />
         </button>
 
-        <div className="flex flex-col items-center md:items-start w-full md:w-auto">
-          <div className="text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              {greeting}
-            </h2>
-          </div>
-          <p className="text-[11px] md:text-sm text-slate-500 dark:text-slate-400 font-medium text-center md:text-left">
+        <div className="flex flex-col pt-1 pl-10 lg:pl-0">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            {greeting}
+          </h2>
+          <p className="text-[11px] md:text-sm text-slate-500 dark:text-slate-400 font-medium">
             {formatDisplayDate(today)}
           </p>
         </div>
         
-        <div className="flex justify-center md:justify-end gap-2 sm:gap-4">
-          <div className="bg-white dark:bg-slate-900 px-3 sm:px-5 py-2 rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-2 sm:gap-4 transition-all hover:shadow-md">
-            <div className="p-1 sm:p-2 bg-orange-50 dark:bg-orange-900/20 rounded-lg sm:rounded-xl">
-              <Flame className="text-orange-500" fill="currentColor" size={14} />
-            </div>
-            <div>
-              <p className="text-[8px] sm:text-[10px] text-slate-400 uppercase font-black tracking-[0.15em]">Streak</p>
-              <p className="font-bold text-slate-900 dark:text-white text-sm sm:text-lg leading-tight">{appState.stats.streak}</p>
-            </div>
-          </div>
+        {/* Compact Stats Icons */}
+        <div className="flex items-center gap-2 relative" ref={popupRef}>
+          <button 
+            onClick={() => setActivePopup(activePopup === 'streak' ? null : 'streak')}
+            className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-orange-50 dark:hover:bg-orange-900/10 active:scale-95 transition-all group"
+          >
+            <Flame size={20} className="text-orange-500 group-hover:fill-current" />
+          </button>
           
-          <div className="bg-white dark:bg-slate-900 px-3 sm:px-5 py-2 rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800/50 flex items-center gap-2 sm:gap-4 transition-all hover:shadow-md">
-            <div className="p-1 sm:p-2 bg-amber-50 dark:bg-amber-900/20 rounded-lg sm:rounded-xl">
-              <Star className="text-amber-500" fill="currentColor" size={14} />
+          <button 
+             onClick={() => setActivePopup(activePopup === 'score' ? null : 'score')}
+             className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/10 active:scale-95 transition-all group"
+          >
+            <PieChart size={20} className="text-emerald-500 group-hover:fill-current" />
+          </button>
+
+          {/* Contextual Popups */}
+          {activePopup && (
+            <div className="absolute top-full right-0 mt-3 z-50 w-52 md:w-60">
+              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-4 animate-in zoom-in-95 origin-top-right relative">
+                 {/* Triangle Arrow */}
+                 <div className={`absolute -top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-l border-t border-slate-100 dark:border-slate-800 transform rotate-45 ${activePopup === 'streak' ? 'right-12' : 'right-4'}`}></div>
+                 
+                 <div className="relative z-10">
+                   <div className="flex justify-between items-start mb-2">
+                      <div className={`p-1.5 rounded-lg ${activePopup === 'streak' ? 'bg-orange-50 text-orange-500' : 'bg-emerald-50 text-emerald-500'}`}>
+                        {activePopup === 'streak' ? <Flame size={14} fill="currentColor" /> : <PieChart size={14} fill="currentColor" />}
+                      </div>
+                      <button onClick={() => setActivePopup(null)} className="text-slate-300 hover:text-slate-500"><X size={14} /></button>
+                   </div>
+                   
+                   {activePopup === 'streak' ? (
+                     <>
+                       <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                         {appState.stats.streak > 0 ? "You're on fire!" : "Start your streak"}
+                       </h4>
+                       <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
+                         You've prayed consistently for <strong className="text-orange-500">{appState.stats.streak} days</strong>.
+                       </p>
+                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-2 py-1 rounded-md inline-block">
+                         Best: {appState.stats.bestStreak} days
+                       </div>
+                     </>
+                   ) : (
+                     <>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                         On-Time Score
+                       </h4>
+                       <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
+                         You have completed <strong className="text-emerald-500">{consistencyScore}%</strong> of your total recorded prayers on time.
+                       </p>
+                       <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div className="h-full bg-emerald-500" style={{ width: `${consistencyScore}%` }}></div>
+                       </div>
+                     </>
+                   )}
+                 </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[8px] sm:text-[10px] text-slate-400 uppercase font-black tracking-[0.15em]">Score</p>
-              <p className="font-bold text-slate-900 dark:text-white text-sm sm:text-lg leading-tight">{consistencyScore}%</p>
-            </div>
-          </div>
+          )}
         </div>
       </header>
 

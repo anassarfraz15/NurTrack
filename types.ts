@@ -36,6 +36,7 @@ export interface DailyLog {
 
 export interface UserStats {
   streak: number;
+  bestStreak: number;
   totalPrayers: number;
   onTimeCount: number;
   lastCompletedDate: string | null;
@@ -45,6 +46,7 @@ export interface AppState {
   logs: Record<string, DailyLog>;
   stats: UserStats;
   settings: AppSettings;
+  unlockedAchievements: string[];
 }
 
 export interface AppSettings {

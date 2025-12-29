@@ -18,6 +18,7 @@ import { Loader2, WifiOff } from 'lucide-react';
 import { Logo } from './constants.tsx';
 
 const SETTINGS_STORAGE_KEY = 'nurtrack_settings_v1';
+const ACHIEVEMENTS_KEY = 'nurtrack_achievements_v1';
 
 const INITIAL_SETTINGS: AppSettings = {
   userName: '',
@@ -81,7 +82,8 @@ const entriesToLogs = (entries: PrayerEntry[]): Record<string, DailyLog> => {
 
 const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats => {
   const safeLogs = logs || {};
-  const dates = Object.keys(safeLogs).sort((a, b) => b.localeCompare(a));
+  const dates = Object.keys(safeLogs).sort((a, b) => b.localeCompare(a)); // Newest first
+  
   let totalPrayers = 0;
   let onTimeCount = 0;
   
@@ -95,34 +97,60 @@ const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats 
     });
   });
 
+  // Revised Streak Logic
   let streak = 0;
-  const today = getTodayDateString();
-  let checkDate = new Date();
+  let bestStreak = 0; // Simplified calculation for now, would ideally need full history traversal
   
-  let safety = 0;
-  while (safety < 365) {
-    safety++;
-    const dateStr = checkDate.toISOString().split('T')[0];
-    const log = safeLogs[dateStr];
-    
-    const isCompleted = log && (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
-      log.prayers?.[p] && log.prayers[p] !== PrayerStatus.NOT_MARKED && log.prayers[p] !== PrayerStatus.MISSED
-    );
+  // We iterate backwards from today
+  const todayStr = getTodayDateString();
+  let currentDate = new Date();
+  
+  // Safety break
+  let checkLimit = 365 * 2; 
+  let currentChain = 0;
+  let isCurrentChainActive = true;
 
-    if (isCompleted) {
-      streak++;
-      checkDate.setDate(checkDate.getDate() - 1);
+  for (let i = 0; i < checkLimit; i++) {
+    const dateKey = currentDate.toISOString().split('T')[0];
+    const log = safeLogs[dateKey];
+    
+    const prayers = log ? Object.values(log.prayers) : [];
+    
+    // Check Statuses
+    const allCompleted = prayers.length === 5 && prayers.every(p => p === PrayerStatus.ON_TIME || p === PrayerStatus.LATE);
+    const allMissed = prayers.length === 5 && prayers.every(p => p === PrayerStatus.MISSED);
+    const partial = !allCompleted && !allMissed && prayers.some(p => p !== PrayerStatus.NOT_MARKED);
+    const empty = !log || prayers.every(p => p === PrayerStatus.NOT_MARKED);
+
+    if (allCompleted) {
+      if (isCurrentChainActive) streak++;
+      currentChain++;
+    } else if (allMissed) {
+      // Breaks the chain immediately
+      isCurrentChainActive = false;
+      currentChain = 0;
+      // If we hit a full miss in the past, the current streak calculation stops there
+      if (i > 0) break; 
     } else {
-      if (dateStr === today) {
-        checkDate.setDate(checkDate.getDate() - 1);
-        continue;
-      }
-      break;
+      // Partial or Empty:
+      // "Partial completion should not reset streak, but should not increase it either."
+      // We just continue to the previous day without incrementing.
     }
+    
+    // Simple Best Streak Logic (Current implementation approximates based on current chain calculation)
+    // In a real app, we'd need to traverse the entire history to find the max
+    bestStreak = Math.max(bestStreak, currentChain);
+
+    // Go back one day
+    currentDate.setDate(currentDate.getDate() - 1);
   }
+
+  // If simple calc failed, ensure best streak is at least current streak
+  if (streak > bestStreak) bestStreak = streak;
 
   return {
     streak,
+    bestStreak,
     totalPrayers,
     onTimeCount,
     lastCompletedDate: dates.find(d => {
@@ -137,21 +165,18 @@ const calculateStatsFromLogs = (logs: Record<string, DailyLog> = {}): UserStats 
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [showAchievement, setShowAchievement] = useState(false);
+  const [showAchievement, setShowAchievement] = useState<{title: string, message: string} | null>(null);
   const [guestMode, setGuestMode] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const [lastCelebratedDate, setLastCelebratedDate] = useState<string | null>(() => {
-    return localStorage.getItem('nurtrack_last_celebrated');
-  });
-
   const [appState, setAppState] = useState<AppState>({
     logs: {},
-    stats: { streak: 0, totalPrayers: 0, onTimeCount: 0, lastCompletedDate: null },
-    settings: INITIAL_SETTINGS
+    stats: { streak: 0, bestStreak: 0, totalPrayers: 0, onTimeCount: 0, lastCompletedDate: null },
+    settings: INITIAL_SETTINGS,
+    unlockedAchievements: []
   });
 
   // Handle Online/Offline Detection
@@ -175,13 +200,15 @@ const App: React.FC = () => {
     const init = async () => {
       try {
         const savedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+        const savedAchievements = localStorage.getItem(ACHIEVEMENTS_KEY);
         const settings = savedSettings ? JSON.parse(savedSettings) : INITIAL_SETTINGS;
+        const unlockedAchievements = savedAchievements ? JSON.parse(savedAchievements) : [];
 
         const entries = await db.getAllLogs();
         const logs = entriesToLogs(entries);
         const stats = calculateStatsFromLogs(logs);
 
-        setAppState(prev => ({ ...prev, settings, logs, stats }));
+        setAppState(prev => ({ ...prev, settings, logs, stats, unlockedAchievements }));
 
         const { data: { session } } = await (supabase.auth as any).getSession();
         setUser(session?.user ?? null);
@@ -218,28 +245,64 @@ const App: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(appState.settings));
+    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(appState.unlockedAchievements));
+    
     if (appState.settings.theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
-  }, [appState.settings]);
+  }, [appState.settings, appState.unlockedAchievements]);
+
+  // Achievement Logic
+  const checkAchievements = (stats: UserStats, logs: Record<string, DailyLog>, currentUnlocked: string[]) => {
+    const newUnlocked = [...currentUnlocked];
+    let justUnlocked: {title: string, message: string} | null = null;
+
+    const unlock = (id: string, title: string, message: string) => {
+      if (!newUnlocked.includes(id)) {
+        newUnlocked.push(id);
+        justUnlocked = { title, message };
+      }
+    };
+
+    // Streak Achievements
+    if (stats.streak >= 7) unlock('streak_7', '7 Day Streak', "You've prayed consistently for a full week!");
+    if (stats.streak >= 30) unlock('streak_30', 'Monthly Champion', "30 days of dedication. Masha'Allah!");
+    if (stats.streak >= 40) unlock('streak_40', '40 Days Steadfast', "You've reached the spiritual milestone of 40 days.");
+    if (stats.streak >= 100) unlock('streak_100', 'Century Streak', "100 days of consistency. An incredible journey.");
+
+    // Volume Achievements
+    if (stats.totalPrayers >= 100) unlock('prayers_100', '100 Prayers', "You have recorded 100 prayers in total.");
+    if (stats.totalPrayers >= 500) unlock('prayers_500', 'Devoted Servant', "500 prayers recorded. Keep going!");
+
+    // Perfect Day (Handled in updatePrayerStatus largely, but double check here)
+    const today = getTodayDateString();
+    const todayLog = logs[today];
+    if (todayLog) {
+      const allOnTime = (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
+        todayLog.prayers[p] === PrayerStatus.ON_TIME
+      );
+      if (allOnTime) unlock(`perfect_${today}`, 'Perfect Day', "Alhamdulillah! You performed all 5 prayers on time today.");
+    }
+
+    return { newUnlocked, justUnlocked };
+  };
 
   const updatePrayerStatus = async (name: PrayerName, status: PrayerStatus, mode?: PrayerMode) => {
     const today = getTodayDateString();
     const userId = user?.id || 'guest_user';
     
-    // Find if we already have an entry for this specific prayer/day combo to update it
     const currentLog = appState.logs[today];
 
     if (currentLog?.isLocked && appState.settings.strictness === 'strict') {
-      return; // Cannot edit locked day in strict mode
+      return; 
     }
 
     const existingEntry = currentLog?.entries?.find(e => e.prayer_name === name);
 
     const newEntry: PrayerEntry = {
-      id: existingEntry?.id || crypto.randomUUID(), // Reuse ID to overwrite in IndexedDB and Supabase
+      id: existingEntry?.id || crypto.randomUUID(),
       user_id: userId,
       prayer_name: name,
       prayer_date: today,
@@ -251,10 +314,8 @@ const App: React.FC = () => {
       is_locked: currentLog?.isLocked || false
     };
 
-    // 1. Persist to IndexedDB
     await db.saveEntry(newEntry);
 
-    // 2. Update Local React State
     setAppState(prev => {
       const currentLog = prev.logs[today] || { 
         date: today, 
@@ -276,11 +337,9 @@ const App: React.FC = () => {
       if (mode) {
         updatedModes[name] = mode;
       } else if (status === PrayerStatus.NOT_MARKED || status === PrayerStatus.LATE || status === PrayerStatus.MISSED) {
-        // Clear mode if status is not ON_TIME or explicitly passed
         delete updatedModes[name];
       }
       
-      // Update entry list
       const updatedEntries = [...(currentLog.entries || [])];
       const eIdx = updatedEntries.findIndex(e => e.prayer_name === name);
       if (eIdx > -1) updatedEntries[eIdx] = newEntry;
@@ -290,24 +349,19 @@ const App: React.FC = () => {
       const updatedLogs = { ...prev.logs, [today]: updatedLog };
       
       const newStats = calculateStatsFromLogs(updatedLogs);
-
-      const allOnTime = (['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as PrayerName[]).every(p => 
-        updatedPrayers[p] === PrayerStatus.ON_TIME
-      );
-
-      if (allOnTime && lastCelebratedDate !== today) {
-        setShowAchievement(true);
-        setLastCelebratedDate(today);
-        localStorage.setItem('nurtrack_last_celebrated', today);
+      
+      // Check Achievements
+      const { newUnlocked, justUnlocked } = checkAchievements(newStats, updatedLogs, prev.unlockedAchievements);
+      
+      if (justUnlocked) {
+        setShowAchievement(justUnlocked);
       }
 
-      return { ...prev, logs: updatedLogs, stats: newStats };
+      return { ...prev, logs: updatedLogs, stats: newStats, unlockedAchievements: newUnlocked };
     });
 
-    // 3. Trigger Sync
     if (isOnline && user) syncEngine.sync(user.id);
     
-    // Haptic feedback
     if (appState.settings.hapticsEnabled && 'vibrate' in navigator) {
       navigator.vibrate(status === PrayerStatus.NOT_MARKED ? 30 : 15);
     }
@@ -318,7 +372,6 @@ const App: React.FC = () => {
     const currentLog = appState.logs[today];
     if (!currentLog) return;
 
-    // Mark all entries for today as locked
     const updatedEntriesPromises = (currentLog.entries || []).map(async entry => {
       const lockedEntry = { ...entry, is_locked: true, synced: false };
       await db.saveEntry(lockedEntry);
@@ -349,26 +402,22 @@ const App: React.FC = () => {
     }
 
     try {
-      // 1. Clear IndexedDB
       const DB_NAME = 'NurTrackDB';
       const deleteReq = indexedDB.deleteDatabase(DB_NAME);
       
       deleteReq.onerror = () => console.error("Could not delete database");
       deleteReq.onsuccess = () => console.log("Database deleted successfully");
 
-      // 2. Clear progress-related localStorage
       localStorage.removeItem('nurtrack_last_celebrated');
+      localStorage.removeItem(ACHIEVEMENTS_KEY);
       
-      // To truly "start again" we clear settings but keep it in a state that forces onboarding
       const freshSettings = { ...INITIAL_SETTINGS, onboardingCompleted: false };
       localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(freshSettings));
 
-      // 3. If signed in, sign out to prevent accidental re-sync of old data
       if (user) {
         await (supabase.auth as any).signOut();
       }
 
-      // 4. Hard reload to ensure clean slate and DB re-init
       window.location.reload();
     } catch (e) {
       alert("An error occurred while resetting data.");
@@ -497,7 +546,7 @@ const App: React.FC = () => {
         {activeTab === 'tools' && <Tools appState={appState} onOpenDrawer={handleOpenDrawer} />}
         {activeTab === 'settings' && <Settings appState={appState} onToggleTheme={toggleTheme} onToggleHaptics={toggleHaptics} onCycleStrictness={cycleStrictness} setUserName={setUserName} setTimingMode={setTimingMode} setManualTiming={setManualTiming} onResetData={resetAllData} />}
       </div>
-      {showAchievement && <AchievementPopup onClose={() => setShowAchievement(false)} userName={appState.settings.userName} />}
+      {showAchievement && <AchievementPopup onClose={() => setShowAchievement(null)} title={showAchievement.title} message={showAchievement.message} />}
     </Layout>
   );
 };

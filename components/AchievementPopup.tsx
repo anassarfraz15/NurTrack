@@ -4,6 +4,8 @@ import { PartyPopper, Star, Sparkles, Heart } from 'lucide-react';
 
 interface AchievementPopupProps {
   onClose: () => void;
+  title?: string;
+  message?: string;
   userName?: string;
 }
 
@@ -20,7 +22,7 @@ interface Particle {
   rotation: number;
 }
 
-const AchievementPopup: React.FC<AchievementPopupProps> = ({ onClose, userName }) => {
+const AchievementPopup: React.FC<AchievementPopupProps> = ({ onClose, title, message, userName }) => {
   const displayName = userName ? ` ${userName}` : '';
   const [particles, setParticles] = useState<Particle[]>([]);
 
@@ -77,10 +79,10 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ onClose, userName }
         {/* Content Section */}
         <div className="p-10 text-center">
           <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
-            Masha'Allah{displayName}!
+            {title || `Masha'Allah${displayName}!`}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
-            You've achieved your goal of praying all five namaz <span className="text-emerald-600 dark:text-emerald-400 font-bold">On Time</span> today. May Allah accept your efforts and grant you steadfastness.
+            {message || "You've achieved a significant milestone in your spiritual journey. May Allah accept your efforts."}
           </p>
           
           <div className="space-y-4">

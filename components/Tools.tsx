@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Compass, RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Info, LocateFixed, ArrowUp, Fingerprint, Loader2, Target, Menu, Sparkles } from 'lucide-react';
+import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Menu, Trophy, Medal, Crown, Star } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
 
@@ -17,13 +17,6 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
   const [customGoal, setCustomGoal] = useState('');
   const [isTapping, setIsTapping] = useState(false);
 
-  // Qibla States
-  const [heading, setHeading] = useState<number>(0);
-  const [qiblaAngle, setQiblaAngle] = useState<number | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
-  const [compassPermission, setCompassPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt');
-  const [isAligned, setIsAligned] = useState(false);
-
   // Calendar States
   const [hijriDate, setHijriDate] = useState('');
   const [islamicEvents, setIslamicEvents] = useState<any[]>([]);
@@ -34,9 +27,18 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
   const tools = [
     { id: 'tasbeeh', icon: Heart, label: 'Tasbeeh' },
-    { id: 'qibla', icon: Compass, label: 'Qibla' },
+    { id: 'achievements', icon: Trophy, label: 'Awards' },
     { id: 'calendar', icon: CalendarIcon, label: 'Hijri' },
     { id: 'fasting', icon: UtensilsCrossed, label: 'Fasting' },
+  ];
+
+  const ACHIEVEMENTS_LIST = [
+    { id: 'streak_7', title: '7 Day Streak', description: 'Prayed consistently for a week', icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-100 dark:bg-yellow-900/30' },
+    { id: 'streak_30', title: 'Monthly Champion', description: '30 days of dedication', icon: Medal, color: 'text-blue-500', bg: 'bg-blue-100 dark:bg-blue-900/30' },
+    { id: 'streak_40', title: '40 Days Steadfast', description: 'Spiritual milestone reached', icon: Crown, color: 'text-purple-500', bg: 'bg-purple-100 dark:bg-purple-900/30' },
+    { id: 'streak_100', title: 'Century Streak', description: '100 days of consistency', icon: Trophy, color: 'text-emerald-500', bg: 'bg-emerald-100 dark:bg-emerald-900/30' },
+    { id: 'prayers_100', title: '100 Prayers', description: 'Total prayers recorded', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-100 dark:bg-rose-900/30' },
+    { id: 'prayers_500', title: 'Devoted Servant', description: '500 prayers recorded', icon: CheckCircle2, color: 'text-teal-500', bg: 'bg-teal-100 dark:bg-teal-900/30' }
   ];
 
   // Initialize Hijri Date
@@ -61,73 +63,6 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
       fetchCalendar();
     }
   }, [activeTool, islamicEvents.length]);
-
-  // Qibla Logic
-  const calculateQibla = (lat: number, lng: number) => {
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const toDeg = (rad: number) => (rad * 180) / Math.PI;
-    const φ1 = toRad(lat);
-    const λ1 = toRad(lng);
-    const φ2 = toRad(21.4225); // Kaaba Lat
-    const λ2 = toRad(39.8262); // Kaaba Lng
-    const y = Math.sin(λ2 - λ1);
-    const x = Math.cos(φ1) * Math.tan(φ2) - Math.sin(φ1) * Math.cos(λ2 - λ1);
-    const qibla = toDeg(Math.atan2(y, x));
-    return (qibla + 360) % 360;
-  };
-
-  const startQibla = () => {
-    if (!navigator.geolocation) {
-      setLocationError("Geolocation is not supported by your browser.");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const angle = calculateQibla(pos.coords.latitude, pos.coords.longitude);
-        setQiblaAngle(angle);
-        requestCompassPermission();
-      },
-      () => setLocationError("Please enable location access to find Qibla direction.")
-    );
-  };
-
-  const requestCompassPermission = async () => {
-    if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
-      try {
-        const permissionState = await (DeviceOrientationEvent as any).requestPermission();
-        if (permissionState === 'granted') {
-          setCompassPermission('granted');
-          (window as any).addEventListener('deviceorientation', handleOrientation, true);
-        } else {
-          setCompassPermission('denied');
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      setCompassPermission('granted');
-      const eventName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-      (window as any).addEventListener(eventName, handleOrientation, true);
-    }
-  };
-
-  const handleOrientation = (event: DeviceOrientationEvent) => {
-    let compass = 0;
-    if ((event as any).webkitCompassHeading) {
-      compass = (event as any).webkitCompassHeading;
-    } else if (event.alpha !== null) {
-      compass = 360 - event.alpha;
-    }
-    setHeading(compass);
-  };
-
-  useEffect(() => {
-    if (qiblaAngle !== null) {
-      const relative = (qiblaAngle - heading + 360) % 360;
-      const aligned = relative < 10 || relative > 350;
-      if (aligned !== isAligned) setIsAligned(aligned);
-    }
-  }, [heading, qiblaAngle, isAligned]);
 
   const triggerHaptics = (strength: 'light' | 'heavy' = 'light') => {
     if (!appState.settings.hapticsEnabled) return;
@@ -261,7 +196,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
           >
             <div className="flex flex-col items-center gap-2 pointer-events-none">
               <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40">
-                <Fingerprint size={16} />
+                <Heart size={16} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap anywhere to count</span>
               </div>
             </div>
@@ -410,103 +345,27 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
           </div>
         )}
 
-        {activeTool === 'qibla' && (
-          <div className="flex flex-col items-center justify-center py-6 space-y-10 animate-in slide-in-from-bottom duration-500">
-            {locationError && (
-              <div className="bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-6 rounded-[2rem] flex items-center gap-4 text-sm font-medium border border-rose-100 dark:border-rose-900/30 max-w-sm">
-                <LocateFixed size={24} className="shrink-0" />
-                <p>{locationError}</p>
-              </div>
-            )}
-
-            {!locationError && compassPermission === 'prompt' && (
-              <div className="text-center space-y-4 p-10 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-2xl max-w-sm mx-auto">
-                <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
-                  <Compass size={40} />
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Qibla Compass</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">To find the direction of the Kaaba accurately, we need access to your location and phone sensors.</p>
-                <button 
-                  onClick={startQibla}
-                  className="w-full py-5 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95"
-                >
-                  Initialize Compass
-                </button>
-              </div>
-            )}
-
-            {compassPermission === 'granted' && qiblaAngle !== null && (
-              <div className="flex flex-col items-center gap-10 w-full max-w-md mx-auto">
-                <div className={`transition-all duration-500 px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-[0.3em] ${
-                  isAligned 
-                  ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30 animate-pulse' 
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
-                }`}>
-                  {isAligned ? 'Pointing to Kaaba' : 'Rotate your phone'}
-                </div>
-
-                <div className="relative w-64 h-64 sm:w-72 sm:h-72">
-                  <div className={`absolute inset-0 rounded-full border-4 transition-all duration-700 ${
-                    isAligned 
-                    ? 'border-emerald-500 scale-110 opacity-100 blur-[2px]' 
-                    : 'border-transparent scale-100 opacity-0'
-                  }`}></div>
-
-                  <div className="relative w-full h-full rounded-full border-8 border-slate-200 dark:border-slate-800 flex items-center justify-center shadow-2xl bg-slate-50 dark:bg-slate-950 overflow-hidden">
-                    <div className="absolute inset-0 opacity-20 pointer-events-none">
-                       {[...Array(12)].map((_, i) => (
-                         <div 
-                           key={i} 
-                           className="absolute top-1/2 left-1/2 w-0.5 h-full bg-slate-400"
-                           style={{ transform: `translate(-50%, -50%) rotate(${i * 30}deg)` }}
-                         >
-                           <div className="h-4 w-full bg-slate-400"></div>
-                         </div>
-                       ))}
-                    </div>
-
-                    <div 
-                      className="absolute inset-0 transition-transform duration-300 ease-out"
-                      style={{ transform: `rotate(${- heading}deg)` }}
-                    >
-                      <div className="absolute top-6 left-1/2 -translate-x-1/2 font-black text-rose-500 text-lg">N</div>
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 font-black text-slate-400">E</div>
-                      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 font-black text-slate-400">S</div>
-                      <div className="absolute left-6 top-1/2 -translate-y-1/2 font-black text-slate-400">W</div>
-                      
-                      <div 
-                        className="absolute inset-0 flex items-center justify-center"
-                        style={{ transform: `rotate(${qiblaAngle}deg)` }}
-                      >
-                        <div className="h-full w-2 flex flex-col items-center group">
-                          <div className={`transition-all duration-500 w-10 h-10 rounded-2xl flex items-center justify-center mt-3 border-4 border-slate-950 shadow-2xl z-30 ${
-                            isAligned ? 'bg-emerald-500 scale-125' : 'bg-slate-800'
-                          }`}>
-                            <div className="w-5 h-5 bg-white rounded-sm transform rotate-45 flex items-center justify-center">
-                               <div className="w-2 h-2 bg-slate-900 rounded-full"></div>
-                            </div>
-                          </div>
-                          <div className={`w-1 flex-1 transition-all duration-500 rounded-full ${isAligned ? 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]' : 'bg-slate-700/50'}`}></div>
-                        </div>
+        {activeTool === 'achievements' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in slide-in-from-bottom duration-500">
+             {ACHIEVEMENTS_LIST.map((ach) => {
+               const isUnlocked = appState.unlockedAchievements?.includes(ach.id);
+               return (
+                 <div key={ach.id} className={`relative overflow-hidden p-6 rounded-[2rem] border transition-all ${isUnlocked ? 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 border-transparent opacity-70 grayscale'}`}>
+                    <div className="flex items-start justify-between">
+                      <div className={`p-3 rounded-2xl mb-4 ${isUnlocked ? ach.bg : 'bg-slate-200 dark:bg-slate-800'}`}>
+                        <ach.icon size={24} className={isUnlocked ? ach.color : 'text-slate-400'} />
                       </div>
+                      {isUnlocked ? (
+                         <div className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest">Unlocked</div>
+                      ) : (
+                         <div className="px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest">Locked</div>
+                      )}
                     </div>
-
-                    <div className="absolute top-0 w-1.5 h-10 bg-rose-500 rounded-b-full z-40 shadow-sm flex items-center justify-center">
-                        <div className="w-4 h-4 rounded-full bg-rose-500 blur-sm opacity-50"></div>
-                    </div>
-
-                    <div className={`transition-all duration-500 p-4 sm:p-6 rounded-full shadow-2xl flex flex-col items-center justify-center z-50 border backdrop-blur-md ${
-                      isAligned 
-                      ? 'bg-emerald-600 border-emerald-400 text-white scale-110' 
-                      : 'bg-white/90 dark:bg-slate-900/90 border-slate-100 dark:border-slate-800 text-slate-900 dark:text-white'
-                    }`}>
-                      <span className="text-[9px] uppercase font-black tracking-[0.2em] opacity-60">Qibla</span>
-                      <span className="text-2xl sm:text-3xl font-black tabular-nums">{Math.round(qiblaAngle)}°</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-1">{ach.title}</h4>
+                    <p className="text-xs text-slate-500 leading-relaxed">{ach.description}</p>
+                 </div>
+               );
+             })}
           </div>
         )}
 
@@ -528,7 +387,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {loadingCalendar ? (
                 <div className="col-span-full py-20 flex flex-col items-center justify-center gap-4 text-slate-400">
-                  <Loader2 className="animate-spin" size={32} />
+                  <RotateCcw className="animate-spin" size={32} />
                   <p className="text-xs font-black uppercase tracking-widest">Syncing religious dates...</p>
                 </div>
               ) : islamicEvents.length > 0 ? (
