@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { ChevronRight, User, Shield, Heart, Check, Sparkles } from 'lucide-react';
+import { ChevronRight, User, Shield, Check, Sparkles, UserCircle2, User2 } from 'lucide-react';
 import { AppSettings } from '../types.ts';
 import { Logo } from '../constants.tsx';
 
@@ -12,6 +12,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Partial<AppSettings>>({
     userName: '',
+    gender: 'male',
     strictness: 'normal',
     intentions: []
   });
@@ -43,28 +44,55 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6 py-6 flex flex-col items-center animate-step-enter">
-            <div className="w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600 mb-2 shadow-sm border border-emerald-100 dark:border-emerald-800">
-               <User size={40} />
+          <div className="space-y-6 py-4 flex flex-col items-center animate-step-enter">
+            <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600 mb-2 shadow-sm border border-emerald-100 dark:border-emerald-800">
+               <User size={36} />
             </div>
-            <div className="w-full space-y-2">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">How should we address you?</label>
-              <div className="relative w-full group">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={20} />
-                <input 
-                  autoFocus
-                  type="text"
-                  value={formData.userName}
-                  onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-                  onKeyDown={(e) => e.key === 'Enter' && handleNext()}
-                  placeholder="Your Name"
-                  className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
-                />
+            
+            <div className="w-full space-y-4">
+              <div className="space-y-1.5">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Your Name</label>
+                 <div className="relative w-full group">
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={20} />
+                  <input 
+                    autoFocus
+                    type="text"
+                    value={formData.userName}
+                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                    onKeyDown={(e) => e.key === 'Enter' && handleNext()}
+                    placeholder="Enter your name"
+                    className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
+                  />
+                 </div>
+              </div>
+
+              <div className="space-y-2">
+                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Gender</label>
+                 <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'male', label: 'Male', icon: User },
+                      { id: 'female', label: 'Female', icon: User2 },
+                      { id: 'other', label: 'Prefer not to say', icon: UserCircle2 }
+                    ].map((g) => (
+                      <button
+                        key={g.id}
+                        onClick={() => setFormData({ ...formData, gender: g.id as any })}
+                        className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl border-2 transition-all ${
+                          formData.gender === g.id 
+                          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-700 dark:text-emerald-400' 
+                          : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-400'
+                        }`}
+                      >
+                         <g.icon size={20} />
+                         <span className="text-[10px] font-bold text-center leading-tight">{g.label}</span>
+                      </button>
+                    ))}
+                 </div>
+                 <p className="text-[9px] text-slate-400 text-center pt-1">
+                   {formData.gender === 'female' ? "We'll customize your dashboard for individual prayer options." : "This helps us tailor your prayer tracking experience."}
+                 </p>
               </div>
             </div>
-            <p className="text-[10px] text-slate-400 font-medium text-center px-4 leading-relaxed">
-              We use this to personalize your dashboard and greetings. It stays on your device.
-            </p>
           </div>
         );
       case 2:
@@ -160,7 +188,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   };
 
   const titles = [
-    { title: "Ahlan wa Sahlan", sub: "Let's personalize your companion." },
+    { title: "Ahlan wa Sahlan", sub: "Tell us about yourself." },
     { title: "Choose Your Path", sub: "Select your preferred tracking discipline." },
     { title: "Daily Intention", sub: "Focusing your intent brings barakah." },
     { title: "Welcome", sub: "Setup complete." }
@@ -187,7 +215,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
 
         <div className="flex flex-col h-full p-6 md:p-10">
           {/* Static Header Section - Prevents jumping */}
-          <div className="flex-shrink-0 mb-6 transition-all duration-300">
+          <div className="flex-shrink-0 mb-4 transition-all duration-300">
             <h2 key={step + 'title'} className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter leading-none animate-fade-in-up">
               {titles[step-1].title}
             </h2>

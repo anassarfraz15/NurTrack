@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, PieChart } from 'lucide-react';
+import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, PieChart, Check } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -38,6 +38,9 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const popupRef = useRef<HTMLDivElement>(null);
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
+
+  // Check Gender - default to male behavior if undefined
+  const isFemale = appState.settings.gender === 'female';
 
   const consistencyScore = appState.stats.totalPrayers 
     ? Math.round((appState.stats.onTimeCount / appState.stats.totalPrayers) * 100) 
@@ -160,38 +163,39 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in duration-700">
       {/* Redesigned Header with Top-Right Stats */}
-      <header className="relative flex items-start justify-between gap-4">
+      <header className="relative flex items-center justify-between h-14 md:h-16 mb-2">
+        {/* Left: Hamburger */}
         <button 
           onClick={onOpenDrawer}
-          className="lg:hidden absolute -left-1 -top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          className="lg:hidden relative z-20 p-2 text-slate-400 hover:text-emerald-600 transition-colors"
           aria-label="Open Settings"
         >
           <Menu size={24} />
         </button>
 
-        <div className="flex flex-col pt-1 pl-10 lg:pl-0">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        {/* Center: Greeting - Absolute Positioned to be perfectly centered */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[240px] z-10 pointer-events-none">
+          <h2 className="text-xl md:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-none">
             {greeting}
           </h2>
-          <p className="text-[11px] md:text-sm text-slate-500 dark:text-slate-400 font-medium">
-            {formatDisplayDate(today)}
-          </p>
         </div>
         
-        {/* Compact Stats Icons */}
-        <div className="flex items-center gap-2 relative" ref={popupRef}>
+        {/* Right: Stats Icons with Numbers */}
+        <div className="ml-auto relative z-20 flex gap-2" ref={popupRef}>
           <button 
             onClick={() => setActivePopup(activePopup === 'streak' ? null : 'streak')}
-            className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-orange-50 dark:hover:bg-orange-900/10 active:scale-95 transition-all group"
+            className="flex items-center gap-1.5 px-3 py-1.5 h-10 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-orange-50 dark:hover:bg-orange-900/10 active:scale-95 transition-all group"
           >
-            <Flame size={20} className="text-orange-500 group-hover:fill-current" />
+            <Flame size={16} className="text-orange-500 group-hover:fill-current" />
+            <span className="text-xs font-black text-slate-700 dark:text-slate-300 tabular-nums">{appState.stats.streak}</span>
           </button>
           
           <button 
              onClick={() => setActivePopup(activePopup === 'score' ? null : 'score')}
-             className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/10 active:scale-95 transition-all group"
+             className="flex items-center gap-1.5 px-3 py-1.5 h-10 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm hover:bg-emerald-50 dark:hover:bg-emerald-900/10 active:scale-95 transition-all group"
           >
-            <PieChart size={20} className="text-emerald-500 group-hover:fill-current" />
+            <PieChart size={16} className="text-emerald-500 group-hover:fill-current" />
+            <span className="text-xs font-black text-slate-700 dark:text-slate-300 tabular-nums">{consistencyScore}%</span>
           </button>
 
           {/* Contextual Popups */}
@@ -199,7 +203,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
             <div className="absolute top-full right-0 mt-3 z-50 w-52 md:w-60">
               <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-4 animate-in zoom-in-95 origin-top-right relative">
                  {/* Triangle Arrow */}
-                 <div className={`absolute -top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-l border-t border-slate-100 dark:border-slate-800 transform rotate-45 ${activePopup === 'streak' ? 'right-12' : 'right-4'}`}></div>
+                 <div className={`absolute -top-1.5 w-3 h-3 bg-white dark:bg-slate-900 border-l border-t border-slate-100 dark:border-slate-800 transform rotate-45 ${activePopup === 'streak' ? 'right-20' : 'right-4'}`}></div>
                  
                  <div className="relative z-10">
                    <div className="flex justify-between items-start mb-2">
@@ -293,7 +297,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-60 h-60 md:w-80 md:h-80 bg-emerald-400/20 rounded-full blur-[70px] md:blur-[90px]"></div>
       </div>
 
-      {/* Redesigned Prayer Marking Cards - Compact & Mono Theme */}
+      {/* Redesigned Prayer Marking Cards - Gender Aware */}
       <section className="space-y-3 relative">
         {PRAYER_NAMES.map((name) => {
           const prayerName = name as PrayerName;
@@ -314,7 +318,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
               key={name}
               className={`flex overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-sm transition-all duration-300 ${!isEnabled || !isEditing ? 'opacity-60 grayscale-[0.3] pointer-events-none' : ''}`}
             >
-              {/* Left Section: Identity - Fixed Width & Mono Color */}
+              {/* Left Section: Identity */}
               <div className={`w-12 md:w-32 flex flex-col items-center justify-center text-white bg-emerald-600 relative shrink-0 transition-colors`}>
                 <div className="flex flex-col items-center gap-0.5 md:gap-1 -rotate-90 md:rotate-0 whitespace-nowrap">
                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-60">
@@ -324,57 +328,81 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                      {name}
                    </span>
                 </div>
-                {/* Subtle pattern for texture */}
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-20"></div>
               </div>
 
-              {/* Right Section: Actions - Compressed for Mobile */}
+              {/* Right Section: Actions */}
               <div className="flex-1 flex items-center justify-between px-2 md:px-6 py-2 md:py-3 relative gap-1 md:gap-4 overflow-hidden">
                 
-                {/* Status Icons Container */}
-                <div className="flex items-center justify-around flex-1 gap-1 md:gap-4">
+                {/* Status Icons Container - Grid changes based on Gender */}
+                <div className="flex items-center justify-around flex-1 gap-1 md:gap-3">
                   
-                  {/* Congregation Button */}
-                  <button
-                    onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.CONGREGATION)}
-                    disabled={!isEnabled}
-                    className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
-                      isCongregation 
-                      ? 'text-emerald-600' 
-                      : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
-                    }`}
-                  >
-                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
-                      isCongregation 
-                      ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
-                      : 'border-transparent bg-slate-50 dark:bg-slate-800'
-                    }`}>
-                       <Users size={18} className={`md:w-5 md:h-5 ${isCongregation ? 'fill-current' : ''}`} />
-                    </div>
-                    <span className="hidden md:block text-[9px] font-bold mt-1">Jamaat</span>
-                  </button>
+                  {isFemale ? (
+                    // Female View: Prayed (On Time), Late, Missed
+                    <>
+                      <button
+                        onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.INDIVIDUAL)}
+                        disabled={!isEnabled}
+                        className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 flex-1 ${
+                          isIndividual 
+                          ? 'text-emerald-600' 
+                          : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
+                        }`}
+                      >
+                        <div className={`w-full h-9 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
+                          isIndividual 
+                          ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
+                          : 'border-transparent bg-slate-50 dark:bg-slate-800'
+                        }`}>
+                           <Check size={18} className={`md:w-5 md:h-5 ${isIndividual ? 'fill-current' : ''}`} />
+                        </div>
+                        <span className="block text-[9px] font-bold mt-1 uppercase tracking-wider">Prayed</span>
+                      </button>
+                    </>
+                  ) : (
+                    // Male/Other View: Jamaat, Alone, Late, Missed
+                    <>
+                      <button
+                        onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.CONGREGATION)}
+                        disabled={!isEnabled}
+                        className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
+                          isCongregation 
+                          ? 'text-emerald-600' 
+                          : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
+                        }`}
+                      >
+                        <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
+                          isCongregation 
+                          ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
+                          : 'border-transparent bg-slate-50 dark:bg-slate-800'
+                        }`}>
+                           <Users size={18} className={`md:w-5 md:h-5 ${isCongregation ? 'fill-current' : ''}`} />
+                        </div>
+                        <span className="hidden md:block text-[9px] font-bold mt-1">Jamaat</span>
+                      </button>
 
-                  {/* Individual Button */}
-                  <button
-                    onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.INDIVIDUAL)}
-                    disabled={!isEnabled}
-                    className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
-                      isIndividual 
-                      ? 'text-emerald-600' 
-                      : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
-                    }`}
-                  >
-                    <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
-                      isIndividual 
-                      ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
-                      : 'border-transparent bg-slate-50 dark:bg-slate-800'
-                    }`}>
-                       <User size={18} className={`md:w-5 md:h-5 ${isIndividual ? 'fill-current' : ''}`} />
-                    </div>
-                    <span className="hidden md:block text-[9px] font-bold mt-1">Alone</span>
-                  </button>
+                      <button
+                        onClick={() => handleStatusUpdate(prayerName, PrayerStatus.ON_TIME, PrayerMode.INDIVIDUAL)}
+                        disabled={!isEnabled}
+                        className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
+                          isIndividual 
+                          ? 'text-emerald-600' 
+                          : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
+                        }`}
+                      >
+                        <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
+                          isIndividual 
+                          ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
+                          : 'border-transparent bg-slate-50 dark:bg-slate-800'
+                        }`}>
+                           <User size={18} className={`md:w-5 md:h-5 ${isIndividual ? 'fill-current' : ''}`} />
+                        </div>
+                        <span className="hidden md:block text-[9px] font-bold mt-1">Alone</span>
+                      </button>
+                    </>
+                  )}
 
-                  {/* Late Button */}
+                  {/* Late Button - Common */}
                   <button
                     onClick={() => handleStatusUpdate(prayerName, PrayerStatus.LATE)}
                     disabled={!isEnabled}
@@ -382,19 +410,21 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                       isLate 
                       ? 'text-amber-500' 
                       : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
-                    }`}
+                    } ${isFemale ? 'flex-1' : ''}`}
                   >
                     <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
+                      isFemale ? 'w-full' : ''
+                    } ${
                       isLate 
                       ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-500 shadow-sm' 
                       : 'border-transparent bg-slate-50 dark:bg-slate-800'
                     }`}>
                        <Clock size={18} className={`md:w-5 md:h-5 ${isLate ? 'fill-current' : ''}`} />
                     </div>
-                    <span className="hidden md:block text-[9px] font-bold mt-1">Late</span>
+                    <span className={`block text-[9px] font-bold mt-1 ${isFemale ? 'uppercase tracking-wider' : 'hidden md:block'}`}>Late</span>
                   </button>
 
-                  {/* Missed Button */}
+                  {/* Missed Button - Common */}
                   <button
                     onClick={() => handleStatusUpdate(prayerName, PrayerStatus.MISSED)}
                     disabled={!isEnabled}
@@ -402,16 +432,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                       isMissed 
                       ? 'text-rose-500' 
                       : 'text-slate-300 dark:text-slate-600 hover:text-slate-500'
-                    }`}
+                    } ${isFemale ? 'flex-1' : ''}`}
                   >
                     <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
+                      isFemale ? 'w-full' : ''
+                    } ${
                       isMissed 
                       ? 'bg-rose-50 dark:bg-rose-900/30 border-rose-500 shadow-sm' 
                       : 'border-transparent bg-slate-50 dark:bg-slate-800'
                     }`}>
                        <XCircle size={18} className={`md:w-5 md:h-5 ${isMissed ? 'fill-current' : ''}`} />
                     </div>
-                    <span className="hidden md:block text-[9px] font-bold mt-1">Missed</span>
+                    <span className={`block text-[9px] font-bold mt-1 ${isFemale ? 'uppercase tracking-wider' : 'hidden md:block'}`}>Missed</span>
                   </button>
                 </div>
 

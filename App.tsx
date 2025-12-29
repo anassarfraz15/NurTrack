@@ -22,6 +22,7 @@ const ACHIEVEMENTS_KEY = 'nurtrack_achievements_v1';
 
 const INITIAL_SETTINGS: AppSettings = {
   userName: '',
+  gender: 'male',
   language: 'English',
   theme: 'light',
   strictness: 'normal',

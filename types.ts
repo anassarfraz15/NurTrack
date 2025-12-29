@@ -51,6 +51,7 @@ export interface AppState {
 
 export interface AppSettings {
   userName?: string;
+  gender?: 'male' | 'female' | 'other';
   language: 'English' | 'Urdu' | 'Arabic';
   theme: 'light' | 'dark';
   strictness: 'soft' | 'normal' | 'strict';
