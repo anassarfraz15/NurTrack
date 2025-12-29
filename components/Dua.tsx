@@ -14,6 +14,7 @@ const TABS = [
 ];
 
 const NAMAZ_STEPS = [
+  { id: 0, title: 'تعارف' },
   { id: 1, title: 'تکبیرِ تحریمہ' },
   { id: 2, title: 'سورۃ الفاتحہ' },
   { id: 3, title: 'رکوع' },
@@ -121,10 +122,33 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
 
             {/* Popup Content Area (Scrollable) */}
             <div className="flex-1 overflow-y-auto no-scrollbar relative">
-              <div className="flex flex-col items-center justify-center h-48 text-center opacity-50">
-                <BookOpen size={32} className="text-slate-300 mb-3" />
-                <p className="text-sm text-slate-400">Authentic Hadith content loading...</p>
-              </div>
+              {selectedStep.id === 0 ? (
+                /* Introduction Content */
+                <div dir="rtl" className="space-y-6 text-right pb-4">
+                  <p className="text-lg leading-loose text-slate-700 dark:text-slate-300 arabic-font">
+                    نماز کا مسنون طریقہ صحیح احادیث کی روشنی میں یہاں بیان کیا جا رہا ہے۔ نبی کریم ﷺ کا ارشاد ہے:
+                  </p>
+                  
+                  <div className="bg-emerald-50/50 dark:bg-emerald-900/20 p-6 rounded-2xl border-r-4 border-emerald-500 my-6">
+                    <p className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-100 leading-relaxed arabic-font mb-3">
+                      "نماز اس طرح پڑھو جس طرح مجھے پڑھتے ہوئے دیکھتے ہو۔"
+                    </p>
+                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 arabic-font">
+                      (صحیح بخاری: 631)
+                    </p>
+                  </div>
+
+                  <p className="text-lg leading-loose text-slate-700 dark:text-slate-300 arabic-font">
+                    یہاں تکبیر تحریمہ سے لے کر سلام تک نماز کے ارکان اور ان میں پڑھی جانے والی مسنون دعائیں صحیح احادیث کے حوالوں کے ساتھ دی جا رہی ہیں۔
+                  </p>
+                </div>
+              ) : (
+                /* Placeholder for Future Steps */
+                <div className="flex flex-col items-center justify-center h-48 text-center opacity-50">
+                  <BookOpen size={32} className="text-slate-300 mb-3" />
+                  <p className="text-sm text-slate-400">Authentic Hadith content loading...</p>
+                </div>
+              )}
             </div>
 
             {/* Popup Footer (Close Button) */}
