@@ -230,14 +230,14 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
                     اب تعوذ (اعوذ باللہ) اور تسمیہ (بسم اللہ) پڑھ کر سورۃ الفاتحہ پڑھیں۔
                   </p>
 
-                  <div className="bg-rose-50 dark:bg-rose-900/20 p-4 rounded-2xl border-r-4 border-rose-500 my-2">
+                  <div className="bg-emerald-50/50 dark:bg-emerald-900/20 p-4 rounded-2xl border-r-4 border-emerald-500 my-2">
                     <p className="text-lg font-bold text-slate-800 dark:text-slate-100 arabic-font">
                       سورۃ الفاتحہ پڑھنا ہر نماز میں لازمی ہے۔
                     </p>
                     <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font mt-2">
                       حدیث: "اس شخص کی نماز نہیں جس نے سورۃ الفاتحہ نہیں پڑھی۔"
                     </p>
-                    <p className="text-sm font-bold text-rose-600 dark:text-rose-400 arabic-font mt-1">
+                    <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 arabic-font mt-1">
                       (صحیح بخاری: 756)
                     </p>
                   </div>
