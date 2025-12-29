@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { LayoutDashboard, Pocket, Activity, X, Settings as SettingsIcon, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
 import { supabase } from '../services/supabase.ts';
@@ -81,7 +82,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
 
       {/* Main Content Area - Reduced top padding on mobile since header is gone */}
       <main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar relative transition-colors duration-500 pb-24 lg:pb-0" style={{ overscrollBehaviorY: 'contain' }}>
-        <div className="max-w-5xl mx-auto w-full p-4 lg:p-8 pt-6 lg:pt-8">
+        <div className="max-w-5xl mx-auto w-full px-4 lg:px-8 pb-4 lg:pb-8 pt-0 lg:pt-8">
           {children}
         </div>
       </main>

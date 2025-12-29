@@ -152,10 +152,10 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer }) => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
-      <header className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-2">
+      <header className="sticky top-0 z-30 flex flex-col md:flex-row md:items-start md:justify-between gap-2 -mx-4 px-4 pt-4 pb-2 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-xl lg:static lg:bg-transparent lg:backdrop-blur-none lg:mx-0 lg:px-0 lg:pt-0">
         <button 
           onClick={(e) => { e.stopPropagation(); onOpenDrawer(); }}
-          className="lg:hidden absolute left-0 top-0.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
+          className="lg:hidden absolute left-4 top-4.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
           aria-label="Open Settings"
         >
           <Menu size={24} />
