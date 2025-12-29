@@ -291,11 +291,11 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
             {/* Custom Goal Modal */}
             {showGoalModal && (
               <div 
-                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-overlay"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
                 onClick={(e) => { e.stopPropagation(); setShowGoalModal(false); }}
               >
                 <div 
-                  className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-popup"
+                  className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between mb-6">
