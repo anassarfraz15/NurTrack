@@ -3,7 +3,9 @@ import { AppSettings, PrayerName } from '../types';
 
 export const getTodayDateString = () => {
   const d = new Date();
-  return d.toISOString().split('T')[0];
+  // Adjust for local timezone to ensure the date string matches the user's local day
+  const localDate = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
+  return localDate.toISOString().split('T')[0];
 };
 
 export const formatDisplayDate = (dateStr: string) => {
@@ -72,18 +74,37 @@ export const getPrayerContext = (settings: AppSettings) => {
   const currentPrayer = prayerMinutes[currentIndex];
   const nextPrayer = prayerMinutes[nextIndex];
 
+  // Friday Logic
+  const isFriday = now.getDay() === 5;
+  
+  // Determine if next prayer is tomorrow
+  const nextIsTomorrow = nextIndex === 0 && currentMinutes >= prayerMinutes[4].mins;
+  
+  // Determine if next prayer day is Friday
+  const nextDate = new Date(now);
+  if (nextIsTomorrow) nextDate.setDate(nextDate.getDate() + 1);
+  const isNextFriday = nextDate.getDay() === 5;
+
+  const currentKey = currentPrayer.name;
+  const currentDisplayName = (currentKey === 'Dhuhr' && isFriday) ? 'Jumma' : currentKey;
+
+  const nextKey = nextPrayer.name;
+  const nextDisplayName = (nextKey === 'Dhuhr' && isNextFriday) ? 'Jumma' : nextKey;
+
   return {
     current: {
-      name: currentPrayer.name,
+      key: currentKey,
+      name: currentDisplayName,
       startTime: formatTime12h(timings[currentPrayer.name]),
       endTime: formatTime12h(timings[nextPrayer.name]),
       isOngoing: true
     },
     next: {
-      name: nextPrayer.name,
+      key: nextKey,
+      name: nextDisplayName,
       startTime: formatTime12h(timings[nextPrayer.name]),
       rawTime: timings[nextPrayer.name],
-      isTomorrow: nextIndex === 0 && currentMinutes >= prayerMinutes[4].mins
+      isTomorrow: nextIsTomorrow
     }
   };
 };
@@ -119,8 +140,11 @@ export const getTimeRemaining = (rawTime: string, isTomorrow: boolean) => {
 
 export const getAllPrayerTimings = (settings: AppSettings) => {
   const timings = settings.timingMode === 'manual' ? settings.manualTimings : DEFAULT_TIMINGS;
+  const isFriday = new Date().getDay() === 5;
+  
   return Object.entries(timings).map(([name, time]) => ({
     name: name as PrayerName,
+    displayName: (name === 'Dhuhr' && isFriday) ? 'Jumma' : name,
     time: formatTime12h(time)
   }));
 };

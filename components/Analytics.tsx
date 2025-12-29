@@ -380,6 +380,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
                 {PRAYER_NAMES.map((name) => {
                   const status = selectedDayLog.prayers[name as PrayerName] || PrayerStatus.NOT_MARKED;
                   const mode = selectedDayLog.modes?.[name as PrayerName];
+                  const isDayFriday = new Date(selectedCalendarDate).getDay() === 5;
+                  const displayName = (name === 'Dhuhr' && isDayFriday) ? 'Jumma' : name;
                   
                   return (
                     <div key={name} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
@@ -392,7 +394,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
                         }`}>
                           {getStatusIcon(status as PrayerStatus)}
                         </div>
-                        <span className="font-bold text-sm text-slate-700 dark:text-slate-200">{name}</span>
+                        <span className="font-bold text-sm text-slate-700 dark:text-slate-200">{displayName}</span>
                       </div>
                       
                       <div className="flex flex-col items-end">

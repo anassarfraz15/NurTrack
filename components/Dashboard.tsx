@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, Check } from 'lucide-react';
+import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, Check, Sunrise, Sun as SunIcon, Sunset, CloudSun, Moon as MoonIcon } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
@@ -38,6 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const popupRef = useRef<HTMLDivElement>(null);
 
   const prayerTimings = getAllPrayerTimings(appState.settings);
+  const isFriday = new Date().getDay() === 5;
 
   // Check Gender - default to male behavior if undefined
   const isFemale = appState.settings.gender === 'female';
@@ -153,6 +154,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     setIsEditing(true);
   };
 
+  const getPrayerIcon = (prayerName: string, size: number = 24) => {
+    const pName = prayerName.includes('Jumma') ? 'Dhuhr' : prayerName;
+    switch (pName) {
+      case 'Fajr': return <Sunrise size={size} strokeWidth={1.5} />;
+      case 'Dhuhr': return <SunIcon size={size} strokeWidth={1.5} />;
+      case 'Asr': return <CloudSun size={size} strokeWidth={1.5} />;
+      case 'Maghrib': return <Sunset size={size} strokeWidth={1.5} />;
+      case 'Isha': return <MoonIcon size={size} strokeWidth={1.5} />;
+      default: return <Clock size={size} strokeWidth={1.5} />;
+    }
+  };
+
   const allPrayersMarked = PRAYER_NAMES.every(name => 
     todayLog.prayers[name as PrayerName] && todayLog.prayers[name as PrayerName] !== PrayerStatus.NOT_MARKED
   );
@@ -224,56 +237,53 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         </div>
       </header>
 
-      {/* Next Prayer Banner */}
-      <div className="relative overflow-hidden bg-emerald-700 dark:bg-emerald-800 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white shadow-xl shadow-emerald-200/40 dark:shadow-none transition-all duration-500">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex-1 flex flex-col gap-1">
-             <div className="flex items-center gap-2 mb-1">
-                <span className="px-2 py-0.5 bg-emerald-600/50 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border border-white/10">
-                   Active Period
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
+      {/* Redesigned Minimal Prayer Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2f5d40] to-[#1a3826] dark:from-[#064e3b] dark:to-[#022c22] rounded-[2.2rem] shadow-xl shadow-emerald-900/10 text-white transition-all duration-500">
+        
+        {/* Top Section - Current Prayer */}
+        <div className="p-7 flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-5">
+             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/5">
+                {getPrayerIcon(prayerContext.current.name, 32)}
              </div>
-             <h3 className="text-3xl md:text-5xl font-black tracking-tighter leading-none flex items-baseline gap-2">
-                {prayerContext.current.name}
-                <span className="text-xs md:text-sm font-medium opacity-60 font-mono tracking-normal">
-                   {prayerContext.current.startTime} — {prayerContext.current.endTime}
-                </span>
-             </h3>
-          </div>
-
-          <div className="hidden md:flex items-center justify-center px-4">
-             <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-md border border-white/10">
-                <ArrowRight size={20} className="text-emerald-200" />
+             <div>
+                <span className="block text-emerald-200/80 text-[10px] font-bold uppercase tracking-widest mb-1">Now</span>
+                <h3 className="text-3xl font-bold tracking-tight leading-none">{prayerContext.current.name}</h3>
              </div>
           </div>
+          <div className="text-right">
+             <span className="block text-emerald-200/80 text-[10px] font-bold uppercase tracking-widest mb-1">Time</span>
+             <p className="text-xl font-bold tracking-tight">{prayerContext.current.startTime}</p>
+          </div>
+        </div>
 
-          <div className="flex-1 flex flex-col md:items-end gap-1">
-             <div className="flex items-center md:justify-end gap-2 mb-1">
-                <span className="px-2 py-0.5 bg-white/10 rounded-full text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-1.5 ring-1 ring-white/20 backdrop-blur-sm">
-                   <Timer size={10} className="opacity-80" />
-                   Upcoming {timeRemaining}
-                </span>
+        {/* Divider */}
+        <div className="mx-7 h-px bg-white/10" />
+
+        {/* Bottom Section - Next Prayer */}
+        <div className="p-7 flex items-center justify-between relative z-10">
+           <div className="flex items-center gap-5">
+             <div className="w-12 h-12 rounded-2xl bg-black/20 flex items-center justify-center backdrop-blur-sm border border-white/5 text-emerald-100/80">
+                {getPrayerIcon(prayerContext.next.name, 22)}
              </div>
-             <div className="md:text-right">
-                <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-emerald-200/80 mb-0.5">
-                   Starts at {prayerContext.next.startTime}
-                </p>
-                <h3 className="text-3xl md:text-5xl font-black tracking-tighter leading-none">
-                   {prayerContext.next.name}
-                   {prayerContext.next.isTomorrow && <span className="text-[10px] md:text-xs font-medium opacity-50 ml-2 uppercase">Tomorrow</span>}
-                </h3>
+             <div>
+                <span className="block text-emerald-200/80 text-[10px] font-bold uppercase tracking-widest mb-1">Next</span>
+                <h3 className="text-xl font-bold tracking-tight leading-none text-white/90">{prayerContext.next.name}</h3>
              </div>
           </div>
-
+          
           <button 
             onClick={() => setIsTimingsPopupOpen(true)}
-            className="md:hidden absolute top-4 right-4 w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-xl ring-1 ring-white/20 active:scale-90"
+            className="bg-white/10 rounded-2xl px-5 py-3 backdrop-blur-md flex items-center gap-3 border border-white/10 hover:bg-white/15 transition-colors active:scale-95 group"
           >
-            <ChevronRight size={18} />
+             <Timer size={18} className="text-emerald-200 group-hover:text-white transition-colors" />
+             <span className="text-lg font-bold tabular-nums tracking-tight">{timeRemaining.replace('in ', '')}</span>
           </button>
         </div>
-        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-60 h-60 md:w-80 md:h-80 bg-emerald-400/20 rounded-full blur-[70px] md:blur-[90px]"></div>
+
+        {/* Background Decorative Blobs */}
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-400/10 rounded-full blur-[80px]"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 bg-emerald-900/40 rounded-full blur-[60px]"></div>
       </div>
 
       {/* Redesigned Prayer Marking Cards - Gender Aware */}
@@ -284,6 +294,9 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           const mode = todayLog.modes?.[prayerName];
           const isEnabled = isPrayerEnabled(prayerName);
           const time = prayerTimings.find(t => t.name === name)?.time;
+          
+          // Rename Dhuhr to Jumma if it is Friday
+          const displayName = (name === 'Dhuhr' && isFriday) ? 'Jumma' : name;
 
           // Determine visual state
           const isCongregation = status === PrayerStatus.ON_TIME && mode === PrayerMode.CONGREGATION;
@@ -304,7 +317,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                      {time?.split(' ')[0]}
                    </span>
                    <span className="text-xs md:text-xl font-black tracking-tight uppercase md:normal-case">
-                     {name}
+                     {displayName}
                    </span>
                 </div>
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-20"></div>
@@ -538,24 +551,20 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                   <div 
                     key={timing.name} 
                     className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${
-                      timing.name === prayerContext.next.name 
+                      timing.name === (prayerContext.next.key as any)
                       ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' 
                       : 'bg-slate-50 dark:bg-slate-800/40 border-slate-100 dark:border-slate-800/50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                        timing.name === prayerContext.next.name 
+                        timing.name === (prayerContext.next.key as any)
                         ? 'bg-emerald-600 text-white' 
                         : 'bg-white dark:bg-slate-700 text-slate-400 shadow-sm'
                       }`}>
-                         {timing.name === 'Fajr' && <Star size={14} />}
-                         {timing.name === 'Dhuhr' && <Sun size={14} />}
-                         {timing.name === 'Asr' && <Clock size={14} />}
-                         {timing.name === 'Maghrib' && <Star size={14} />}
-                         {timing.name === 'Isha' && <Moon size={14} />}
+                         {getPrayerIcon(timing.name, 14)}
                       </div>
-                      <span className="font-bold text-sm text-slate-800 dark:text-slate-100">{timing.name}</span>
+                      <span className="font-bold text-sm text-slate-800 dark:text-slate-100">{timing.displayName}</span>
                     </div>
                     <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">
                       {timing.time}
@@ -570,8 +579,5 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     </div>
   );
 };
-
-const Sun = ({ size, className = "" }: { size: number, className?: string }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>;
-const Moon = ({ size, className = "" }: { size: number, className?: string }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>;
 
 export default Dashboard;
