@@ -175,17 +175,19 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
                     اس موقع پر نبی ﷺ سے مختلف دعائیں ثابت ہیں، یہاں سب سے زیادہ مشہور اور صحیح ترین دعائیں درج ہیں:
                   </h4>
 
-                  {/* Dua 1 */}
-                  <div className="bg-emerald-50/50 dark:bg-emerald-900/10 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-800/50 shadow-sm">
-                     <p className="text-2xl md:text-3xl font-bold text-center text-slate-800 dark:text-slate-100 leading-[2.5] arabic-font mb-4">
-                       سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، وَتَبَارَكَ اسْمُكَ، وَتَعَالَىٰ جَدُّكَ، وَلَا إِلَٰهَ غَيْرُكَ
-                     </p>
-                     <p className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 arabic-font text-center">
-                       (سنن ابی داؤد: 775، ترمذی: 242 — البانی نے اسے صحیح کہا ہے)
-                     </p>
+                  {/* Dua 1: Subhanaka */}
+                  <div className="my-6">
+                    <div className="w-full bg-[#1e293b] dark:bg-[#0f172a] rounded-2xl p-6 border border-slate-700 relative overflow-hidden shadow-lg">
+                       <p className="text-2xl md:text-3xl leading-[2.2] text-center text-white arabic-font mb-4" dir="rtl">
+                         سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ، وَتَبَارَكَ اسْمُكَ، وَتَعَالَىٰ جَدُّكَ، وَلَا إِلَٰهَ غَيْرُكَ
+                       </p>
+                       <p className="text-sm font-bold text-emerald-400 arabic-font text-center" dir="rtl">
+                         (سنن ابی داؤد: 775، ترمذی: 242 — البانی نے اسے صحیح کہا ہے)
+                       </p>
+                    </div>
                   </div>
 
-                  {/* Dua 2 */}
+                  {/* Dua 2: Allahumma Baid */}
                   <div className="mt-8">
                      <h5 className="text-lg font-bold text-slate-800 dark:text-slate-200 arabic-font mb-2">
                        دوسری دعا (جو صحیح بخاری و مسلم میں ہے اور بہت فضیلت والی ہے):
@@ -194,32 +196,29 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
                        حضرت ابوہریرہ رضی اللہ عنہ فرماتے ہیں کہ نبی ﷺ تکبیر اور قراءت کے درمیان تھوڑی دیر خاموش رہتے اور یہ دعا پڑھتے تھے:
                      </p>
 
-                     <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
-                       <p className="text-2xl md:text-3xl font-bold text-center text-slate-800 dark:text-slate-100 leading-[2.2] arabic-font mb-6">
-                         اللَّهُمَّ بَاعِدْ بَيْنِي وَبَيْنَ خَطَايَايَ كَمَا بَاعَدْتَ بَيْنَ الْمَشْرِقِ وَالْمَغْرِبِ،
-                         <br />
-                         اللَّهُمَّ نَقِّنِي مِنَ الْخَطَايَا كَمَا يُنَقَّى الثَّوْبُ الأَبْيَضُ مِنَ الدَّنَسِ،
-                         <br />
-                         اللَّهُمَّ اغْسِلْ خَطَايَايَ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ
+                     {/* Arabic Block */}
+                     <div className="w-full bg-[#1e293b] dark:bg-[#0f172a] rounded-2xl p-6 border border-slate-700 relative overflow-hidden mb-6 shadow-lg">
+                       <p className="text-2xl md:text-3xl leading-[2.2] text-center text-white arabic-font mb-4" dir="rtl">
+                         اللَّهُمَّ بَاعِدْ بَيْنِي وَبَيْنَ خَطَايَايَ كَمَا بَاعَدْتَ بَيْنَ الْمَشْرِقِ وَالْمَغْرِبِ، اللَّهُمَّ نَقِّنِي مِنَ الْخَطَايَا كَمَا يُنَقَّى الثَّوْبُ الأَبْيَضُ مِنَ الدَّنَسِ، اللَّهُمَّ اغْسِلْ خَطَايَايَ بِالْمَاءِ وَالثَّلْجِ وَالْبَرَدِ
                        </p>
-                       
-                       <div className="text-right space-y-2 border-t border-slate-200 dark:border-slate-700 pt-4">
-                          <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font leading-loose">
-                            اے اللہ!
-                            میرے اور میری خطاؤں کے درمیان اتنی دوری کر دے جتنی دوری تو نے مشرق اور مغرب کے درمیان کی ہے۔
-                          </p>
-                          <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font leading-loose">
-                            اے اللہ! مجھے گناہوں سے اس طرح پاک کر دے جیسے سفید کپڑا میل کچیل سے پاک کیا جاتا ہے۔
-                          </p>
-                          <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font leading-loose">
-                             اے اللہ! میرے گناہوں کو پانی، برف اور اولوں سے دھو ڈال۔
-                          </p>
-                       </div>
+                       <p className="text-sm font-bold text-emerald-400 arabic-font text-center" dir="rtl">
+                         (صحیح بخاری: 744، صحیح مسلم: 598)
+                       </p>
                      </div>
-
-                     <p className="text-sm font-bold text-emerald-600 dark:text-emerald-400 arabic-font mt-3">
-                       (صحیح بخاری: 744، صحیح مسلم: 598)
-                     </p>
+                     
+                     {/* Urdu Translation Section */}
+                     <div className="text-right space-y-2">
+                        <h4 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mb-2">ترجمہ</h4>
+                        <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font leading-loose">
+                          اے اللہ! میرے اور میری خطاؤں کے درمیان اتنی دوری کر دے جتنی دوری تو نے مشرق اور مغرب کے درمیان کی ہے۔
+                        </p>
+                        <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font leading-loose">
+                          اے اللہ! مجھے گناہوں سے اس طرح پاک کر دے جیسے سفید کپڑا میل کچیل سے پاک کیا جاتا ہے۔
+                        </p>
+                        <p className="text-lg text-slate-700 dark:text-slate-300 arabic-font leading-loose">
+                           اے اللہ! میرے گناہوں کو پانی، برف اور اولوں سے دھو ڈال۔
+                        </p>
+                     </div>
                   </div>
                 </div>
               )}
