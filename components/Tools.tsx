@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Menu, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
@@ -291,7 +290,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
             {/* Custom Goal Modal */}
             {showGoalModal && (
               <div 
-                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm animate-in fade-in duration-300"
+                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300"
                 onClick={(e) => { e.stopPropagation(); setShowGoalModal(false); }}
               >
                 <div 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X, BookOpen, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -114,7 +113,7 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
 
       {/* 4. Popup Structure */}
       {selectedStep && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
           <div 
             className="bg-white dark:bg-slate-900 w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border-t sm:border border-slate-100 dark:border-slate-800 animate-in slide-in-from-bottom-10 duration-300 relative flex flex-col"
             onClick={(e) => e.stopPropagation()}
