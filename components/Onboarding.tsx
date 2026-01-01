@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ChevronRight, User, Shield, Check, Sparkles, UserCircle2, User2 } from 'lucide-react';
 import { AppSettings } from '../types.ts';
@@ -61,7 +60,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                     onKeyDown={(e) => e.key === 'Enter' && handleNext()}
                     placeholder="Enter your name"
-                    className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
+                    className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-[#1E1E1E] border-2 border-slate-100 dark:border-[#444444] focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
                   />
                  </div>
               </div>
@@ -80,16 +79,16 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                         className={`w-full p-3.5 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-[0.98] ${
                           formData.gender === g.id 
                           ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-sm' 
-                          : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-emerald-200'
+                          : 'bg-white dark:bg-[#1E1E1E]/50 border-slate-100 dark:border-[#444444] hover:border-emerald-200'
                         }`}
                       >
                          <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                            formData.gender === g.id ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'
+                            formData.gender === g.id ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-[#2C2C2C] text-slate-400'
                          }`}>
                            <g.icon size={20} />
                          </div>
                          <div className="flex-1 text-left">
-                           <span className={`block text-sm font-bold ${formData.gender === g.id ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-slate-200'}`}>
+                           <span className={`block text-sm font-bold ${formData.gender === g.id ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-[#E0E0E0]'}`}>
                              {g.label}
                            </span>
                            <span className={`block text-[10px] ${formData.gender === g.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
@@ -97,7 +96,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                            </span>
                          </div>
                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            formData.gender === g.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
+                            formData.gender === g.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-[#444444]'
                          }`}>
                             {formData.gender === g.id && <Check size={12} strokeWidth={4} />}
                          </div>
@@ -122,22 +121,22 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 group active:scale-[0.98] ${
                   formData.strictness === m.id 
                   ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 shadow-md transform scale-[1.02]' 
-                  : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700'
+                  : 'bg-white dark:bg-[#1E1E1E]/50 border-slate-100 dark:border-[#444444] hover:border-slate-200 dark:hover:border-[#888888]'
                 }`}
               >
                 <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl transition-colors ${
                   formData.strictness === m.id 
                   ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
-                  : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:text-slate-600'
+                  : 'bg-slate-100 dark:bg-[#2C2C2C] text-slate-400 group-hover:text-slate-600'
                 }`}>
                   <Shield size={20} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <span className="font-bold text-base block text-slate-900 dark:text-white leading-tight mb-0.5">{m.label}</span>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-tight truncate">{m.desc}</p>
+                  <p className="text-xs text-slate-500 dark:text-[#B0B0B0] font-medium leading-tight truncate">{m.desc}</p>
                 </div>
                 <div className={`flex-shrink-0 ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                   formData.strictness === m.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
+                   formData.strictness === m.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-[#444444]'
                 }`}>
                   {formData.strictness === m.id && <Check size={12} strokeWidth={4} />}
                 </div>
@@ -162,14 +161,14 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 active:scale-[0.98] ${
                     isActive
                     ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 text-emerald-800 dark:text-emerald-300 shadow-sm' 
-                    : 'bg-white dark:bg-slate-800/50 border-slate-100 dark:border-slate-800 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    : 'bg-white dark:bg-[#1E1E1E]/50 border-slate-100 dark:border-[#444444] text-slate-500 hover:bg-slate-50 dark:hover:bg-[#1E1E1E]'
                   }`}
                 >
                   <span className="text-sm font-bold text-left flex-1 mr-2">{goal}</span>
                   <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
-                    isActive ? 'bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-300'
+                    isActive ? 'bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-[#2C2C2C] text-slate-300'
                   }`}>
-                    {isActive ? <Check size={14} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" />}
+                    {isActive ? <Check size={14} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-[#444444]" />}
                   </div>
                 </button>
               );
@@ -189,7 +188,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 Bismillah
               </div>
               <h2 className="font-black text-3xl text-slate-900 dark:text-white tracking-tight">You're Ready</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
+              <p className="text-slate-500 dark:text-[#B0B0B0] text-sm font-medium leading-relaxed">
                 Your spiritual journey is configured. May your heart find peace in every prayer.
               </p>
             </div>
@@ -208,7 +207,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[500] bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 overflow-hidden">
+    <div className="fixed inset-0 z-[500] bg-slate-50 dark:bg-[#121212] flex items-center justify-center p-4 overflow-hidden">
       {/* Subtle Background */}
       <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-emerald-400/30 rounded-full blur-[120px]"></div>
@@ -216,10 +215,10 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       </div>
 
       {/* Main Container - Fixed Height for Stability */}
-      <div className="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-white/50 dark:border-slate-800 relative flex flex-col h-[600px] max-h-[85vh] overflow-hidden transition-all duration-500">
+      <div className="w-full max-w-md bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-white/50 dark:border-[#444444] relative flex flex-col h-[600px] max-h-[85vh] overflow-hidden transition-all duration-500">
         
         {/* Progress Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 dark:bg-slate-800">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 dark:bg-[#121212]">
           <div 
             className="h-full bg-emerald-500 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
             style={{ width: `${progress}%` }}
@@ -232,7 +231,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
             <h2 key={step + 'title'} className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter leading-none animate-fade-in-up">
               {titles[step-1].title}
             </h2>
-            <p key={step + 'sub'} className="text-sm text-slate-500 dark:text-slate-400 font-medium animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <p key={step + 'sub'} className="text-sm text-slate-500 dark:text-[#888888] font-medium animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               {titles[step-1].sub}
             </p>
           </div>
@@ -246,11 +245,11 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
           </div>
 
           {/* Footer Actions - Optimized Padding for Mobile */}
-          <div className="mt-8 flex items-center justify-between gap-3 flex-shrink-0 pt-4 border-t border-slate-50 dark:border-slate-800/50">
+          <div className="mt-8 flex items-center justify-between gap-3 flex-shrink-0 pt-4 border-t border-slate-50 dark:border-[#444444]/50">
             {step < totalSteps && (
               <button 
                 onClick={handleSkip}
-                className="px-4 py-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold text-xs uppercase tracking-widest transition-colors"
+                className="px-4 py-3 text-slate-400 hover:text-slate-600 dark:hover:text-[#E0E0E0] font-bold text-xs uppercase tracking-widest transition-colors"
               >
                 Skip
               </button>

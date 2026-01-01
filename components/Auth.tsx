@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { supabase } from '../services/supabase.ts';
 import { Mail, Lock, Loader2, ChevronRight, Heart, Sparkles } from 'lucide-react';
@@ -34,7 +33,7 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 overflow-hidden p-4">
+    <div className="fixed inset-0 w-full h-full flex items-center justify-center bg-slate-50 dark:bg-[#121212] overflow-hidden p-4">
       
       {/* Dynamic Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -43,19 +42,19 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
       </div>
 
       <div className="w-full max-w-md relative z-10 flex flex-col justify-center">
-        <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] border border-white/50 dark:border-slate-800 flex flex-col overflow-hidden transition-all duration-500">
+        <div className="bg-white/90 dark:bg-[#1E1E1E]/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.15)] border border-white/50 dark:border-[#444444] flex flex-col overflow-hidden transition-all duration-500">
           
           {/* Compressed Hero Header */}
-          <div className="relative pt-8 pb-6 flex flex-col items-center justify-center text-center px-6 border-b border-slate-50 dark:border-slate-800/50">
+          <div className="relative pt-8 pb-6 flex flex-col items-center justify-center text-center px-6 border-b border-slate-50 dark:border-[#444444]/50">
             <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 to-transparent dark:from-emerald-900/10 dark:to-transparent pointer-events-none"></div>
             <div className="relative z-10 mb-4 transform hover:scale-105 transition-transform duration-500">
                <Logo size={70} className="drop-shadow-xl" />
             </div>
             <div className="relative z-10">
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter leading-none mb-1">NurTrack</h1>
+              <h1 className="text-2xl font-black text-slate-900 dark:text-[#E0E0E0] tracking-tighter leading-none mb-1">NurTrack</h1>
               <div className="flex items-center justify-center gap-1.5">
                 <Sparkles size={10} className="text-emerald-500" />
-                <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.25em]">Spiritual Companion</p>
+                <p className="text-[9px] font-bold text-slate-400 dark:text-[#888888] uppercase tracking-[0.25em]">Spiritual Companion</p>
               </div>
             </div>
           </div>
@@ -64,9 +63,9 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
           <div className="px-5 sm:px-8 py-6 flex flex-col min-h-0 overflow-y-auto no-scrollbar">
             
             {/* Smooth Toggle Switch */}
-            <div className="relative flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl mb-8 w-full border border-slate-200/50 dark:border-slate-700/50 shrink-0">
+            <div className="relative flex p-1 bg-slate-100 dark:bg-[#121212] rounded-xl mb-8 w-full border border-slate-200/50 dark:border-[#444444]/50 shrink-0">
               <div 
-                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-slate-700 rounded-lg shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isLogin ? 'translate-x-0' : 'translate-x-[calc(100%+8px)]'}`} 
+                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-[#2C2C2C] rounded-lg shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isLogin ? 'translate-x-0' : 'translate-x-[calc(100%+8px)]'}`} 
               />
               <button 
                 onClick={() => { setIsLogin(true); setError(null); }}
@@ -93,7 +92,7 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="servant@nurtrack.com"
-                    className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 text-sm font-bold"
+                    className="w-full px-5 py-4 bg-slate-50 dark:bg-[#121212]/50 border border-slate-200 dark:border-[#444444] rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all dark:text-white placeholder:text-slate-300 dark:placeholder:text-[#888888] text-sm font-bold"
                     required
                   />
                 </div>
@@ -107,7 +106,7 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600 text-sm font-bold"
+                    className="w-full px-5 py-4 bg-slate-50 dark:bg-[#121212]/50 border border-slate-200 dark:border-[#444444] rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none transition-all dark:text-white placeholder:text-slate-300 dark:placeholder:text-[#888888] text-sm font-bold"
                     required
                   />
                 </div>
@@ -135,14 +134,14 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
 
             <div className="mt-8 space-y-4 animate-fade-in delay-100">
               <div className="relative flex items-center">
-                <div className="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
-                <span className="flex-shrink mx-4 text-[8px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-[0.4em]">Or</span>
-                <div className="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
+                <div className="flex-grow border-t border-slate-100 dark:border-[#444444]"></div>
+                <span className="flex-shrink mx-4 text-[8px] font-black text-slate-300 dark:text-[#888888] uppercase tracking-[0.4em]">Or</span>
+                <div className="flex-grow border-t border-slate-100 dark:border-[#444444]"></div>
               </div>
 
               <button 
                 onClick={onGuestMode}
-                className="w-full py-3.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-xs rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all flex items-center justify-center gap-2 group active:scale-[0.99] max-w-full"
+                className="w-full py-3.5 bg-white dark:bg-[#2C2C2C] text-slate-600 dark:text-[#B0B0B0] font-bold text-xs rounded-2xl border border-slate-200 dark:border-[#444444] hover:border-emerald-200 dark:hover:border-emerald-800 hover:bg-slate-50 dark:hover:bg-[#1E1E1E]/50 transition-all flex items-center justify-center gap-2 group active:scale-[0.99] max-w-full"
               >
                 <Heart size={14} className="text-rose-500 fill-rose-500/20 group-hover:scale-110 transition-transform shrink-0" />
                 <span className="truncate">Continue as Guest</span>
@@ -150,8 +149,8 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
             </div>
           </div>
           
-          <div className="p-4 border-t border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-center">
-             <p className="text-slate-400 dark:text-slate-500 text-[10px] leading-relaxed italic">
+          <div className="p-4 border-t border-slate-50 dark:border-[#444444] bg-slate-50/50 dark:bg-[#121212]/50 text-center">
+             <p className="text-slate-400 dark:text-[#888888] text-[10px] leading-relaxed italic">
                "Verily, in the remembrance of Allah do hearts find rest."
              </p>
           </div>
