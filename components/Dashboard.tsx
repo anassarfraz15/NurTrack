@@ -187,10 +187,10 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
         {/* Center: Greeting & Date - Absolute Positioned to be perfectly centered */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[240px] z-10 pointer-events-none">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-[#E0E0E0] tracking-tight leading-none">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-charcoal-text tracking-tight leading-none">
             {greeting}
           </h2>
-          <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-[#B0B0B0] mt-0.5 uppercase tracking-wide">
+          <p className="text-[10px] md:text-xs font-bold text-slate-500 dark:text-charcoal-sub mt-0.5 uppercase tracking-wide">
             {formatDisplayDate(today)}
           </p>
         </div>
@@ -199,18 +199,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         <div className="ml-auto relative z-20" ref={popupRef}>
           <button 
             onClick={() => setActivePopup(activePopup === 'streak' ? null : 'streak')}
-            className="flex items-center gap-1.5 px-3 py-1.5 h-10 bg-white dark:bg-[#1E1E1E] rounded-xl border border-slate-100 dark:border-[#444444] shadow-sm hover:bg-orange-50 dark:hover:bg-orange-900/10 active:scale-95 transition-all group"
+            className="flex items-center gap-1.5 px-3 py-1.5 h-10 bg-white dark:bg-charcoal-surface rounded-xl border border-slate-100 dark:border-charcoal-border shadow-sm hover:bg-orange-50 dark:hover:bg-orange-900/10 active:scale-95 transition-all group"
           >
             <Flame size={16} className="text-orange-500 group-hover:fill-current" />
-            <span className="text-xs font-black text-slate-700 dark:text-[#B0B0B0] tabular-nums">{appState.stats.streak}</span>
+            <span className="text-xs font-black text-slate-700 dark:text-charcoal-text tabular-nums">{appState.stats.streak}</span>
           </button>
 
           {/* Contextual Popup */}
           {activePopup && (
             <div className="absolute top-full right-0 mt-3 z-50 w-52 md:w-60">
-              <div className="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-xl border border-slate-100 dark:border-[#444444] p-4 animate-in zoom-in-95 origin-top-right relative">
+              <div className="bg-white dark:bg-charcoal-surface rounded-2xl shadow-xl border border-slate-100 dark:border-charcoal-border p-4 animate-in zoom-in-95 origin-top-right relative">
                  {/* Triangle Arrow */}
-                 <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white dark:bg-[#1E1E1E] border-l border-t border-slate-100 dark:border-[#444444] transform rotate-45"></div>
+                 <div className="absolute -top-1.5 right-4 w-3 h-3 bg-white dark:bg-charcoal-surface border-l border-t border-slate-100 dark:border-charcoal-border transform rotate-45"></div>
                  
                  <div className="relative z-10">
                    <div className="flex justify-between items-start mb-2">
@@ -220,13 +220,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                       <button onClick={() => setActivePopup(null)} className="text-slate-300 hover:text-slate-500"><X size={14} /></button>
                    </div>
                    
-                   <h4 className="text-sm font-bold text-slate-900 dark:text-[#E0E0E0] mb-1">
+                   <h4 className="text-sm font-bold text-slate-900 dark:text-charcoal-text mb-1">
                      {appState.stats.streak > 0 ? "You're on fire!" : "Start your streak"}
                    </h4>
                    <p className="text-[11px] text-slate-500 leading-relaxed mb-2">
                      You've prayed consistently for <strong className="text-orange-500">{appState.stats.streak} days</strong>.
                    </p>
-                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-[#2C2C2C] px-2 py-1 rounded-md inline-block">
+                   <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 dark:bg-charcoal px-2 py-1 rounded-md inline-block">
                      Best: {appState.stats.bestStreak} days
                    </div>
                  </div>
@@ -313,7 +313,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           return (
             <div 
               key={name}
-              className={`flex overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-white dark:bg-[#1E1E1E] border border-slate-100 dark:border-[#444444] shadow-sm transition-all duration-300 ${!isEnabled || !isEditing ? 'opacity-60 grayscale-[0.3] pointer-events-none' : ''}`}
+              className={`flex overflow-hidden rounded-[1.5rem] md:rounded-[2rem] bg-white dark:bg-charcoal-surface border border-slate-100 dark:border-charcoal-border shadow-sm transition-all duration-300 ${!isEnabled || !isEditing ? 'opacity-60 grayscale-[0.3] pointer-events-none' : ''}`}
             >
               {/* Left Section: Identity */}
               <div className={`w-12 md:w-32 flex flex-col items-center justify-center text-white bg-emerald-600 relative shrink-0 transition-colors`}>
@@ -343,13 +343,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                         className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 flex-1 ${
                           isIndividual 
                           ? 'text-emerald-600' 
-                          : 'text-slate-300 dark:text-[#888888] hover:text-slate-500'
+                          : 'text-slate-300 dark:text-charcoal-accent hover:text-slate-500'
                         }`}
                       >
                         <div className={`w-full h-9 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                           isIndividual 
                           ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
-                          : 'border-transparent bg-slate-50 dark:bg-[#2C2C2C]'
+                          : 'border-transparent bg-slate-50 dark:bg-charcoal'
                         }`}>
                            <Check size={18} className={`md:w-5 md:h-5 ${isIndividual ? 'fill-current' : ''}`} />
                         </div>
@@ -365,13 +365,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                         className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                           isCongregation 
                           ? 'text-emerald-600' 
-                          : 'text-slate-300 dark:text-[#888888] hover:text-slate-500'
+                          : 'text-slate-300 dark:text-charcoal-accent hover:text-slate-500'
                         }`}
                       >
                         <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                           isCongregation 
                           ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
-                          : 'border-transparent bg-slate-50 dark:bg-[#2C2C2C]'
+                          : 'border-transparent bg-slate-50 dark:bg-charcoal'
                         }`}>
                            <Users size={18} className={`md:w-5 md:h-5 ${isCongregation ? 'fill-current' : ''}`} />
                         </div>
@@ -384,13 +384,13 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                         className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                           isIndividual 
                           ? 'text-emerald-600' 
-                          : 'text-slate-300 dark:text-[#888888] hover:text-slate-500'
+                          : 'text-slate-300 dark:text-charcoal-accent hover:text-slate-500'
                         }`}
                       >
                         <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
                           isIndividual 
                           ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500 shadow-sm' 
-                          : 'border-transparent bg-slate-50 dark:bg-[#2C2C2C]'
+                          : 'border-transparent bg-slate-50 dark:bg-charcoal'
                         }`}>
                            <User size={18} className={`md:w-5 md:h-5 ${isIndividual ? 'fill-current' : ''}`} />
                         </div>
@@ -406,7 +406,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                       isLate 
                       ? 'text-amber-500' 
-                      : 'text-slate-300 dark:text-[#888888] hover:text-slate-500'
+                      : 'text-slate-300 dark:text-charcoal-accent hover:text-slate-500'
                     } ${isFemale ? 'flex-1' : ''}`}
                   >
                     <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
@@ -414,7 +414,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     } ${
                       isLate 
                       ? 'bg-amber-50 dark:bg-amber-900/30 border-amber-500 shadow-sm' 
-                      : 'border-transparent bg-slate-50 dark:bg-[#2C2C2C]'
+                      : 'border-transparent bg-slate-50 dark:bg-charcoal'
                     }`}>
                        <Clock size={18} className={`md:w-5 md:h-5 ${isLate ? 'fill-current' : ''}`} />
                     </div>
@@ -428,7 +428,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     className={`flex flex-col items-center justify-center p-1 rounded-xl transition-all active:scale-95 ${
                       isMissed 
                       ? 'text-rose-500' 
-                      : 'text-slate-300 dark:text-[#888888] hover:text-slate-500'
+                      : 'text-slate-300 dark:text-charcoal-accent hover:text-slate-500'
                     } ${isFemale ? 'flex-1' : ''}`}
                   >
                     <div className={`w-9 h-9 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all border-2 ${
@@ -436,7 +436,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     } ${
                       isMissed 
                       ? 'bg-rose-50 dark:bg-rose-900/30 border-rose-500 shadow-sm' 
-                      : 'border-transparent bg-slate-50 dark:bg-[#2C2C2C]'
+                      : 'border-transparent bg-slate-50 dark:bg-charcoal'
                     }`}>
                        <XCircle size={18} className={`md:w-5 md:h-5 ${isMissed ? 'fill-current' : ''}`} />
                     </div>
@@ -445,7 +445,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                 </div>
 
                 {/* Completion Checkmark */}
-                <div className="pl-2 md:pl-4 border-l border-slate-100 dark:border-[#444444]/50 flex items-center justify-center">
+                <div className="pl-2 md:pl-4 border-l border-slate-100 dark:border-charcoal-border/50 flex items-center justify-center">
                   <button 
                     onClick={() => handleCheckmarkClick(prayerName)}
                     disabled={!isEnabled}
@@ -454,7 +454,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                       ? (isLate ? 'bg-amber-500 border-amber-500 text-white shadow-md' : 
                          isMissed ? 'bg-rose-500 border-rose-500 text-white shadow-md' :
                          'bg-emerald-600 border-emerald-600 text-white shadow-md')
-                      : 'border-slate-200 dark:border-[#444444] text-slate-300 dark:text-[#888888] bg-transparent'
+                      : 'border-slate-200 dark:border-charcoal-border text-slate-300 dark:text-charcoal-accent bg-transparent'
                     }`}
                   >
                     {isMarked ? <CheckCircle size={20} className="md:w-6 md:h-6" /> : <Circle size={20} className="md:w-6 md:h-6" />}
@@ -480,7 +480,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           ) : (
             <button
               onClick={handleEdit}
-              className={`px-8 py-4 bg-slate-900 dark:bg-[#2C2C2C] hover:bg-slate-800 dark:hover:bg-[#1E1E1E] text-white font-black text-sm rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3 min-w-[160px] justify-center ${
+              className={`px-8 py-4 bg-slate-900 dark:bg-charcoal-surface hover:bg-slate-800 dark:hover:bg-charcoal-surface/80 text-white font-black text-sm rounded-2xl shadow-lg transition-all active:scale-95 flex items-center gap-3 min-w-[160px] justify-center ${
                 appState.settings.strictness === 'strict' && todayLog.isLocked ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
@@ -492,8 +492,8 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
       )}
 
       {/* Reflection Card */}
-      <section className="bg-white dark:bg-[#1E1E1E] border border-slate-100 dark:border-[#444444]/80 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-6 text-slate-50 dark:text-[#2C2C2C] group-hover:text-emerald-500/10 transition-colors pointer-events-none">
+      <section className="bg-white dark:bg-charcoal-surface border border-slate-100 dark:border-charcoal-border rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-6 text-slate-50 dark:text-charcoal group-hover:text-emerald-500/10 transition-colors pointer-events-none">
           <Quote size={80} />
         </div>
         
@@ -502,18 +502,18 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
             <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600">
               <Quote size={16} />
             </div>
-            <h3 className="font-bold text-lg text-slate-900 dark:text-[#E0E0E0] tracking-tight">Reflection</h3>
+            <h3 className="font-bold text-lg text-slate-900 dark:text-charcoal-text tracking-tight">Reflection</h3>
           </div>
           
           {loadingMotivation ? (
             <div className="space-y-3 animate-pulse">
-              <div className="h-4 bg-slate-100 dark:bg-[#2C2C2C] rounded-full w-full"></div>
-              <div className="h-4 bg-slate-100 dark:bg-[#2C2C2C] rounded-full w-3/4"></div>
+              <div className="h-4 bg-slate-100 dark:bg-charcoal rounded-full w-full"></div>
+              <div className="h-4 bg-slate-100 dark:bg-charcoal rounded-full w-3/4"></div>
             </div>
           ) : motivation ? (
             <div className="space-y-3">
               <div>
-                <p className="text-slate-800 dark:text-[#E0E0E0] italic text-lg leading-relaxed arabic-font font-medium">
+                <p className="text-slate-800 dark:text-charcoal-text italic text-lg leading-relaxed arabic-font font-medium">
                   "{motivation.message}"
                 </p>
                 <p className="text-emerald-600 dark:text-emerald-400 font-black text-[9px] mt-2 tracking-widest uppercase">— {motivation.source}</p>
@@ -531,7 +531,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
       {isTimingsPopupOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
           <div 
-            className="bg-white dark:bg-[#1E1E1E] w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-[#444444] animate-in zoom-in-95 duration-500 relative"
+            className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-500 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 md:p-8">
@@ -541,11 +541,11 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     <Calendar size={10} />
                     Schedule
                   </div>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-[#E0E0E0] tracking-tight">Prayer Timings</h3>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-charcoal-text tracking-tight">Prayer Timings</h3>
                 </div>
                 <button 
                   onClick={() => setIsTimingsPopupOpen(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-[#E0E0E0] transition-colors bg-slate-50 dark:bg-[#2C2C2C] rounded-xl"
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text transition-colors bg-slate-50 dark:bg-charcoal rounded-xl"
                 >
                   <X size={18} />
                 </button>
@@ -558,20 +558,20 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
                     className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${
                       timing.name === (prayerContext.next.key as any)
                       ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800' 
-                      : 'bg-slate-50 dark:bg-[#2C2C2C]/50 border-slate-100 dark:border-[#444444]/50'
+                      : 'bg-slate-50 dark:bg-charcoal/50 border-slate-100 dark:border-charcoal-border/50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                         timing.name === (prayerContext.next.key as any)
                         ? 'bg-emerald-600 text-white' 
-                        : 'bg-white dark:bg-[#444444] text-slate-400 shadow-sm'
+                        : 'bg-white dark:bg-charcoal-border text-slate-400 shadow-sm'
                       }`}>
                          {getPrayerIcon(timing.name, 14)}
                       </div>
-                      <span className="font-bold text-sm text-slate-800 dark:text-[#E0E0E0]">{timing.displayName}</span>
+                      <span className="font-bold text-sm text-slate-800 dark:text-charcoal-text">{timing.displayName}</span>
                     </div>
-                    <span className="font-mono font-bold text-slate-900 dark:text-[#E0E0E0] text-xs">
+                    <span className="font-mono font-bold text-slate-900 dark:text-charcoal-text text-xs">
                       {timing.time}
                     </span>
                   </div>

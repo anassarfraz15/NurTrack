@@ -166,12 +166,12 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
         </button>
 
         <div className="flex flex-col items-center md:items-start w-full">
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-[#E0E0E0] tracking-tight text-center md:text-left">Daily Tools</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-charcoal-text tracking-tight text-center md:text-left">Daily Tools</h2>
           <p className="text-slate-500 text-sm md:text-base font-medium text-center md:text-left">Your everyday Muslim companions</p>
         </div>
       </header>
 
-      <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-[#1E1E1E] rounded-2xl overflow-x-auto no-scrollbar w-full md:w-fit max-w-full">
+      <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-charcoal-surface rounded-2xl overflow-x-auto no-scrollbar w-full md:w-fit max-w-full">
         {tools.map((tool) => (
           <button
             key={tool.id}
@@ -182,8 +182,8 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
             }}
             className={`flex-shrink-0 whitespace-nowrap flex items-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
               activeTool === tool.id 
-              ? 'bg-white dark:bg-[#2C2C2C] text-emerald-600 shadow-sm' 
-              : 'text-slate-500 hover:text-slate-700 dark:text-[#888888] dark:hover:text-[#B0B0B0]'
+              ? 'bg-white dark:bg-charcoal text-emerald-600 shadow-sm' 
+              : 'text-slate-500 hover:text-slate-700 dark:text-charcoal-accent dark:hover:text-charcoal-sub'
             }`}
           >
             <tool.icon size={16} className="sm:w-[18px] sm:h-[18px]" />
@@ -208,7 +208,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
             {/* Centered Counter Circle */}
             <div className="flex flex-col items-center gap-8 w-full">
               <div 
-                className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-[#1E1E1E] shadow-2xl relative overflow-hidden pointer-events-none ${
+                className={`w-56 h-56 sm:w-64 sm:h-64 rounded-full border-8 transition-all duration-300 flex flex-col items-center justify-center bg-white dark:bg-charcoal-surface shadow-2xl relative overflow-hidden pointer-events-none ${
                   isTapping ? 'scale-95' : 'scale-100'
                 } ${
                   tasbeehGoal && tasbeehCount >= tasbeehGoal 
@@ -223,7 +223,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                   />
                 )}
                 <div className="relative z-10 flex flex-col items-center">
-                  <span className={`text-5xl sm:text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-[#E0E0E0]'}`}>
+                  <span className={`text-5xl sm:text-6xl font-black font-mono transition-colors ${tasbeehGoal && tasbeehCount >= tasbeehGoal ? 'text-emerald-600' : 'text-slate-800 dark:text-charcoal-text'}`}>
                     {tasbeehCount}
                   </span>
                   <div className="flex flex-col items-center mt-1">
@@ -247,7 +247,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                     setTasbeehCount(0); 
                     triggerHaptics('heavy'); 
                   }}
-                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-[#1E1E1E] rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-[#444444] transition-all active:rotate-180 hover:scale-105"
+                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-charcoal-surface rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-charcoal-border transition-all active:rotate-180 hover:scale-105"
                   title="Reset Counter"
                 >
                   <RotateCcw size={18} />
@@ -259,7 +259,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                     setShowGoalModal(true); 
                     triggerHaptics('light'); 
                   }}
-                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-[#1E1E1E] rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-[#444444] transition-all hover:scale-105"
+                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-charcoal-surface rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-charcoal-border transition-all hover:scale-105"
                   title="Set Goal"
                 >
                   <Settings2 size={18} />
@@ -278,7 +278,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                     className={`py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl border transition-all font-black text-xs sm:text-sm ${
                       tasbeehGoal === val 
                       ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/30' 
-                      : 'border-slate-200 dark:border-[#444444] text-slate-600 dark:text-[#B0B0B0] hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
+                      : 'border-slate-200 dark:border-charcoal-border text-slate-600 dark:text-charcoal-sub hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-200'
                     }`}
                   >
                     {val}
@@ -294,7 +294,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                 onClick={(e) => { e.stopPropagation(); setShowGoalModal(false); }}
               >
                 <div 
-                  className="bg-white dark:bg-[#1E1E1E] w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-[#444444] animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
+                  className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between mb-6">
@@ -302,11 +302,11 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                       <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-xl">
                         <Target size={20} />
                       </div>
-                      <h3 className="text-xl font-black text-slate-900 dark:text-[#E0E0E0] tracking-tight">Set Custom Goal</h3>
+                      <h3 className="text-xl font-black text-slate-900 dark:text-charcoal-text tracking-tight">Set Custom Goal</h3>
                     </div>
                     <button 
                       onClick={(e) => { e.stopPropagation(); setShowGoalModal(false); triggerHaptics('light'); }}
-                      className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-[#E0E0E0] transition-colors"
+                      className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text transition-colors"
                     >
                       <X size={20} />
                     </button>
@@ -321,7 +321,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                         value={customGoal}
                         onChange={(e) => setCustomGoal(e.target.value)}
                         placeholder="e.g. 500"
-                        className="w-full px-6 py-4 bg-slate-50 dark:bg-[#2C2C2C] border-2 border-transparent focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
+                        className="w-full px-6 py-4 bg-slate-50 dark:bg-charcoal border-2 border-transparent focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
                         min="1"
                       />
                     </div>
@@ -330,7 +330,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                       <button 
                         type="button"
                         onClick={(e) => { e.stopPropagation(); selectGoal(null); }}
-                        className="flex-1 py-4 bg-slate-100 dark:bg-[#2C2C2C] text-slate-600 dark:text-[#B0B0B0] font-bold rounded-2xl hover:bg-slate-200 transition-all"
+                        className="flex-1 py-4 bg-slate-100 dark:bg-charcoal text-slate-600 dark:text-charcoal-sub font-bold rounded-2xl hover:bg-slate-200 transition-all"
                       >
                         Free Mode
                       </button>
@@ -351,11 +351,11 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
 
         {activeTool === 'records' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
-             <div className="bg-white dark:bg-[#1E1E1E] p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-[#444444] shadow-sm text-center">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-[#2C2C2C] rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
+             <div className="bg-white dark:bg-charcoal-surface p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-charcoal-border shadow-sm text-center">
+                <div className="w-16 h-16 bg-slate-100 dark:bg-charcoal rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
                   <ClipboardList size={32} />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-[#E0E0E0] tracking-tight mb-2">Lifetime Statistics</h3>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-charcoal-text tracking-tight mb-2">Lifetime Statistics</h3>
                 <p className="text-slate-500 text-sm">Your total spiritual journey at a glance.</p>
              </div>
              
@@ -395,18 +395,18 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
              {ACHIEVEMENTS_LIST.map((ach) => {
                const isUnlocked = appState.unlockedAchievements?.includes(ach.id);
                return (
-                 <div key={ach.id} className={`relative overflow-hidden p-6 rounded-[2rem] border transition-all ${isUnlocked ? 'bg-white dark:bg-[#1E1E1E] border-slate-100 dark:border-[#444444] shadow-sm' : 'bg-slate-50 dark:bg-[#121212]/50 border-transparent opacity-70 grayscale'}`}>
+                 <div key={ach.id} className={`relative overflow-hidden p-6 rounded-[2rem] border transition-all ${isUnlocked ? 'bg-white dark:bg-charcoal-surface border-slate-100 dark:border-charcoal-border shadow-sm' : 'bg-slate-50 dark:bg-charcoal/50 border-transparent opacity-70 grayscale'}`}>
                     <div className="flex items-start justify-between">
-                      <div className={`p-3 rounded-2xl mb-4 ${isUnlocked ? ach.bg : 'bg-slate-200 dark:bg-[#2C2C2C]'}`}>
+                      <div className={`p-3 rounded-2xl mb-4 ${isUnlocked ? ach.bg : 'bg-slate-200 dark:bg-charcoal'}`}>
                         <ach.icon size={24} className={isUnlocked ? ach.color : 'text-slate-400'} />
                       </div>
                       {isUnlocked ? (
                          <div className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest">Unlocked</div>
                       ) : (
-                         <div className="px-2 py-1 bg-slate-200 dark:bg-[#2C2C2C] text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest">Locked</div>
+                         <div className="px-2 py-1 bg-slate-200 dark:bg-charcoal text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest">Locked</div>
                       )}
                     </div>
-                    <h4 className="text-lg font-bold text-slate-900 dark:text-[#E0E0E0] mb-1">{ach.title}</h4>
+                    <h4 className="text-lg font-bold text-slate-900 dark:text-charcoal-text mb-1">{ach.title}</h4>
                     <p className="text-xs text-slate-500 leading-relaxed">{ach.description}</p>
                  </div>
                );
@@ -416,14 +416,14 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
 
         {activeTool === 'calendar' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div className="bg-white dark:bg-[#1E1E1E] rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 dark:border-[#444444] text-center mx-auto max-w-2xl">
+            <div className="bg-white dark:bg-charcoal-surface rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100 dark:border-charcoal-border text-center mx-auto max-w-2xl">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6 sm:mb-8 shadow-xl shadow-emerald-200/50">
                 <CalendarIcon size={32} className="sm:w-[40px] sm:h-[40px]" />
               </div>
               <h3 className="text-2xl sm:text-4xl font-black arabic-font mb-2 leading-tight">{hijriDate || 'Calculating...'}</h3>
               <p className="text-slate-500 text-sm sm:text-lg mb-4">Islamic Hijri Calendar</p>
               
-              <div className="bg-slate-50 dark:bg-[#2C2C2C] p-3 sm:p-4 rounded-2xl border border-slate-100 dark:border-[#444444] inline-flex items-center gap-3">
+              <div className="bg-slate-50 dark:bg-charcoal p-3 sm:p-4 rounded-2xl border border-slate-100 dark:border-charcoal-border inline-flex items-center gap-3">
                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                  <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500">Live Astronomical Calculation</span>
               </div>
@@ -437,16 +437,16 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                 </div>
               ) : islamicEvents.length > 0 ? (
                 islamicEvents.map((event, idx) => (
-                  <div key={idx} className="p-6 sm:p-8 bg-white dark:bg-[#1E1E1E] rounded-[2.5rem] border border-slate-100 dark:border-[#444444] shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group mx-auto w-full max-w-md">
+                  <div key={idx} className="p-6 sm:p-8 bg-white dark:bg-charcoal-surface rounded-[2.5rem] border border-slate-100 dark:border-charcoal-border shadow-sm hover:border-emerald-200 dark:hover:border-emerald-800 transition-all group mx-auto w-full max-w-md">
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-[9px] sm:text-[10px] text-slate-400 uppercase font-black tracking-widest block">{event.hijriDate}</span>
                       <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full text-[9px] sm:text-[10px] font-bold">
                         Upcoming
                       </div>
                     </div>
-                    <h4 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-[#E0E0E0] mb-2 leading-tight">{event.name}</h4>
+                    <h4 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-charcoal-text mb-2 leading-tight">{event.name}</h4>
                     <p className="text-slate-500 text-xs sm:text-sm mb-6 leading-relaxed">{event.description || `Expected on ${new Date(event.gregorianDate).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}`}</p>
-                    <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-[#444444]">
+                    <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-charcoal-border">
                       <span className="text-[10px] sm:text-xs font-bold text-slate-400">Countdown</span>
                       <span className="text-emerald-600 font-black text-xs sm:text-sm">{calculateDaysRemaining(event.gregorianDate)}</span>
                     </div>
@@ -463,9 +463,9 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
 
         {activeTool === 'fasting' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
-             <div className="bg-white dark:bg-[#1E1E1E] p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-[#444444] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm max-w-3xl mx-auto w-full">
+             <div className="bg-white dark:bg-charcoal-surface p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-charcoal-border flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm max-w-3xl mx-auto w-full">
                <div className="text-center sm:text-left">
-                 <h4 className="font-bold text-slate-800 dark:text-[#E0E0E0] text-lg sm:text-xl tracking-tight leading-tight">Sunnah Fasting</h4>
+                 <h4 className="font-bold text-slate-800 dark:text-charcoal-text text-lg sm:text-xl tracking-tight leading-tight">Sunnah Fasting</h4>
                  <p className="text-slate-500 text-sm font-medium">Track your Monday & Thursday fasts</p>
                </div>
                <button className="w-full sm:w-auto px-8 py-3 bg-emerald-600 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 hover:bg-emerald-700 transition-all active:scale-95 text-sm">Track Fast</button>
@@ -481,7 +481,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                     <p className="text-[9px] sm:text-[10px] text-amber-600 font-bold uppercase tracking-widest">Steady Progress</p>
                   </div>
                 </div>
-                <div className="p-6 sm:p-8 bg-slate-50 dark:bg-[#2C2C2C] rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between min-h-[160px]">
+                <div className="p-6 sm:p-8 bg-slate-50 dark:bg-charcoal rounded-[2.5rem] border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between min-h-[160px]">
                   <div>
                     <h5 className="font-bold text-slate-800 dark:text-slate-200 text-lg mb-2 leading-tight">Ayam al-Bid</h5>
                     <p className="text-slate-500 text-xs sm:text-sm leading-relaxed">The "White Days" are the 13th, 14th, and 15th of every lunar month.</p>

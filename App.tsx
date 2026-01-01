@@ -520,7 +520,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 gap-4">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-slate-50 dark:bg-charcoal gap-4">
         <div className="relative">
           <Logo size={120} className="animate-pulse" />
           <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full -z-10 animate-pulse"></div>

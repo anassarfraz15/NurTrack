@@ -21,9 +21,9 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
   const isDark = appState.settings.theme === 'dark';
 
   const colors = {
-    text: isDark ? '#94a3b8' : '#64748b',
-    grid: isDark ? 'rgba(51, 65, 85, 0.4)' : 'rgba(226, 232, 240, 0.6)',
-    barBg: isDark ? 'rgba(30, 41, 59, 0.5)' : 'rgba(241, 245, 249, 0.8)',
+    text: isDark ? '#E0E0E0' : '#64748b',
+    grid: isDark ? 'rgba(68, 68, 68, 0.4)' : 'rgba(226, 232, 240, 0.6)',
+    barBg: isDark ? '#1E1E1E' : 'rgba(241, 245, 249, 0.8)',
   };
 
   const viewMonth = viewDate.getMonth();
@@ -126,13 +126,13 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white dark:bg-[#1E1E1E] p-3 border-0 shadow-2xl rounded-2xl ring-1 ring-slate-200 dark:ring-[#444444]/50 backdrop-blur-md">
-          <p className="text-[10px] font-bold text-slate-400 dark:text-[#888888] mb-2 uppercase tracking-widest">{label}</p>
+        <div className="bg-white dark:bg-charcoal-surface p-3 border-0 shadow-2xl rounded-2xl ring-1 ring-slate-200 dark:ring-charcoal-border/50 backdrop-blur-md">
+          <p className="text-[10px] font-bold text-slate-400 dark:text-charcoal-accent mb-2 uppercase tracking-widest">{label}</p>
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4 mb-1 last:mb-0">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.fill || entry.color || entry.stroke }}></div>
-                <span className="text-xs font-medium text-slate-600 dark:text-[#E0E0E0]">{entry.name}</span>
+                <span className="text-xs font-medium text-slate-600 dark:text-charcoal-text">{entry.name}</span>
               </div>
               <span className="text-xs font-bold font-mono text-slate-800 dark:text-white">{entry.value}</span>
             </div>
@@ -169,8 +169,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
         </button>
 
         <div className="flex flex-col items-center md:items-start w-full">
-          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-[#E0E0E0] tracking-tight text-center md:text-left">Visual Streak Calendar</h2>
-          <p className="text-sm text-slate-500 dark:text-[#B0B0B0] mt-1 text-center md:text-left">Identify your consistency patterns at a glance</p>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-charcoal-text tracking-tight text-center md:text-left">Visual Streak Calendar</h2>
+          <p className="text-sm text-slate-500 dark:text-charcoal-sub mt-1 text-center md:text-left">Identify your consistency patterns at a glance</p>
         </div>
         
         <div className="bg-emerald-50 dark:bg-emerald-900/20 px-5 py-2.5 rounded-2xl flex items-center gap-3 border border-emerald-100 dark:border-emerald-800/50 self-center md:self-auto">
@@ -180,26 +180,26 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
       </header>
 
       {/* Full Width Calendar Section */}
-      <section className="bg-white dark:bg-[#1E1E1E]/50 backdrop-blur-sm p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-[#444444]/80 w-full">
+      <section className="bg-white dark:bg-charcoal-surface/50 backdrop-blur-sm p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-charcoal-border/80 w-full">
         <div className="flex items-center justify-between mb-6 md:mb-8">
           <div className="flex items-center gap-3 md:gap-4">
             <div className="p-2.5 md:p-3 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl text-emerald-600">
               <CalendarDays size={20} />
             </div>
-            <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-[#E0E0E0] tracking-tight">
+            <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-charcoal-text tracking-tight">
               {viewDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
             </h3>
           </div>
           <div className="flex gap-1">
             <button 
               onClick={handlePrevMonth}
-              className="p-2 hover:bg-slate-50 dark:hover:bg-[#2C2C2C] rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-[#E0E0E0]"
+              className="p-2 hover:bg-slate-50 dark:hover:bg-charcoal rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-charcoal-text"
             >
               <ChevronLeft size={18} />
             </button>
             <button 
               onClick={handleNextMonth}
-              className="p-2 hover:bg-slate-50 dark:hover:bg-[#2C2C2C] rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-[#E0E0E0]"
+              className="p-2 hover:bg-slate-50 dark:hover:bg-charcoal rounded-lg md:rounded-xl transition-colors text-slate-600 dark:text-charcoal-text"
             >
               <ChevronRight size={18} />
             </button>
@@ -217,8 +217,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
             const isToday = dayObj.dateKey === todayStr;
             const isFuture = dayObj.dateKey > todayStr;
 
-            let bgClass = "bg-white dark:bg-[#121212] border-slate-100 dark:border-[#444444]/50";
-            let textClass = "text-slate-600 dark:text-[#B0B0B0]";
+            let bgClass = "bg-white dark:bg-charcoal border-slate-100 dark:border-charcoal-border/50";
+            let textClass = "text-slate-600 dark:text-charcoal-sub";
             let shadowClass = "";
 
             if (!isFuture) {
@@ -236,7 +236,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
                 shadowClass = "shadow-md md:shadow-lg shadow-rose-500/20";
               }
             } else {
-              bgClass = "bg-slate-50 dark:bg-[#1E1E1E]/20 border-transparent opacity-50";
+              bgClass = "bg-slate-50 dark:bg-charcoal-surface/20 border-transparent opacity-50";
             }
 
             return (
@@ -259,7 +259,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-6 pt-6 border-t border-slate-50 dark:border-[#444444]/50">
+        <div className="flex flex-wrap items-center gap-3 md:gap-6 mt-6 pt-6 border-t border-slate-50 dark:border-charcoal-border/50">
           <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
             <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-emerald-500 shadow-sm" /> Perfect
           </div>
@@ -270,22 +270,22 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
             <div className="w-3 h-3 md:w-4 md:h-4 rounded-md bg-rose-500 shadow-sm" /> Missed
           </div>
           <div className="flex items-center gap-1.5 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest ml-auto">
-            <div className="w-3 h-3 md:w-4 md:h-4 rounded-md border-2 border-slate-100 dark:border-[#444444] opacity-50" /> Future
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-md border-2 border-slate-100 dark:border-charcoal-border opacity-50" /> Future
           </div>
         </div>
       </section>
 
       {/* Statistics Grids */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-        <section className="lg:col-span-2 bg-white dark:bg-[#1E1E1E]/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-[#444444]/80 relative">
+        <section className="lg:col-span-2 bg-white dark:bg-charcoal-surface/50 backdrop-blur-sm p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-charcoal-border/80 relative">
           <div className="flex items-center justify-between mb-8 md:mb-10">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-emerald-100 dark:bg-emerald-900/20 rounded-xl md:rounded-2xl flex items-center justify-center text-emerald-600">
                 <TrendingUp size={24} />
               </div>
               <div>
-                <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-[#E0E0E0] tracking-tight">Discipline Progress</h3>
-                <p className="text-[10px] md:text-xs text-slate-400 dark:text-[#888888] font-medium">Weekly performance breakdown</p>
+                <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-charcoal-text tracking-tight">Discipline Progress</h3>
+                <p className="text-[10px] md:text-xs text-slate-400 dark:text-charcoal-sub font-medium">Weekly performance breakdown</p>
               </div>
             </div>
           </div>
@@ -305,12 +305,12 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
           </div>
         </section>
 
-        <section className="bg-white dark:bg-[#1E1E1E]/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-[#444444]/80 flex flex-col">
+        <section className="bg-white dark:bg-charcoal-surface/50 p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-charcoal-border/80 flex flex-col">
           <div className="flex items-center gap-4 mb-6 md:mb-8">
             <div className="p-2.5 md:p-3 bg-amber-100 dark:bg-amber-900/20 rounded-xl md:rounded-2xl text-amber-600">
               <Award size={20} />
             </div>
-            <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-[#E0E0E0] tracking-tight">Accuracy Ratio</h3>
+            <h3 className="font-bold text-base md:text-lg text-slate-800 dark:text-charcoal-text tracking-tight">Accuracy Ratio</h3>
           </div>
           
           <div className="flex-1 min-h-[200px] md:min-h-[220px] relative flex items-center justify-center">
@@ -334,14 +334,14 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
              </ResponsiveContainer>
              <div className="absolute flex flex-col items-center pointer-events-none">
                <span className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tighter">{averageConsistency}%</span>
-               <span className="text-[8px] md:text-[10px] text-slate-400 dark:text-[#888888] font-bold uppercase tracking-[0.25em] mt-1">Efficiency</span>
+               <span className="text-[8px] md:text-[10px] text-slate-400 dark:text-charcoal-sub font-bold uppercase tracking-[0.25em] mt-1">Efficiency</span>
              </div>
           </div>
           
           <div className="grid grid-cols-3 gap-2 md:gap-3 mt-6 md:mt-8">
              {overallDistribution.map((item) => (
-               <div key={item.name} className="flex flex-col items-center p-2.5 md:p-3 bg-slate-50/80 dark:bg-[#1E1E1E]/30 rounded-xl md:rounded-2xl border border-transparent">
-                 <span className="text-[8px] md:text-[10px] text-slate-400 dark:text-[#888888] font-bold uppercase mb-1 tracking-wide">{item.name}</span>
+               <div key={item.name} className="flex flex-col items-center p-2.5 md:p-3 bg-slate-50/80 dark:bg-charcoal-surface/30 rounded-xl md:rounded-2xl border border-transparent">
+                 <span className="text-[8px] md:text-[10px] text-slate-400 dark:text-charcoal-sub font-bold uppercase mb-1 tracking-wide">{item.name}</span>
                  <span className="text-lg md:text-xl font-black" style={{ color: item.color }}>{item.value}</span>
                </div>
              ))}
@@ -356,20 +356,20 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
           onClick={() => setShowDayPopup(false)}
         >
           <div 
-            className="bg-white dark:bg-[#1E1E1E] w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-[#444444] animate-in zoom-in-95 duration-300 relative"
+            className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-300 relative"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 md:p-8">
-              <div className="flex items-center justify-between mb-6 border-b border-slate-100 dark:border-[#444444] pb-4">
+              <div className="flex items-center justify-between mb-6 border-b border-slate-100 dark:border-charcoal-border pb-4">
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Daily Log</p>
-                  <h3 className="text-xl font-black text-slate-900 dark:text-[#E0E0E0] tracking-tight">
+                  <h3 className="text-xl font-black text-slate-900 dark:text-charcoal-text tracking-tight">
                     {formatDisplayDateSimple(selectedCalendarDate)}
                   </h3>
                 </div>
                 <button 
                   onClick={() => setShowDayPopup(false)}
-                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-[#E0E0E0] transition-colors bg-slate-50 dark:bg-[#2C2C2C] rounded-xl"
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text transition-colors bg-slate-50 dark:bg-charcoal rounded-xl"
                 >
                   <X size={20} />
                 </button>
@@ -383,13 +383,13 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
                   const displayName = (name === 'Dhuhr' && isDayFriday) ? 'Jumma' : name;
                   
                   return (
-                    <div key={name} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-[#1E1E1E]/50 rounded-2xl border border-slate-100 dark:border-[#444444]">
+                    <div key={name} className="flex items-center justify-between p-3.5 bg-slate-50 dark:bg-charcoal-surface/50 rounded-2xl border border-slate-100 dark:border-charcoal-border">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                           status === PrayerStatus.ON_TIME ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' :
                           status === PrayerStatus.LATE ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600' :
                           status === PrayerStatus.MISSED ? 'bg-rose-100 dark:bg-rose-900/30 text-rose-600' :
-                          'bg-slate-200 dark:bg-[#444444] text-slate-400'
+                          'bg-slate-200 dark:bg-charcoal-border text-slate-400'
                         }`}>
                           {getStatusIcon(status as PrayerStatus)}
                         </div>
