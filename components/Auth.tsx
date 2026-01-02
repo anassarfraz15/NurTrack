@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../services/supabase.ts';
-import { Mail, Lock, Loader2, ChevronRight, Heart, Sparkles } from 'lucide-react';
+import { Mail, Lock, Loader2, ChevronRight, Heart, Sparkles, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { Logo } from '../constants.tsx';
 
 interface AuthProps {
@@ -13,20 +13,73 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showResend, setShowResend] = useState(false);
+
+  // Map raw Supabase errors to user-friendly messages
+  const mapAuthError = (message: string) => {
+    const msg = message.toLowerCase();
+    if (msg.includes('valid email')) return "Please enter a valid email address.";
+    if (msg.includes('password') && (msg.includes('short') || msg.includes('characters'))) return "Password should be at least 6 characters.";
+    if (msg.includes('email not confirmed')) return "Please confirm your email address before logging in.";
+    if (msg.includes('invalid login credentials')) return "Incorrect email or password. Please try again.";
+    if (msg.includes('user already registered')) return "This email is already registered. Please log in.";
+    // Catch-all
+    return "Something went wrong. Please try again in a moment.";
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
+    setShowResend(false);
 
     try {
-      const { error } = isLogin 
-        ? await (supabase.auth as any).signInWithPassword({ email, password })
-        : await (supabase.auth as any).signUp({ email, password });
-
-      if (error) throw error;
+      if (isLogin) {
+        const { error } = await (supabase.auth as any).signInWithPassword({ email, password });
+        if (error) throw error;
+      } else {
+        const { data, error } = await (supabase.auth as any).signUp({ 
+          email, 
+          password,
+          options: { emailRedirectTo: window.location.origin }
+        });
+        if (error) throw error;
+        
+        // Handle Email Confirmation Flow
+        if (data.user && !data.session) {
+          setSuccessMessage("You’re almost done! Please check your email and confirm your account before logging in.");
+          setIsLogin(true); // Switch to login mode
+          setPassword('');  // Clear password for security
+        }
+      }
     } catch (err: any) {
-      setError(err.message || 'An authentication error occurred');
+      console.error("Auth Error:", err.message);
+      const friendlyMsg = mapAuthError(err.message || "");
+      setError(friendlyMsg);
+      
+      if (friendlyMsg.includes("confirm your email")) {
+        setShowResend(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (!email) return;
+    setLoading(true);
+    try {
+      const { error } = await (supabase.auth as any).resend({ type: 'signup', email });
+      if (error) throw error;
+      setSuccessMessage("Confirmation email resent. Please check your inbox.");
+      setError(null);
+      setShowResend(false);
+    } catch (err: any) {
+      setError(mapAuthError(err.message));
     } finally {
       setLoading(false);
     }
@@ -59,27 +112,37 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
             </div>
           </div>
 
-          {/* Form Section - Adjusted padding for mobile */}
+          {/* Form Section */}
           <div className="px-5 sm:px-8 py-6 flex flex-col min-h-0 overflow-y-auto no-scrollbar">
             
             {/* Smooth Toggle Switch */}
-            <div className="relative flex p-1 bg-slate-100 dark:bg-charcoal rounded-xl mb-8 w-full border border-slate-200/50 dark:border-charcoal-border/50 shrink-0">
+            <div className="relative flex p-1 bg-slate-100 dark:bg-charcoal rounded-xl mb-6 w-full border border-slate-200/50 dark:border-charcoal-border/50 shrink-0">
               <div 
                 className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-charcoal-surface rounded-lg shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${isLogin ? 'translate-x-0' : 'translate-x-[calc(100%+8px)]'}`} 
               />
               <button 
-                onClick={() => { setIsLogin(true); setError(null); }}
+                onClick={() => { setIsLogin(true); setError(null); setSuccessMessage(null); setShowResend(false); }}
                 className={`flex-1 relative py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${isLogin ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}
               >
                 Login
               </button>
               <button 
-                onClick={() => { setIsLogin(false); setError(null); }}
+                onClick={() => { setIsLogin(false); setError(null); setSuccessMessage(null); setShowResend(false); }}
                 className={`flex-1 relative py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${!isLogin ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}
               >
                 Register
               </button>
             </div>
+
+            {/* Success Message Banner */}
+            {successMessage && (
+              <div className="mb-6 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 rounded-2xl flex items-start gap-3 animate-fade-in">
+                <CheckCircle2 className="text-emerald-500 shrink-0 mt-0.5" size={18} />
+                <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200 leading-relaxed">
+                  {successMessage}
+                </p>
+              </div>
+            )}
 
             <form onSubmit={handleAuth} className="space-y-5" key={isLogin ? 'login' : 'register'}>
               <div className="space-y-4 animate-slide-in">
@@ -113,20 +176,32 @@ const Auth: React.FC<AuthProps> = ({ onGuestMode }) => {
               </div>
 
               {error && (
-                <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl border border-rose-100 dark:border-rose-900/50 text-center animate-shake leading-tight">
-                  {error}
+                <div className="p-4 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-xs font-bold rounded-xl border border-rose-100 dark:border-rose-900/50 text-center animate-shake leading-tight flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={14} />
+                    {error}
+                  </div>
+                  {showResend && (
+                    <button 
+                      type="button" 
+                      onClick={handleResend}
+                      className="text-[10px] underline hover:text-rose-700 dark:hover:text-rose-300 mt-1 uppercase tracking-wider font-black"
+                    >
+                      Resend Verification Email
+                    </button>
+                  )}
                 </div>
               )}
 
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full py-4 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group overflow-hidden relative max-w-full"
+                className="w-full py-4 mt-2 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group overflow-hidden relative max-w-full disabled:opacity-70 disabled:cursor-not-allowed"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : (
                   <>
                     <span className="relative z-10 truncate">{isLogin ? 'Enter App' : 'Create Account'}</span>
-                    <ChevronRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform shrink-0" />
+                    <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform shrink-0" />
                   </>
                 )}
               </button>
