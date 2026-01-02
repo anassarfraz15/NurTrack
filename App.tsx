@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AppState, PrayerStatus, PrayerName, PrayerMode, AppSettings, UserStats, DailyLog, PrayerEntry } from './types.ts';
 import Layout from './components/Layout.tsx';
@@ -10,6 +9,7 @@ import Dua from './components/Dua.tsx';
 import AchievementPopup from './components/AchievementPopup.tsx';
 import Auth from './components/Auth.tsx';
 import Onboarding from './components/Onboarding.tsx';
+import DailySpiritualPopup from './components/DailySpiritualPopup.tsx';
 import { getTodayDateString } from './utils/dateTime.ts';
 import { supabase } from './services/supabase.ts';
 import { db } from './services/db.ts';
@@ -561,6 +561,7 @@ const App: React.FC = () => {
       } 
       user={user}
     >
+      <DailySpiritualPopup />
       {!isOnline && (
         <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-center justify-center gap-3 animate-in fade-in slide-in-from-top-4">
           <WifiOff size={16} className="text-amber-600 dark:text-amber-400" />

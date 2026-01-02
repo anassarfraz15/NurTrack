@@ -74,3 +74,89 @@ export const Logo: React.FC<{ size?: number; className?: string }> = ({ size = 4
     />
   </svg>
 );
+
+export type SpiritualContentType = 'ayah' | 'hadith';
+
+export interface SpiritualContent {
+  id: string;
+  type: SpiritualContentType;
+  arabic: string;
+  urdu: string;
+  reference: string;
+}
+
+export const SPIRITUAL_CONTENT: SpiritualContent[] = [
+  // Ayahs
+  {
+    id: 'ayah_1',
+    type: 'ayah',
+    arabic: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا',
+    urdu: 'پس بیشک مشکل کے ساتھ آسانی ہے۔',
+    reference: 'سورة الشرح: 5'
+  },
+  {
+    id: 'ayah_2',
+    type: 'ayah',
+    arabic: 'لَا يُكَلِّفُ اللَّهُ نَفْسًا إِلَّا وُسْعَهَا',
+    urdu: 'اللہ کسی جان پر اس کی طاقت سے زیادہ بوجھ نہیں ڈالتا۔',
+    reference: 'سورة البقرة: 286'
+  },
+  {
+    id: 'ayah_3',
+    type: 'ayah',
+    arabic: 'وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ',
+    urdu: 'اور جب میرے بندے آپ سے میرے بارے میں پوچھیں تو (کہہ دیں کہ) میں قریب ہوں۔',
+    reference: 'سورة البقرة: 186'
+  },
+  {
+    id: 'ayah_4',
+    type: 'ayah',
+    arabic: 'إِنَّ اللَّهَ مَعَ الصَّابِرِينَ',
+    urdu: 'بیشک اللہ صبر کرنے والوں کے ساتھ ہے۔',
+    reference: 'سورة البقرة: 153'
+  },
+  {
+    id: 'ayah_5',
+    type: 'ayah',
+    arabic: 'أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ',
+    urdu: 'خبردار! اللہ کے ذکر ہی سے دلوں کو اطمینان نصیب ہوتا ہے۔',
+    reference: 'سورة الرعد: 28'
+  },
+  
+  // Hadiths
+  {
+    id: 'hadith_1',
+    type: 'hadith',
+    arabic: 'إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ',
+    urdu: 'اعمال کا دارومدار نیتوں پر ہے۔',
+    reference: 'صحیح بخاری: 1'
+  },
+  {
+    id: 'hadith_2',
+    type: 'hadith',
+    arabic: 'الطُّهُورُ شَطْرُ الْإِيمَانِ',
+    urdu: 'پاکیزگی ایمان کا نصف حصہ ہے۔',
+    reference: 'صحیح مسلم: 223'
+  },
+  {
+    id: 'hadith_3',
+    type: 'hadith',
+    arabic: 'خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ',
+    urdu: 'تم میں سے بہترین وہ ہے جو قرآن سیکھے اور سکھائے۔',
+    reference: 'صحیح بخاری: 5027'
+  },
+  {
+    id: 'hadith_4',
+    type: 'hadith',
+    arabic: 'لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ',
+    urdu: 'تم میں سے کوئی مومن نہیں ہو سکتا جب تک اپنے بھائی کے لیے وہی پسند نہ کرے جو اپنے لیے کرتا ہے۔',
+    reference: 'صحیح بخاری: 13'
+  },
+  {
+    id: 'hadith_5',
+    type: 'hadith',
+    arabic: 'تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ',
+    urdu: 'اپنے بھائی کے سامنے مسکرانا تمہارے لیے صدقہ ہے۔',
+    reference: 'جامع ترمذی: 1956'
+  }
+];
