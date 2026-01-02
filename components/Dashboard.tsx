@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, Check, Sunrise, Sun as SunIcon, Sunset, CloudSun, Moon as MoonIcon } from 'lucide-react';
+import { Clock, Flame, Star, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, Check, Sunrise, Sun as SunIcon, Sunset, CloudSun, Moon as MoonIcon } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
 import { PRAYER_NAMES } from '../constants';
-import { getSpiritualMotivation } from '../services/gemini';
 
 interface DashboardProps {
   appState: AppState;
@@ -28,9 +27,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
   const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining(prayerContext.next.rawTime, prayerContext.next.isTomorrow));
   const [isTimingsPopupOpen, setIsTimingsPopupOpen] = useState(false);
   
-  const [motivation, setMotivation] = useState<{message: string, source: string, reflection: string} | null>(null);
-  const [loadingMotivation, setLoadingMotivation] = useState(false);
-  
   const [isEditing, setIsEditing] = useState(!todayLog.isLocked);
   
   // Popup States
@@ -42,10 +38,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
   // Check Gender - default to male behavior if undefined
   const isFemale = appState.settings.gender === 'female';
-
-  const consistencyScore = appState.stats.totalPrayers 
-    ? Math.round((appState.stats.onTimeCount / appState.stats.totalPrayers) * 100) 
-    : 0;
 
   useEffect(() => {
     setIsEditing(!todayLog.isLocked);
@@ -59,19 +51,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     }, 60000);
     return () => clearInterval(timer);
   }, [appState.settings]);
-
-  useEffect(() => {
-    const fetchMotivation = async () => {
-      setLoadingMotivation(true);
-      const data = await getSpiritualMotivation(
-        appState.stats.streak,
-        `${consistencyScore}% consistency`
-      );
-      setMotivation(data);
-      setLoadingMotivation(false);
-    };
-    fetchMotivation();
-  }, [appState.stats.streak, consistencyScore]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -492,42 +471,6 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
           )}
         </div>
       )}
-
-      {/* Reflection Card */}
-      <section className="bg-white dark:bg-charcoal-surface border border-slate-100 dark:border-charcoal-border rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-6 text-slate-50 dark:text-charcoal group-hover:text-emerald-500/10 transition-colors pointer-events-none">
-          <Quote size={80} />
-        </div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg text-emerald-600">
-              <Quote size={16} />
-            </div>
-            <h3 className="font-bold text-lg text-slate-900 dark:text-charcoal-text tracking-tight">Reflection</h3>
-          </div>
-          
-          {loadingMotivation ? (
-            <div className="space-y-3 animate-pulse">
-              <div className="h-4 bg-slate-100 dark:bg-charcoal rounded-full w-full"></div>
-              <div className="h-4 bg-slate-100 dark:bg-charcoal rounded-full w-3/4"></div>
-            </div>
-          ) : motivation ? (
-            <div className="space-y-3">
-              <div>
-                <p className="text-slate-800 dark:text-charcoal-text italic text-lg leading-relaxed arabic-font font-medium">
-                  "{motivation.message}"
-                </p>
-                <p className="text-emerald-600 dark:text-emerald-400 font-black text-[9px] mt-2 tracking-widest uppercase">— {motivation.source}</p>
-              </div>
-            </div>
-          ) : (
-            <div className="py-6 text-center">
-              <p className="text-slate-400 text-xs font-medium italic">Start tracking to unlock insights.</p>
-            </div>
-          )}
-        </div>
-      </section>
 
       {/* Timings Popup - Portal to Body */}
       {isTimingsPopupOpen && createPortal(
