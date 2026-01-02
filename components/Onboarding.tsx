@@ -43,16 +43,16 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6 py-4 flex flex-col items-center animate-step-enter">
-            <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600 mb-2 shadow-sm border border-emerald-100 dark:border-emerald-800">
-               <User size={36} />
+          <div className="space-y-4 sm:space-y-6 py-2 sm:py-4 flex flex-col items-center animate-step-enter">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600 mb-2 shadow-sm border border-emerald-100 dark:border-emerald-800 shrink-0">
+               <User size={28} className="sm:w-9 sm:h-9" />
             </div>
             
-            <div className="w-full space-y-5">
-              <div className="space-y-2">
+            <div className="w-full space-y-4 sm:space-y-5">
+              <div className="space-y-1.5 sm:space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Your Name</label>
                  <div className="relative w-full group">
-                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={20} />
+                  <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" size={18} />
                   <input 
                     autoFocus
                     type="text"
@@ -60,14 +60,14 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                     onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
                     onKeyDown={(e) => e.key === 'Enter' && handleNext()}
                     placeholder="Enter your name"
-                    className="w-full pl-12 pr-6 py-4 bg-slate-50 dark:bg-charcoal border-2 border-slate-100 dark:border-charcoal-border focus:border-emerald-500 rounded-2xl outline-none transition-all text-lg font-bold dark:text-white placeholder:text-slate-300"
+                    className="w-full pl-12 pr-6 py-3 sm:py-4 bg-slate-50 dark:bg-charcoal border-2 border-slate-100 dark:border-charcoal-border focus:border-emerald-500 rounded-2xl outline-none transition-all text-base sm:text-lg font-bold dark:text-white placeholder:text-slate-300"
                   />
                  </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5 sm:space-y-2">
                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Gender</label>
-                 <div className="space-y-2.5">
+                 <div className="space-y-2 sm:space-y-2.5">
                     {[
                       { id: 'male', label: 'Male', icon: User, desc: 'Optimized for congregation.' },
                       { id: 'female', label: 'Female', icon: User2, desc: 'Optimized for privacy.' },
@@ -76,29 +76,29 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                       <button
                         key={g.id}
                         onClick={() => setFormData({ ...formData, gender: g.id as any })}
-                        className={`w-full p-3.5 rounded-2xl border-2 flex items-center gap-4 transition-all active:scale-[0.98] ${
+                        className={`w-full p-3 sm:p-3.5 rounded-xl sm:rounded-2xl border-2 flex items-center gap-3 sm:gap-4 transition-all active:scale-[0.98] ${
                           formData.gender === g.id 
                           ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-sm' 
                           : 'bg-white dark:bg-charcoal/50 border-slate-100 dark:border-charcoal-border hover:border-emerald-200'
                         }`}
                       >
-                         <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                         <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors flex-shrink-0 ${
                             formData.gender === g.id ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-charcoal-surface text-slate-400'
                          }`}>
-                           <g.icon size={20} />
+                           <g.icon size={16} className="sm:w-5 sm:h-5" />
                          </div>
-                         <div className="flex-1 text-left">
-                           <span className={`block text-sm font-bold ${formData.gender === g.id ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-charcoal-text'}`}>
+                         <div className="flex-1 text-left min-w-0">
+                           <span className={`block text-xs sm:text-sm font-bold truncate ${formData.gender === g.id ? 'text-emerald-900 dark:text-emerald-100' : 'text-slate-700 dark:text-charcoal-text'}`}>
                              {g.label}
                            </span>
-                           <span className={`block text-[10px] ${formData.gender === g.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
+                           <span className={`block text-[9px] sm:text-[10px] truncate ${formData.gender === g.id ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>
                              {g.desc}
                            </span>
                          </div>
-                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                         <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                             formData.gender === g.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-charcoal-border'
                          }`}>
-                            {formData.gender === g.id && <Check size={12} strokeWidth={4} />}
+                            {formData.gender === g.id && <Check size={10} strokeWidth={4} />}
                          </div>
                       </button>
                     ))}
@@ -109,7 +109,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
         );
       case 2:
         return (
-          <div className="space-y-3 py-2 animate-step-enter">
+          <div className="space-y-2.5 sm:space-y-3 py-2 animate-step-enter">
             {[
               { id: 'soft', label: 'Soft', desc: 'Graceful tracking, easy to adjust later.' },
               { id: 'normal', label: 'Normal', desc: 'The balanced path of consistency.' },
@@ -118,27 +118,27 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
               <button
                 key={m.id}
                 onClick={() => setFormData({ ...formData, strictness: m.id as any })}
-                className={`w-full p-4 rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-4 group active:scale-[0.98] ${
+                className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl border-2 text-left transition-all duration-300 flex items-center gap-3 sm:gap-4 group active:scale-[0.98] ${
                   formData.strictness === m.id 
                   ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 shadow-md transform scale-[1.02]' 
                   : 'bg-white dark:bg-charcoal/50 border-slate-100 dark:border-charcoal-border hover:border-slate-200 dark:hover:border-charcoal-accent'
                 }`}
               >
-                <div className={`flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-xl transition-colors ${
+                <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-xl transition-colors ${
                   formData.strictness === m.id 
                   ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
                   : 'bg-slate-100 dark:bg-charcoal-surface text-slate-400 group-hover:text-slate-600'
                 }`}>
-                  <Shield size={20} />
+                  <Shield size={18} className="sm:w-5 sm:h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="font-bold text-base block text-slate-900 dark:text-white leading-tight mb-0.5">{m.label}</span>
-                  <p className="text-xs text-slate-500 dark:text-charcoal-sub font-medium leading-tight truncate">{m.desc}</p>
+                  <span className="font-bold text-sm sm:text-base block text-slate-900 dark:text-white leading-tight mb-0.5">{m.label}</span>
+                  <p className="text-[10px] sm:text-xs text-slate-500 dark:text-charcoal-sub font-medium leading-tight truncate">{m.desc}</p>
                 </div>
-                <div className={`flex-shrink-0 ml-auto w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                <div className={`flex-shrink-0 ml-auto w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                    formData.strictness === m.id ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-200 dark:border-charcoal-border'
                 }`}>
-                  {formData.strictness === m.id && <Check size={12} strokeWidth={4} />}
+                  {formData.strictness === m.id && <Check size={10} strokeWidth={4} />}
                 </div>
               </button>
             ))}
@@ -158,17 +158,17 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                 <button
                   key={goal}
                   onClick={() => toggleIntention(goal)}
-                  className={`w-full p-4 rounded-2xl border-2 flex items-center justify-between transition-all duration-200 active:scale-[0.98] ${
+                  className={`w-full p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border-2 flex items-center justify-between transition-all duration-200 active:scale-[0.98] ${
                     isActive
                     ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-500 text-emerald-800 dark:text-emerald-300 shadow-sm' 
                     : 'bg-white dark:bg-charcoal/50 border-slate-100 dark:border-charcoal-border text-slate-500 hover:bg-slate-50 dark:hover:bg-charcoal'
                   }`}
                 >
-                  <span className="text-sm font-bold text-left flex-1 mr-2">{goal}</span>
-                  <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+                  <span className="text-xs sm:text-sm font-bold text-left flex-1 mr-2">{goal}</span>
+                  <div className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all ${
                     isActive ? 'bg-emerald-500 text-white scale-110 shadow-lg shadow-emerald-500/20' : 'bg-slate-100 dark:bg-charcoal-surface text-slate-300'
                   }`}>
-                    {isActive ? <Check size={14} strokeWidth={3} /> : <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-charcoal-border" />}
+                    {isActive ? <Check size={12} strokeWidth={3} /> : <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-300 dark:bg-charcoal-border" />}
                   </div>
                 </button>
               );
@@ -178,17 +178,18 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
       case 4:
         return (
           <div className="flex flex-col items-center justify-center h-full py-4 text-center animate-step-enter">
-            <div className="relative mb-8">
+            <div className="relative mb-6 sm:mb-8">
               <div className="absolute inset-0 bg-emerald-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-              <Logo size={120} className="relative z-10 drop-shadow-2xl" />
+              {/* Responsive Logo Sizing */}
+              <Logo className="w-24 h-24 sm:w-[120px] sm:h-[120px] relative z-10 drop-shadow-2xl" />
             </div>
-            <div className="space-y-4 max-w-xs mx-auto">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-black uppercase text-[10px] tracking-widest rounded-full">
-                <Sparkles size={12} />
+            <div className="space-y-3 sm:space-y-4 max-w-xs mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-black uppercase text-[9px] sm:text-[10px] tracking-widest rounded-full">
+                <Sparkles size={10} className="sm:w-3 sm:h-3" />
                 Bismillah
               </div>
-              <h2 className="font-black text-3xl text-slate-900 dark:text-white tracking-tight">You're Ready</h2>
-              <p className="text-slate-500 dark:text-charcoal-sub text-sm font-medium leading-relaxed">
+              <h2 className="font-black text-2xl sm:text-3xl text-slate-900 dark:text-white tracking-tight">You're Ready</h2>
+              <p className="text-slate-500 dark:text-charcoal-sub text-xs sm:text-sm font-medium leading-relaxed px-4 sm:px-0">
                 Your spiritual journey is configured. May your heart find peace in every prayer.
               </p>
             </div>
@@ -207,59 +208,59 @@ const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-[500] bg-slate-50 dark:bg-charcoal flex items-center justify-center p-4 overflow-hidden">
+    <div className="fixed inset-0 z-[500] bg-slate-50 dark:bg-charcoal flex items-center justify-center p-2 sm:p-4 overflow-hidden">
       {/* Subtle Background */}
       <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden">
         <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-emerald-400/30 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-400/20 rounded-full blur-[120px]"></div>
       </div>
 
-      {/* Main Container - Fixed Height for Stability */}
-      <div className="w-full max-w-md bg-white/90 dark:bg-charcoal-surface/90 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-white/50 dark:border-charcoal-border relative flex flex-col h-[600px] max-h-[85vh] overflow-hidden transition-all duration-500">
+      {/* Main Container - Responsive Height */}
+      <div className="w-full max-w-md bg-white/90 dark:bg-charcoal-surface/90 backdrop-blur-2xl rounded-[1.5rem] sm:rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-white/50 dark:border-charcoal-border relative flex flex-col h-[500px] sm:h-[600px] max-h-[100dvh] overflow-hidden transition-all duration-500">
         
         {/* Progress Bar */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-100 dark:bg-charcoal">
+        <div className="absolute top-0 left-0 right-0 h-1 sm:h-1.5 bg-slate-100 dark:bg-charcoal">
           <div 
             className="h-full bg-emerald-500 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
             style={{ width: `${progress}%` }}
           />
         </div>
 
-        <div className="flex flex-col h-full p-6 md:p-10">
+        <div className="flex flex-col h-full p-5 sm:p-10">
           {/* Static Header Section - Prevents jumping */}
-          <div className="flex-shrink-0 mb-4 transition-all duration-300">
-            <h2 key={step + 'title'} className="text-3xl font-black text-slate-900 dark:text-white mb-2 tracking-tighter leading-none animate-fade-in-up">
+          <div className="flex-shrink-0 mb-3 sm:mb-4 transition-all duration-300">
+            <h2 key={step + 'title'} className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mb-1 sm:mb-2 tracking-tighter leading-none animate-fade-in-up">
               {titles[step-1].title}
             </h2>
-            <p key={step + 'sub'} className="text-sm text-slate-500 dark:text-charcoal-accent font-medium animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <p key={step + 'sub'} className="text-xs sm:text-sm text-slate-500 dark:text-charcoal-accent font-medium animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               {titles[step-1].sub}
             </p>
           </div>
           
           {/* Dynamic Content Area - Keyed for animation */}
           {/* Added px-2 to prevent border clipping */}
-          <div className="flex-1 relative overflow-y-auto no-scrollbar mask-gradient-b px-2 -mx-2">
+          <div className="flex-1 relative overflow-y-auto no-scrollbar mask-gradient-b px-1 sm:px-2 -mx-1 sm:-mx-2">
             <div key={step}>
               {renderStepContent()}
             </div>
           </div>
 
           {/* Footer Actions - Optimized Padding for Mobile */}
-          <div className="mt-8 flex items-center justify-between gap-3 flex-shrink-0 pt-4 border-t border-slate-50 dark:border-charcoal-border/50">
+          <div className="mt-4 sm:mt-8 flex items-center justify-between gap-3 flex-shrink-0 pt-3 sm:pt-4 border-t border-slate-50 dark:border-charcoal-border/50">
             {step < totalSteps && (
               <button 
                 onClick={handleSkip}
-                className="px-4 py-3 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text font-bold text-xs uppercase tracking-widest transition-colors"
+                className="px-3 py-2 sm:px-4 sm:py-3 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-colors"
               >
                 Skip
               </button>
             )}
             <button 
               onClick={handleNext}
-              className={`py-3.5 px-6 sm:px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 group ${step === totalSteps ? 'w-full' : 'ml-auto'}`}
+              className={`py-3 px-5 sm:py-3.5 sm:px-8 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl sm:rounded-2xl shadow-xl shadow-emerald-500/20 transition-all active:scale-95 flex items-center justify-center gap-2 group ${step === totalSteps ? 'w-full' : 'ml-auto'}`}
             >
-              <span className="text-sm whitespace-nowrap">{step === totalSteps ? 'Start Journey' : 'Continue'}</span>
-              <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              <span className="text-xs sm:text-sm whitespace-nowrap">{step === totalSteps ? 'Start Journey' : 'Continue'}</span>
+              <ChevronRight size={16} className="sm:w-[18px] sm:h-[18px] group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
