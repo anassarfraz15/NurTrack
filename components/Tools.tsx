@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity, Fingerprint } from 'lucide-react';
+import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity, Fingerprint, Flame } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
 
@@ -42,6 +42,29 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
     { id: 'prayers_100', title: '100 Prayers', description: 'Total prayers recorded', icon: Heart, color: 'text-rose-500', bg: 'bg-rose-100 dark:bg-rose-900/30' },
     { id: 'prayers_500', title: 'Devoted Servant', description: '500 prayers recorded', icon: CheckCircle2, color: 'text-teal-500', bg: 'bg-teal-100 dark:bg-teal-900/30' }
   ];
+
+  // Helper to calculate progress for achievements
+  const getAchievementProgress = (id: string) => {
+    const stats = appState.stats;
+    let current = 0;
+    let target = 1; // avoid divide by zero
+
+    switch(id) {
+      case 'streak_7': current = stats.streak; target = 7; break;
+      case 'streak_30': current = stats.streak; target = 30; break;
+      case 'streak_40': current = stats.streak; target = 40; break;
+      case 'streak_100': current = stats.streak; target = 100; break;
+      case 'prayers_100': current = stats.totalPrayers; target = 100; break;
+      case 'prayers_500': current = stats.totalPrayers; target = 500; break;
+      default: return { current: 1, target: 1, percent: 100 };
+    }
+
+    // Cap current at target for display purposes if unlocked
+    const displayCurrent = Math.min(current, target);
+    const percent = Math.min(100, Math.max(0, (current / target) * 100));
+    
+    return { current: displayCurrent, target, percent };
+  };
 
   // Initialize Hijri Date
   useEffect(() => {
@@ -156,7 +179,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
+    <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden pb-20">
       <header className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-2">
         <div className="flex flex-col items-center md:items-start w-full">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-charcoal-text tracking-tight text-center md:text-left">Daily Tools</h2>
@@ -347,63 +370,96 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
 
         {activeTool === 'records' && (
           <div className="space-y-6 animate-in slide-in-from-right duration-300">
-             <div className="bg-white dark:bg-charcoal-surface p-6 sm:p-8 rounded-[2.5rem] border border-slate-100 dark:border-charcoal-border shadow-sm text-center">
-                <div className="w-16 h-16 bg-slate-100 dark:bg-charcoal rounded-full flex items-center justify-center mx-auto mb-4 text-slate-500">
-                  <ClipboardList size={32} />
+             <div className="bg-white dark:bg-charcoal-surface p-6 rounded-[2.5rem] border border-slate-100 dark:border-charcoal-border shadow-sm text-center">
+                <div className="w-14 h-14 bg-slate-100 dark:bg-charcoal rounded-full flex items-center justify-center mx-auto mb-3 text-slate-500">
+                  <ClipboardList size={28} />
                 </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-charcoal-text tracking-tight mb-2">Lifetime Statistics</h3>
-                <p className="text-slate-500 text-sm">Your total spiritual journey at a glance.</p>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-charcoal-text tracking-tight mb-1">Lifetime Statistics</h3>
+                <p className="text-slate-500 text-xs sm:text-sm">Your total spiritual journey at a glance.</p>
              </div>
              
-             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             {/* 2-Column Grid Layout for Records */}
+             <div className="grid grid-cols-2 gap-4">
                 {/* Total Prayers */}
-                <div className="p-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-[2rem] border border-emerald-100 dark:border-emerald-800/50 flex flex-col items-center justify-center text-center">
-                   <div className="p-3 bg-emerald-100 dark:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 rounded-xl mb-3">
-                     <CheckCircle2 size={24} />
+                <div className="p-5 bg-emerald-50 dark:bg-emerald-900/20 rounded-[2rem] border border-emerald-100 dark:border-emerald-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-2.5 bg-emerald-100 dark:bg-emerald-800/50 text-emerald-600 dark:text-emerald-400 rounded-xl mb-3">
+                     <CheckCircle2 size={20} />
                    </div>
-                   <h4 className="text-3xl font-black text-emerald-900 dark:text-emerald-100 mb-1">{appState.stats.totalPrayers}</h4>
-                   <p className="text-xs font-bold uppercase tracking-widest text-emerald-600/80 dark:text-emerald-400/80">Prayers Offered</p>
+                   <h4 className="text-2xl sm:text-3xl font-black text-emerald-900 dark:text-emerald-100 mb-0.5">{appState.stats.totalPrayers}</h4>
+                   <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-emerald-600/80 dark:text-emerald-400/80">Prayers Offered</p>
                 </div>
 
-                {/* Total Missed */}
-                <div className="p-6 bg-rose-50 dark:bg-rose-900/20 rounded-[2rem] border border-rose-100 dark:border-rose-800/50 flex flex-col items-center justify-center text-center">
-                   <div className="p-3 bg-rose-100 dark:bg-rose-800/50 text-rose-600 dark:text-rose-400 rounded-xl mb-3">
-                     <AlertCircle size={24} />
+                {/* Best Streak */}
+                <div className="p-5 bg-orange-50 dark:bg-orange-900/20 rounded-[2rem] border border-orange-100 dark:border-orange-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-2.5 bg-orange-100 dark:bg-orange-800/50 text-orange-600 dark:text-orange-400 rounded-xl mb-3">
+                     <Flame size={20} />
                    </div>
-                   <h4 className="text-3xl font-black text-rose-900 dark:text-rose-100 mb-1">{appState.stats.totalMissed}</h4>
-                   <p className="text-xs font-bold uppercase tracking-widest text-rose-600/80 dark:text-rose-400/80">Prayers Missed</p>
+                   <h4 className="text-2xl sm:text-3xl font-black text-orange-900 dark:text-orange-100 mb-0.5">{appState.stats.bestStreak}</h4>
+                   <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-orange-600/80 dark:text-orange-400/80">Best Streak</p>
                 </div>
 
                 {/* Total Tasbeeh */}
-                <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-[2rem] border border-blue-100 dark:border-blue-800/50 flex flex-col items-center justify-center text-center">
-                   <div className="p-3 bg-blue-100 dark:bg-blue-800/50 text-blue-600 dark:text-blue-400 rounded-xl mb-3">
-                     <Infinity size={24} />
+                <div className="p-5 bg-blue-50 dark:bg-blue-900/20 rounded-[2rem] border border-blue-100 dark:border-blue-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-2.5 bg-blue-100 dark:bg-blue-800/50 text-blue-600 dark:text-blue-400 rounded-xl mb-3">
+                     <Infinity size={20} />
                    </div>
-                   <h4 className="text-3xl font-black text-blue-900 dark:text-blue-100 mb-1">{appState.stats.totalTasbeeh}</h4>
-                   <p className="text-xs font-bold uppercase tracking-widest text-blue-600/80 dark:text-blue-400/80">Total Tasbeeh</p>
+                   <h4 className="text-2xl sm:text-3xl font-black text-blue-900 dark:text-blue-100 mb-0.5">{appState.stats.totalTasbeeh}</h4>
+                   <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-blue-600/80 dark:text-blue-400/80">Total Tasbeeh</p>
+                </div>
+
+                {/* Total Missed */}
+                <div className="p-5 bg-rose-50 dark:bg-rose-900/20 rounded-[2rem] border border-rose-100 dark:border-rose-800/50 flex flex-col items-center justify-center text-center">
+                   <div className="p-2.5 bg-rose-100 dark:bg-rose-800/50 text-rose-600 dark:text-rose-400 rounded-xl mb-3">
+                     <AlertCircle size={20} />
+                   </div>
+                   <h4 className="text-2xl sm:text-3xl font-black text-rose-900 dark:text-rose-100 mb-0.5">{appState.stats.totalMissed}</h4>
+                   <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-rose-600/80 dark:text-rose-400/80">Prayers Missed</p>
                 </div>
              </div>
           </div>
         )}
 
         {activeTool === 'achievements' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in slide-in-from-bottom duration-500">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 animate-in slide-in-from-bottom duration-500">
              {ACHIEVEMENTS_LIST.map((ach) => {
                const isUnlocked = appState.unlockedAchievements?.includes(ach.id);
+               const { current, target, percent } = getAchievementProgress(ach.id);
+               
                return (
-                 <div key={ach.id} className={`relative overflow-hidden p-6 rounded-[2rem] border transition-all ${isUnlocked ? 'bg-white dark:bg-charcoal-surface border-slate-100 dark:border-charcoal-border shadow-sm' : 'bg-slate-50 dark:bg-charcoal/50 border-transparent opacity-70 grayscale'}`}>
-                    <div className="flex items-start justify-between">
-                      <div className={`p-3 rounded-2xl mb-4 ${isUnlocked ? ach.bg : 'bg-slate-200 dark:bg-charcoal'}`}>
-                        <ach.icon size={24} className={isUnlocked ? ach.color : 'text-slate-400'} />
+                 <div key={ach.id} className={`relative flex flex-col p-4 sm:p-5 rounded-[2rem] border transition-all ${isUnlocked ? 'bg-white dark:bg-charcoal-surface border-slate-100 dark:border-charcoal-border shadow-sm' : 'bg-slate-50 dark:bg-charcoal/50 border-transparent opacity-80'}`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`p-2.5 rounded-2xl ${isUnlocked ? ach.bg : 'bg-slate-200 dark:bg-charcoal'}`}>
+                        <ach.icon size={20} className={isUnlocked ? ach.color : 'text-slate-400'} />
                       </div>
                       {isUnlocked ? (
-                         <div className="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg text-[9px] font-black uppercase tracking-widest">Unlocked</div>
+                         <div className="p-1.5 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg">
+                           <CheckCircle2 size={12} strokeWidth={3} />
+                         </div>
                       ) : (
-                         <div className="px-2 py-1 bg-slate-200 dark:bg-charcoal text-slate-500 rounded-lg text-[9px] font-black uppercase tracking-widest">Locked</div>
+                         <div className="p-1.5 bg-slate-200 dark:bg-charcoal text-slate-400 rounded-lg">
+                           <X size={12} strokeWidth={3} />
+                         </div>
                       )}
                     </div>
-                    <h4 className="text-lg font-bold text-slate-900 dark:text-charcoal-text mb-1">{ach.title}</h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">{ach.description}</p>
+                    
+                    <div className="flex-1 mb-4">
+                      <h4 className={`text-sm sm:text-base font-bold mb-1 leading-tight ${isUnlocked ? 'text-slate-900 dark:text-charcoal-text' : 'text-slate-500'}`}>{ach.title}</h4>
+                      <p className="text-[10px] text-slate-400 leading-relaxed line-clamp-2">{ach.description}</p>
+                    </div>
+
+                    {/* Progress Bar Section */}
+                    <div className="mt-auto space-y-2">
+                       <div className="flex justify-between items-end text-[9px] font-black uppercase tracking-widest">
+                         <span className={isUnlocked ? 'text-emerald-600' : 'text-slate-400'}>{isUnlocked ? 'Completed' : 'Progress'}</span>
+                         <span className="text-slate-500 dark:text-charcoal-sub">{current}/{target}</span>
+                       </div>
+                       <div className="h-1.5 w-full bg-slate-100 dark:bg-charcoal rounded-full overflow-hidden">
+                         <div 
+                           className={`h-full rounded-full transition-all duration-700 ${isUnlocked ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-charcoal-border'}`} 
+                           style={{ width: `${percent}%` }}
+                         />
+                       </div>
+                    </div>
                  </div>
                );
              })}
