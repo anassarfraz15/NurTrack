@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie
 } from 'recharts';
@@ -340,14 +341,15 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
         </section>
       </div>
 
-      {/* Detailed Day View Popup */}
-      {showDayPopup && (
-        <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-300"
-          onClick={() => setShowDayPopup(false)}
-        >
+      {/* Detailed Day View Popup - Portal to Body */}
+      {showDayPopup && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 w-screen h-screen">
           <div 
-            className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-300 relative"
+            className="absolute inset-0 bg-black/50 animate-in fade-in duration-300 w-full h-full"
+            onClick={() => setShowDayPopup(false)}
+          ></div>
+          <div 
+            className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-300 relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 md:p-8">
@@ -409,7 +411,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

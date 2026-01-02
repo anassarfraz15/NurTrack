@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DuaProps {
@@ -103,11 +104,12 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
         )}
       </div>
 
-      {/* 4. Popup Structure */}
-      {selectedStep && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 bg-black/50 animate-in fade-in duration-300">
+      {/* 4. Popup Structure - Portal to Body */}
+      {selectedStep && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4 w-screen h-screen">
+          <div className="absolute inset-0 bg-black/50 animate-in fade-in duration-300 w-full h-full" onClick={() => setSelectedStep(null)}></div>
           <div 
-            className="bg-white dark:bg-charcoal-surface w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border-t sm:border border-slate-100 dark:border-charcoal-border animate-in slide-in-from-bottom-10 duration-300 relative flex flex-col"
+            className="bg-white dark:bg-charcoal-surface w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[85vh] rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 sm:p-8 shadow-2xl border-t sm:border border-slate-100 dark:border-charcoal-border animate-in slide-in-from-bottom-10 duration-300 relative flex flex-col z-10"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Popup Header */}
@@ -358,7 +360,8 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

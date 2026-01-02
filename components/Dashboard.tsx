@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Clock, Flame, Star, Quote, ChevronRight, Timer, Menu, Save, Edit3, X, Calendar, ArrowRight, Circle, Users, User, XCircle, CheckCircle, Check, Sunrise, Sun as SunIcon, Sunset, CloudSun, Moon as MoonIcon } from 'lucide-react';
 import { PrayerName, PrayerStatus, AppState, PrayerMode } from '../types';
 import { getTodayDateString, formatDisplayDate, getPrayerContext, getTimeRemaining, getAllPrayerTimings } from '../utils/dateTime';
@@ -527,11 +528,12 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         </div>
       </section>
 
-      {/* Timings Popup */}
-      {isTimingsPopupOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-300">
+      {/* Timings Popup - Portal to Body */}
+      {isTimingsPopupOpen && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 w-screen h-screen">
+          <div className="absolute inset-0 bg-black/50 animate-in fade-in duration-300 w-full h-full" onClick={() => setIsTimingsPopupOpen(false)}></div>
           <div 
-            className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-500 relative"
+            className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-500 relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 md:p-8">
@@ -579,7 +581,8 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

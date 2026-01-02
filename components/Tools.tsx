@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity, Fingerprint } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
@@ -280,14 +281,15 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
               </div>
             </div>
 
-            {/* Custom Goal Modal */}
-            {showGoalModal && (
-              <div 
-                className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-300"
-                onClick={(e) => { e.stopPropagation(); setShowGoalModal(false); }}
-              >
+            {/* Custom Goal Modal - Portal to Body */}
+            {showGoalModal && createPortal(
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 w-screen h-screen">
                 <div 
-                  className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 slide-in-from-bottom-4 duration-500"
+                  className="absolute inset-0 bg-black/50 animate-in fade-in duration-300 w-full h-full"
+                  onClick={(e) => { e.stopPropagation(); setShowGoalModal(false); }}
+                ></div>
+                <div 
+                  className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 slide-in-from-bottom-4 duration-500 relative z-10"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center justify-between mb-6">
@@ -337,7 +339,8 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                     </div>
                   </form>
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         )}

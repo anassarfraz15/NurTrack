@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { LayoutDashboard, Pocket, Activity, X, Settings as SettingsIcon, LogOut, User as UserIcon, BookOpen } from 'lucide-react';
 import { supabase } from '../services/supabase.ts';
 import { Logo } from '../constants.tsx';
@@ -112,48 +113,51 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         })}
       </nav>
 
-      {/* Mobile Settings Drawer */}
-      <div 
-        className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-      >
-        {/* Dimmed Overlay - Removed backdrop-blur-md, changed color to black/50 */}
-        <div className="absolute inset-0 bg-black/50 touch-none" onClick={onCloseDrawer}></div>
+      {/* Mobile Settings Drawer - Portal to Body for Full Screen Overlay */}
+      {createPortal(
         <div 
-          className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-charcoal-surface backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`lg:hidden fixed inset-0 z-[9999] transition-opacity duration-300 w-screen h-screen ${isDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
         >
-          <div className="p-6 border-b border-slate-100 dark:border-charcoal-border flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <SettingsIcon className="text-emerald-600" size={24} />
-              <h2 className="text-xl font-bold dark:text-charcoal-text">Settings</h2>
+          {/* Dimmed Overlay */}
+          <div className="absolute inset-0 bg-black/50 touch-none w-full h-full" onClick={onCloseDrawer}></div>
+          <div 
+            className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-charcoal-surface backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col h-full ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          >
+            <div className="p-6 border-b border-slate-100 dark:border-charcoal-border flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <SettingsIcon className="text-emerald-600" size={24} />
+                <h2 className="text-xl font-bold dark:text-charcoal-text">Settings</h2>
+              </div>
+              <button onClick={onCloseDrawer} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text transition-colors"><X size={24} /></button>
             </div>
-            <button onClick={onCloseDrawer} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-charcoal-text transition-colors"><X size={24} /></button>
-          </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar p-6">
-            <div className="settings-drawer-content">
-              {drawerContent}
+            <div className="flex-1 overflow-y-auto no-scrollbar p-6">
+              <div className="settings-drawer-content">
+                {drawerContent}
+              </div>
+            </div>
+            
+            <div className="p-4 bg-slate-50/50 dark:bg-charcoal/50 backdrop-blur-md border-t border-slate-100 dark:border-charcoal-border">
+               {user && (
+                 <div className="mb-3 p-3 bg-white/50 dark:bg-charcoal rounded-xl border border-slate-200 dark:border-charcoal-border shadow-sm">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[9px] font-black text-slate-400 dark:text-charcoal-accent uppercase tracking-widest">Logged in as</span>
+                      <button 
+                        onClick={handleLogout} 
+                        className="text-[9px] font-black text-rose-500 hover:text-rose-600 uppercase flex items-center gap-1 transition-colors"
+                      >
+                        <LogOut size={10} /> Sign Out
+                      </button>
+                    </div>
+                    <p className="text-[11px] font-bold text-slate-700 dark:text-charcoal-text truncate">{user.email}</p>
+                 </div>
+               )}
+               <p className="text-center text-[8px] font-black text-slate-400 dark:text-charcoal-accent uppercase tracking-widest opacity-60">NurTrack v1.1.0 • Cloud Sync</p>
             </div>
           </div>
-          
-          <div className="p-4 bg-slate-50/50 dark:bg-charcoal/50 backdrop-blur-md border-t border-slate-100 dark:border-charcoal-border">
-             {user && (
-               <div className="mb-3 p-3 bg-white/50 dark:bg-charcoal rounded-xl border border-slate-200 dark:border-charcoal-border shadow-sm">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[9px] font-black text-slate-400 dark:text-charcoal-accent uppercase tracking-widest">Logged in as</span>
-                    <button 
-                      onClick={handleLogout} 
-                      className="text-[9px] font-black text-rose-500 hover:text-rose-600 uppercase flex items-center gap-1 transition-colors"
-                    >
-                      <LogOut size={10} /> Sign Out
-                    </button>
-                  </div>
-                  <p className="text-[11px] font-bold text-slate-700 dark:text-charcoal-text truncate">{user.email}</p>
-               </div>
-             )}
-             <p className="text-center text-[8px] font-black text-slate-400 dark:text-charcoal-accent uppercase tracking-widest opacity-60">NurTrack v1.1.0 • Cloud Sync</p>
-          </div>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
 
       <style>{`
         @keyframes bounce-short {
