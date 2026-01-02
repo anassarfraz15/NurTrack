@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Menu, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity } from 'lucide-react';
+import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
 
@@ -157,14 +157,6 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
   return (
     <div className="space-y-6 animate-in fade-in duration-500 overflow-x-hidden">
       <header className="relative flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-        <button 
-          onClick={(e) => { e.stopPropagation(); onOpenDrawer(); }}
-          className="lg:hidden absolute left-0 top-0.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
-          aria-label="Open Settings"
-        >
-          <Menu size={24} />
-        </button>
-
         <div className="flex flex-col items-center md:items-start w-full">
           <h2 className="text-2xl font-bold text-slate-800 dark:text-charcoal-text tracking-tight text-center md:text-left">Daily Tools</h2>
           <p className="text-slate-500 text-sm md:text-base font-medium text-center md:text-left">Your everyday Muslim companions</p>

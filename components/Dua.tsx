@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, BookOpen, Menu, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DuaProps {
   onOpenDrawer: () => void;
@@ -39,14 +39,6 @@ const Dua: React.FC<DuaProps> = ({ onOpenDrawer }) => {
     <div className="flex flex-col h-full animate-in fade-in duration-500 relative">
       {/* Header Section */}
       <header className="flex-shrink-0 mb-4 flex flex-col items-center relative">
-        <button 
-          onClick={onOpenDrawer}
-          className="lg:hidden absolute left-0 top-1 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
-          aria-label="Open Settings"
-        >
-          <Menu size={24} />
-        </button>
-
         <div className="flex flex-col items-center gap-2 mb-2 w-full">
            <div className="p-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl text-emerald-600">
              <BookOpen size={24} />

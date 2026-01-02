@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import { AppState, PrayerStatus, PrayerName, DailyLog, PrayerMode } from '../types.ts';
 import { PRAYER_NAMES } from '../constants.tsx';
-import { TrendingUp, Award, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame, Menu, X, Users, User } from 'lucide-react';
+import { TrendingUp, Award, CalendarDays, ChevronLeft, ChevronRight, CheckCircle2, Clock, AlertCircle, Circle, Flame, X, Users, User } from 'lucide-react';
 import { getTodayDateString } from '../utils/dateTime.ts';
 
 interface AnalyticsProps {
@@ -159,15 +159,6 @@ const Analytics: React.FC<AnalyticsProps> = ({ appState, onOpenDrawer }) => {
   return (
     <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-4 duration-700 px-1 md:px-0">
       <header className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-6">
-        {/* Mobile Hamburger - Left Corner */}
-        <button 
-          onClick={onOpenDrawer}
-          className="lg:hidden absolute left-0 top-1.5 p-2 text-slate-400 hover:text-emerald-600 transition-colors z-10"
-          aria-label="Open Settings"
-        >
-          <Menu size={24} />
-        </button>
-
         <div className="flex flex-col items-center md:items-start w-full">
           <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-charcoal-text tracking-tight text-center md:text-left">Visual Streak Calendar</h2>
           <p className="text-sm text-slate-500 dark:text-charcoal-sub mt-1 text-center md:text-left">Identify your consistency patterns at a glance</p>
