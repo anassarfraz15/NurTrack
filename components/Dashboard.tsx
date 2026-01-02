@@ -529,7 +529,7 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
 
       {/* Timings Popup */}
       {isTimingsPopupOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-300">
           <div 
             className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-100 dark:border-charcoal-border animate-in zoom-in-95 duration-500 relative"
             onClick={(e) => e.stopPropagation()}

@@ -116,7 +116,8 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       <div 
         className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
-        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md touch-none" onClick={onCloseDrawer}></div>
+        {/* Dimmed Overlay - Removed backdrop-blur-md, changed color to black/50 */}
+        <div className="absolute inset-0 bg-black/50 touch-none" onClick={onCloseDrawer}></div>
         <div 
           className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-charcoal-surface backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >

@@ -48,7 +48,7 @@ const AchievementPopup: React.FC<AchievementPopupProps> = ({ onClose, title, mes
   }, []);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-in fade-in duration-500 overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 animate-in fade-in duration-500 overflow-hidden">
       
       {/* Main Popup Content - Lower Z-Index (z-10) */}
       <div className="bg-white dark:bg-charcoal-surface w-full max-w-sm rounded-[3rem] overflow-hidden shadow-2xl shadow-emerald-500/30 border border-emerald-100 dark:border-charcoal-border animate-in zoom-in-95 duration-500 relative z-10">
