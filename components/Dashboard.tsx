@@ -154,15 +154,16 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
     setIsEditing(true);
   };
 
-  const getPrayerIcon = (prayerName: string, size: number = 24) => {
+  const getPrayerIcon = (prayerName: string, size: number = 24, className?: string) => {
     const pName = prayerName.includes('Jumma') ? 'Dhuhr' : prayerName;
+    const props = { size, className, strokeWidth: 1.5 };
     switch (pName) {
-      case 'Fajr': return <Sunrise size={size} strokeWidth={1.5} />;
-      case 'Dhuhr': return <SunIcon size={size} strokeWidth={1.5} />;
-      case 'Asr': return <CloudSun size={size} strokeWidth={1.5} />;
-      case 'Maghrib': return <Sunset size={size} strokeWidth={1.5} />;
-      case 'Isha': return <MoonIcon size={size} strokeWidth={1.5} />;
-      default: return <Clock size={size} strokeWidth={1.5} />;
+      case 'Fajr': return <Sunrise {...props} />;
+      case 'Dhuhr': return <SunIcon {...props} />;
+      case 'Asr': return <CloudSun {...props} />;
+      case 'Maghrib': return <Sunset {...props} />;
+      case 'Isha': return <MoonIcon {...props} />;
+      default: return <Clock {...props} />;
     }
   };
 
@@ -237,59 +238,59 @@ const Dashboard: React.FC<DashboardProps> = ({ appState, updatePrayerStatus, loc
         </div>
       </header>
 
-      {/* Redesigned Minimal Prayer Banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#2f5d40] to-[#1a3826] dark:from-[#064e3b] dark:to-[#022c22] rounded-[2.2rem] shadow-xl shadow-emerald-900/10 text-white transition-all duration-500 group">
+      {/* Redesigned Minimal Prayer Banner - Fully Responsive */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-[#2f5d40] to-[#1a3826] dark:from-[#064e3b] dark:to-[#022c22] rounded-[1.8rem] md:rounded-[2.2rem] shadow-xl shadow-emerald-900/10 text-white transition-all duration-500 group">
         
         {/* Top Section - Current Prayer */}
-        <div className="p-7 pr-20 flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-5">
-             <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/5">
-                {getPrayerIcon(prayerContext.current.name, 32)}
+        <div className="p-5 pr-14 md:p-7 md:pr-20 flex items-center justify-between relative z-10">
+          <div className="flex items-center gap-4 md:gap-5">
+             <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/5">
+                {getPrayerIcon(prayerContext.current.name, undefined, "w-6 h-6 md:w-8 md:h-8")}
              </div>
              <div>
-                <span className="block text-emerald-200/80 text-[10px] font-bold uppercase tracking-widest mb-1">Now</span>
-                <h3 className="text-3xl font-bold tracking-tight leading-none">{prayerContext.current.name}</h3>
+                <span className="block text-emerald-200/80 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-0.5 md:mb-1">Now</span>
+                <h3 className="text-2xl md:text-3xl font-bold tracking-tight leading-none">{prayerContext.current.name}</h3>
              </div>
           </div>
           <div className="text-right">
-             <span className="block text-emerald-200/80 text-[10px] font-bold uppercase tracking-widest mb-1">Time</span>
-             <p className="text-xl font-bold tracking-tight">{prayerContext.current.startTime}</p>
+             <span className="block text-emerald-200/80 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-0.5 md:mb-1">Time</span>
+             <p className="text-lg md:text-xl font-bold tracking-tight">{prayerContext.current.startTime}</p>
           </div>
         </div>
 
         {/* Divider */}
-        <div className="mx-7 h-px bg-white/10" />
+        <div className="mx-5 md:mx-7 h-px bg-white/10" />
 
         {/* Bottom Section - Next Prayer */}
-        <div className="p-7 pr-20 flex items-center justify-between relative z-10">
-           <div className="flex items-center gap-5">
-             <div className="w-12 h-12 rounded-2xl bg-black/20 flex items-center justify-center backdrop-blur-sm border border-white/5 text-emerald-100/80">
-                {getPrayerIcon(prayerContext.next.name, 22)}
+        <div className="p-5 pr-14 md:p-7 md:pr-20 flex items-center justify-between relative z-10">
+           <div className="flex items-center gap-4 md:gap-5">
+             <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-black/20 flex items-center justify-center backdrop-blur-sm border border-white/5 text-emerald-100/80">
+                {getPrayerIcon(prayerContext.next.name, undefined, "w-5 h-5 md:w-[22px] md:h-[22px]")}
              </div>
              <div>
-                <span className="block text-emerald-200/80 text-[10px] font-bold uppercase tracking-widest mb-1">Next</span>
-                <h3 className="text-xl font-bold tracking-tight leading-none text-white/90">{prayerContext.next.name}</h3>
+                <span className="block text-emerald-200/80 text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-0.5 md:mb-1">Next</span>
+                <h3 className="text-lg md:text-xl font-bold tracking-tight leading-none text-white/90">{prayerContext.next.name}</h3>
              </div>
           </div>
           
-          <div className="bg-white/10 rounded-2xl px-5 py-3 backdrop-blur-md flex items-center gap-3 border border-white/10">
-             <Timer size={18} className="text-emerald-200" />
-             <span className="text-lg font-bold tabular-nums tracking-tight">{timeRemaining.replace('in ', '')}</span>
+          <div className="bg-white/10 rounded-2xl px-3 py-2 md:px-5 md:py-3 backdrop-blur-md flex items-center gap-2 md:gap-3 border border-white/10">
+             <Timer className="text-emerald-200 w-3.5 h-3.5 md:w-[18px] md:h-[18px]" />
+             <span className="text-sm md:text-lg font-bold tabular-nums tracking-tight">{timeRemaining.replace('in ', '')}</span>
           </div>
         </div>
 
         {/* Dedicated Timings Icon */}
         <button
           onClick={() => setIsTimingsPopupOpen(true)}
-          className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all text-emerald-200 hover:text-white z-20"
+          className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 bg-white/5 backdrop-blur-md flex items-center justify-center hover:bg-white/10 active:scale-95 transition-all text-emerald-200 hover:text-white z-20"
           aria-label="View Prayer Timings"
         >
-          <Calendar size={22} strokeWidth={1.5} />
+          <Calendar className="w-4 h-4 md:w-[22px] md:h-[22px]" strokeWidth={1.5} />
         </button>
 
         {/* Background Decorative Blobs */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-emerald-400/10 rounded-full blur-[80px]"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 bg-emerald-900/40 rounded-full blur-[60px]"></div>
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-80 md:h-80 bg-emerald-400/10 rounded-full blur-[60px] md:blur-[80px]"></div>
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-40 h-40 md:w-60 md:h-60 bg-emerald-900/40 rounded-full blur-[40px] md:blur-[60px]"></div>
       </div>
 
       {/* Redesigned Prayer Marking Cards - Gender Aware */}
