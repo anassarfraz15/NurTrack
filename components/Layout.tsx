@@ -87,18 +87,23 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       </main>
 
       {/* Mobile Bottom Dock */}
-      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/70 dark:bg-charcoal-surface/90 backdrop-blur-xl border border-slate-200/50 dark:border-charcoal-border rounded-3xl p-1.5 px-3 flex items-center justify-between shadow-2xl z-40">
+      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/70 dark:bg-charcoal-surface/90 backdrop-blur-xl border border-slate-200/50 dark:border-charcoal-border rounded-3xl p-1.5 px-3 grid grid-cols-4 gap-1 shadow-2xl z-50 pointer-events-auto">
         {mainTabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
-              onClick={() => handleTabClick(tab.id)}
-              className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-2xl transition-all ${
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                handleTabClick(tab.id);
+              }}
+              className={`flex flex-col items-center justify-center gap-0.5 py-2 rounded-2xl transition-colors duration-200 cursor-pointer touch-manipulation ${
                 isActive 
                 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20' 
-                : 'text-slate-400 dark:text-charcoal-accent'
+                : 'text-slate-400 dark:text-charcoal-accent hover:bg-slate-50/50 dark:hover:bg-charcoal-surface/50'
               }`}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <tab.icon size={20} className={isActive ? 'animate-bounce-short' : ''} />
               <span className="text-[9px] font-black uppercase tracking-widest">{tab.label}</span>
@@ -111,7 +116,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       <div 
         className={`lg:hidden fixed inset-0 z-[60] transition-opacity duration-300 ${isDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
-        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md" onClick={onCloseDrawer}></div>
+        <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md touch-none" onClick={onCloseDrawer}></div>
         <div 
           className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-charcoal-surface backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >

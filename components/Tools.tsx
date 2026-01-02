@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity } from 'lucide-react';
+import { RotateCcw, Heart, Calendar as CalendarIcon, UtensilsCrossed, Settings2, CheckCircle2, X, Target, Trophy, Medal, Crown, Star, ClipboardList, AlertCircle, Infinity, Fingerprint } from 'lucide-react';
 import { getIslamicCalendarData } from '../services/gemini';
 import { AppState } from '../types';
 
@@ -188,11 +188,12 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
         {activeTool === 'tasbeeh' && (
           <div 
             onClick={handleTasbeehIncrement}
-            className={`flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] select-none w-full rounded-[3rem] transition-colors cursor-pointer ${isTapping ? 'bg-emerald-500/5 dark:bg-emerald-500/10' : ''}`}
+            className="flex flex-col items-center justify-center space-y-8 animate-in zoom-in duration-300 relative min-h-[500px] select-none w-full rounded-[3rem] cursor-pointer touch-manipulation"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             <div className="flex flex-col items-center gap-2 pointer-events-none">
               <div className="flex items-center gap-2 text-emerald-500/60 dark:text-emerald-400/40">
-                <Heart size={16} />
+                <Fingerprint size={24} />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Tap anywhere to count</span>
               </div>
             </div>
@@ -239,7 +240,7 @@ const Tools: React.FC<ToolsProps> = ({ appState, onOpenDrawer, onIncrementTasbee
                     setTasbeehCount(0); 
                     triggerHaptics('heavy'); 
                   }}
-                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-charcoal-surface rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-charcoal-border transition-all active:rotate-180 hover:scale-105"
+                  className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-charcoal-surface rounded-2xl text-slate-500 hover:text-emerald-500 shadow-lg border border-slate-100 dark:border-charcoal-border transition-colors active:scale-95"
                   title="Reset Counter"
                 >
                   <RotateCcw size={18} />
