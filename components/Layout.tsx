@@ -35,7 +35,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
     <div className="fixed inset-0 flex flex-col lg:flex-row bg-transparent transition-colors duration-500 overflow-hidden">
       
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-white/40 dark:bg-charcoal-surface/60 backdrop-blur-md border-r border-slate-200/50 dark:border-charcoal-border/50 p-6 transition-colors duration-500 flex-shrink-0">
+      <aside className="hidden lg:flex flex-col w-64 bg-white/40 dark:bg-charcoal-surface/60 backdrop-blur-md border-r border-slate-200/50 dark:border-charcoal-border p-6 transition-colors duration-500 flex-shrink-0">
         <div className="flex items-center gap-3 mb-10">
           <Logo size={48} className="drop-shadow-lg" />
           <h1 className="text-xl font-bold text-slate-800 dark:text-charcoal-text tracking-tight">NurTrack</h1>
@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                 activeTab === tab.id 
                 ? 'bg-emerald-600 text-white font-semibold shadow-lg shadow-emerald-600/20' 
-                : 'text-slate-500 dark:text-charcoal-sub hover:bg-white/50 dark:hover:bg-charcoal-surface/50 hover:text-slate-900 dark:hover:text-charcoal-text'
+                : 'text-slate-500 dark:text-charcoal-sub hover:bg-white/50 dark:hover:bg-charcoal-surface hover:text-slate-900 dark:hover:text-charcoal-text'
               }`}
             >
               <tab.icon size={20} className={activeTab !== tab.id ? "dark:text-charcoal-accent" : ""} />
@@ -59,9 +59,9 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
         </nav>
 
         {user && (
-          <div className="mt-auto pt-6 border-t border-slate-100/50 dark:border-charcoal-border/50">
+          <div className="mt-auto pt-6 border-t border-slate-100/50 dark:border-charcoal-border">
             <div className="flex items-center gap-3 px-2 mb-4">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-charcoal-surface flex items-center justify-center text-emerald-600 border border-emerald-100 dark:border-charcoal-border">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-charcoal-surface border border-emerald-100 dark:border-charcoal-border flex items-center justify-center text-emerald-600">
                 <UserIcon size={16} />
               </div>
               <div className="flex-1 min-w-0">
@@ -87,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       </main>
 
       {/* Mobile Bottom Dock */}
-      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/70 dark:bg-charcoal-surface/80 backdrop-blur-xl border border-slate-200/50 dark:border-charcoal-border rounded-3xl p-1.5 px-3 flex items-center justify-between shadow-2xl z-40">
+      <nav className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm bg-white/70 dark:bg-charcoal-surface/90 backdrop-blur-xl border border-slate-200/50 dark:border-charcoal-border rounded-3xl p-1.5 px-3 flex items-center justify-between shadow-2xl z-40">
         {mainTabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -113,7 +113,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
       >
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-md" onClick={onCloseDrawer}></div>
         <div 
-          className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-charcoal-surface/95 backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
+          className={`absolute inset-y-0 left-0 w-4/5 max-w-sm bg-white/95 dark:bg-charcoal-surface backdrop-blur-xl shadow-2xl transition-transform duration-300 transform flex flex-col ${isDrawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
           <div className="p-6 border-b border-slate-100 dark:border-charcoal-border flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -131,7 +131,7 @@ const Layout: React.FC<LayoutProps> = ({ children, activeTab, setActiveTab, draw
           
           <div className="p-4 bg-slate-50/50 dark:bg-charcoal/50 backdrop-blur-md border-t border-slate-100 dark:border-charcoal-border">
              {user && (
-               <div className="mb-3 p-3 bg-white/50 dark:bg-charcoal-surface rounded-xl border border-slate-200 dark:border-charcoal-border shadow-sm">
+               <div className="mb-3 p-3 bg-white/50 dark:bg-charcoal rounded-xl border border-slate-200 dark:border-charcoal-border shadow-sm">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-[9px] font-black text-slate-400 dark:text-charcoal-accent uppercase tracking-widest">Logged in as</span>
                     <button 

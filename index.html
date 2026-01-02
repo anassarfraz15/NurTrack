@@ -14,14 +14,14 @@
       theme: {
         extend: {
           colors: {
-            // Custom Palette Mapping - Strict Dark Mode
+            // Strict Dark Mode Palette
             charcoal: {
-              DEFAULT: '#121212', // Main App Background
-              surface: '#1E1E1E', // Cards, Popups, Sidebar
-              border: '#444444',  // Dividers, Outlines
-              text: '#E0E0E0',    // Primary Text
-              sub: '#B0B0B0',     // Secondary Text
-              accent: '#888888'   // Icons, Active States
+              DEFAULT: '#121212', // Main Background (Deep & Calm)
+              surface: '#1E1E1E', // Cards, Modals (Slight Elevation)
+              border: '#444444',  // Dividers (Subtle)
+              text: '#E0E0E0',    // Primary Text (High Readability)
+              sub: '#B0B0B0',     // Secondary Text (Soft)
+              accent: '#888888'   // Icons/Active (Non-intrusive)
             }
           },
           fontFamily: {
@@ -34,7 +34,7 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -48,8 +48,10 @@
     }
 
     /* 
-      Background Pattern & Mesh Gradient 
-      Designed to be subtle, large-scale, and non-intrusive.
+      Background Layer 
+      - Large scale geometric motif
+      - Extremely low opacity for subtlety
+      - Sitting behind all content
     */
     .spiritual-bg {
       position: fixed;
@@ -57,7 +59,7 @@
       z-index: -1;
       pointer-events: none;
       background-color: #f8fafc; /* Light Mode Base */
-      /* Light mode pattern */
+      /* Light mode: Subtle organic gradients */
       background-image: 
         radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(56, 189, 248, 0.05) 0px, transparent 50%);
@@ -65,28 +67,31 @@
 
     .dark .spiritual-bg {
       background-color: #121212; /* Charcoal Black Base */
+      
       /* 
-         Premium Dark Mode Pattern:
-         - Deep charcoal base
-         - Very subtle large-scale geometric motif overlay (white with 2% opacity)
-         - Soft ambient gradients for depth without noise
+         New Premium Dark Pattern:
+         - An interlocking diamond lattice (geometric tessellation).
+         - White stroke with 2% opacity for a premium texture.
+         - Deeper ambient lighting positioning.
       */
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(255, 255, 255, 0.03) 0%, transparent 45%),
-        radial-gradient(circle at 85% 85%, rgba(255, 255, 255, 0.02) 0%, transparent 45%),
-        url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 0L120 60L60 120L0 60L60 0ZM60 10L10 60L60 110L110 60L60 10Z' fill='%23ffffff' fill-opacity='0.015' fill-rule='evenodd'/%3E%3C/svg%3E");
-      background-size: cover, cover, 120px 120px;
+        radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.025) 0%, transparent 50%),
+        radial-gradient(circle at 80% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 50%),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%23ffffff' stroke-width='1' stroke-opacity='0.02'%3E%3Cpath d='M30 0L60 30L30 60L0 30z'/%3E%3Cpath d='M30 0v60M0 30h60' stroke-opacity='0.01'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-size: cover, cover, 60px 60px;
+      background-repeat: no-repeat, no-repeat, repeat;
     }
 
     .glass-effect {
       background: rgba(255, 255, 255, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     .dark .glass-effect {
-      background: rgba(30, 30, 30, 0.85); /* #1E1E1E Surface equivalent */
-      border-color: rgba(68, 68, 68, 0.4); /* #444444 Border equivalent */
+      background: rgba(30, 30, 30, 0.7); /* #1E1E1E Surface */
+      border: 1px solid rgba(68, 68, 68, 0.5); /* #444444 Border */
     }
+    
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -94,6 +99,7 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    
     html.dark {
       background-color: #121212;
       color: #E0E0E0;
@@ -120,7 +126,6 @@
 </script>
 </head>
 <body class="text-slate-900 dark:text-charcoal-text transition-colors duration-500 min-h-screen selection:bg-emerald-500/30">
-  <!-- Spiritual Background Layer -->
   <div class="spiritual-bg"></div>
   <div id="root"></div>
   <script type="module" src="./index.tsx"></script>
